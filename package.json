@@ -1,17 +1,24 @@
 {
-  "name": "backend-template",
+  "name": "aquilaltd-editor",
   "version": "1.0.0",
-  "description": "",
-  "main": "app.js",
+  "description": "Aquila Ltd Editor",
+  "main": "client/app.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/BesarAjruli/AquilaLtd-Editor.git"
+  },
+  "keywords": [
+    "editor",
+    "design",
+    "website"
+  ],
   "author": "Besar Ajruli",
   "license": "ISC",
-  "dependencies": {
-    "dotenv": "^16.4.7",
-    "ejs": "^3.1.10",
-    "express": "^4.21.2",
-    "pg": "^8.13.1"
-  }
+  "bugs": {
+    "url": "https://github.com/BesarAjruli/AquilaLtd-Editor/issues"
+  },
+  "homepage": "https://github.com/BesarAjruli/AquilaLtd-Editor#readme"
 }

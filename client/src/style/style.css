@@ -1,0 +1,106 @@
+body,html{
+    margin: 0;
+}
+.sideElementsBar{
+    width: 10%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    place-items: center;
+    background-color: #eee;
+    padding: 30px;
+    border-radius: 15px;
+    position: fixed;
+    top: 10px;
+    left: -12.5%
+}
+.sideElementsBar:hover {
+    left: 0px;
+}
+.dots{
+display: flex;
+flex-direction: column;
+gap: 10px;
+position: absolute;
+right: 10px;
+bottom: 45%;
+}
+.dots div{
+    width: 8px;
+    height: 8px;
+    border-radius: 100%;
+    background-color: #c0c0c0;
+}
+.sideElementsBar hr {
+    width: 40%;
+    margin-top: 5px;
+    margin-bottom: 5px;
+}
+.button button{
+    height: 30px;
+    width: 100px;
+    border: 0;
+    border-radius: 10px;
+    background-color: #94c3df;
+    color: #fff;
+}
+.text{
+    font-weight: 700;
+}
+.link {
+    color: blue;
+    text-decoration: underline;
+}
+.list ul{
+    padding-left: 10px;
+    margin: 0;
+}
+.section{
+    width: 80px;
+    height: 54px;
+    border: 1px dotted #000;
+}
+.input{
+    width: 120px;
+    height: 25px;
+    background-color: #e9e0e9;
+    border: 1px solid #c2c2c2;
+    border-radius: 15px;
+    position: relative;
+}
+.input span{
+position: absolute;
+left:15px;
+top: 3px;
+}
+
+.editorContainer{
+    display: flex;
+    flex-grow: 1;
+    justify-content: center;
+    place-items: center;
+}
+.editor{
+    width: 1280px;
+    height: 520px;
+    border: 1px solid #000;
+    border-radius: 10px;
+    margin-bottom: 30px;
+}
+.toolBar{
+    height: 70px;
+    display: flex;
+    justify-content: center;
+    place-items: center;
+    background-color: #e9e0e9;
+    margin-bottom: 30px;
+}
+.toolBar button {
+    margin-left: 30px;
+    height: 30px;
+    width: 100px;
+    border: 0;
+    border-radius: 10px;
+    background-color: #c2c2c2;
+    color: #fff;
+}
