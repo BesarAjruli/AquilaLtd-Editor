@@ -91,12 +91,13 @@ top: 3px;
     border-radius: 10px;
     margin-bottom: 30px;
     position: relative;
+    overflow: hidden;
 }
 .editor * {
     position: absolute;
     top: 0;
     left: 0;
-    border-
+    user-select: none;
 }
 .toolBar{
     height: 70px;
@@ -112,10 +113,123 @@ top: 3px;
     width: 100px;
     border: 0;
     border-radius: 10px;
-    background-color: #c2c2c2;
+    background-color: #6b6b6b;
     color: #fff;
+    cursor: pointer;
+}
+.toolBar button:hover{
+  background-color: #a7a6a6;
 }
 
 .edit{
     cursor: grabbing;
 }
+.dragging {
+    opacity: 0.6;
+    cursor: grabbing;
+  }
+
+  /* Dialog Styles */
+.custom-dialog {
+    padding: 20px;
+    border: 2px solid #ddd;
+    border-radius: 8px;
+    max-width: 480px;
+    background: #fefefe;
+    font-family: Arial, sans-serif;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  }
+  
+  /* Header */
+  .dialog-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+  }
+  
+  .dialog-header h3 {
+    margin: 0;
+    font-size: 1.6rem;
+  }
+  
+  .close-icon {
+    cursor: pointer;
+    font-size: 1.2rem;
+    color: #888;
+    transition: color 0.2s;
+  }
+  
+  .close-icon:hover {
+    color: #333;
+  }
+  
+  /* Form Grid */
+  .dialog-form {
+    display: grid;
+    grid-template-columns: 1fr 2fr;
+    gap: 16px 12px;
+    align-items: center;
+  }
+  
+  .dialog-form label {
+    font-size: 0.9rem;
+    color: #555;
+    text-align: right;
+  }
+  
+  .dialog-form input[type="text"],
+  .dialog-form input[type="number"],
+  .dialog-form input[type="file"],
+  .dialog-form input[type="color"] {
+    padding: 3px 3px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 1rem;
+    outline: none;
+    transition: border 0.2s;
+  }
+  
+  .dialog-form input[type="text"]:focus,
+  .dialog-form input[type="number"]:focus,
+  .dialog-form input[type="file"]:focus,
+  .dialog-form input[type="color"]:focus {
+    border-color: #007bff;
+  }
+  
+  .dialog-form input[type="file"] {
+    padding: 4px;
+  }
+  
+  /* Submit Button */
+  .submit-button {
+    margin-left: 90px;
+    padding: 10px 20px;
+    background-color: #007bff;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background-color 0.2s;
+  }  
+  .deleteButton{
+    padding: 10px 20px;
+    background-color: #a8afb8;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background-color 0.2s;
+  }
+  .maxWidth{
+    margin-left: 20px;
+    border: 0;
+    border-radius: 5px;
+    height: 30px;
+    width: 75px;
+  }
+  .maxWidth:hover{
+    background-color: #a7a6a6;
+  }
