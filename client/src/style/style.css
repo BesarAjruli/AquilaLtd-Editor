@@ -12,10 +12,14 @@ body,html{
     border-radius: 15px;
     position: fixed;
     top: 10px;
-    left: -12.5%
+    left: -12.5%;
+    z-index: 2;
 }
 .sideElementsBar:hover {
     left: 0px;
+}
+.sideElementsBar *{
+    cursor: pointer;
 }
 .dots{
 display: flex;
@@ -86,6 +90,13 @@ top: 3px;
     border: 1px solid #000;
     border-radius: 10px;
     margin-bottom: 30px;
+    position: relative;
+}
+.editor * {
+    position: absolute;
+    top: 0;
+    left: 0;
+    border-
 }
 .toolBar{
     height: 70px;
@@ -103,4 +114,8 @@ top: 3px;
     border-radius: 10px;
     background-color: #c2c2c2;
     color: #fff;
+}
+
+.edit{
+    cursor: grabbing;
 }
