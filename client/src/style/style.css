@@ -106,6 +106,7 @@ top: 3px;
     place-items: center;
     background-color: #e9e0e9;
     margin-bottom: 30px;
+    padding: 0 50px;
 }
 .toolBar button {
     margin-left: 30px;
@@ -215,13 +216,19 @@ top: 3px;
   }  
   .deleteButton{
     padding: 10px 20px;
-    background-color: #a8afb8;
+    background-color: #6b6c6e;
     color: #fff;
     border: none;
     border-radius: 4px;
     font-size: 1rem;
     cursor: pointer;
     transition: background-color 0.2s;
+  }
+  .deleteButton:disabled{
+    background-color: #a7a6a6;
+  }
+  .deleteButton:enabled:hover{
+    background-color: #333;
   }
   .maxWidth{
     margin-left: 20px;
@@ -232,4 +239,25 @@ top: 3px;
   }
   .maxWidth:hover{
     background-color: #a7a6a6;
+  }
+
+  .history{
+    display: flex;
+    gap: 50px;
+    flex-grow: 1;
+  }
+  .history button{
+    height: 30px;
+    width: 30px;
+    background-color: transparent;
+    padding: 2px;
+  }
+  .history button>svg{
+    fill: #333;
+  }
+  .history div>svg:hover{
+    fill: #000;
+  }
+  .history button:disabled>svg{
+    fill: #6b6b6b;
   }
