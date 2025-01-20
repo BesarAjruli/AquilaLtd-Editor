@@ -1,5 +1,6 @@
 import React, { useState, useRef } from 'react';
 import './style/style.css';
+import html2canvas from 'html2canvas'
 
 const Text = ({style}) => <span className='edit' style={style}>Text</span>;
 const Button = ({style}) => <button className='edit' style={style}>Button</button>;
@@ -27,8 +28,25 @@ export default function App() {
   const [chngStyle, setChangingStyle] = useState(false)
   const [history, setHistory] = useState([[]]);
   const [historyIndex, setHistoryIndex] = useState(0);
+  const editorRef = useRef(null)
+  const [pages, setPage] = useState([1])
+  const [currentPage, setCurrentPage] = useState(1)
 
   const uniqueId = () => `element-${Date.now()}-${Math.random()}`;
+
+  const editorStyle = {
+    width: '1280px',
+    height: '520px',
+    borderWidth: '0',
+    borderColor: '#000',
+    borderRadius: '10px',
+    marginBottom: '30px',
+    position: 'relative',
+    overflow: 'hidden',
+    color: '#000',
+    boxShadow: '0 4px 12px rgba(0, 0, 0, 0.5)',
+    backgroundColor: '#fff'
+}
 
   //History (undo/redo functions)
   const saveHistory = (newElements) => {
@@ -57,7 +75,8 @@ export default function App() {
     const newElement = {
       id,
       component: <Component key={id} style={{}} />,
-      style: {}
+      style: {},
+      page: currentPage
     }
     setCurrentElement(newElement)
 
@@ -68,6 +87,12 @@ export default function App() {
     const imageContent = dialogRef.current.querySelector('#imageContent')
     const imgContLabel = dialogRef.current.querySelector('label[for="imageContent"]') 
     dialogRef.current.querySelector('.deleteButton').setAttribute('disabled', 'true')
+    dialogRef.current.querySelector('#content').removeAttribute('disabled')
+      dialogRef.current.querySelector('#width').removeAttribute('disabled')
+      dialogRef.current.querySelector('#borderWidth').removeAttribute('disabled')
+      dialogRef.current.querySelector('#borderRadius').removeAttribute('disabled')
+      dialogRef.current.querySelector('#fontSize').removeAttribute('disabled')
+      dialogRef.current.querySelector('#imageContent').removeAttribute('disabled')
 
     if( type === 'Image'){
       content.style.display = 'none'
@@ -90,6 +115,10 @@ export default function App() {
     e.preventDefault();
 
     const elementIndex = elements.findIndex((el) => el.id === id);
+    const crntElement = elements[elementIndex];
+
+    console.log(elements)
+
     if (elementIndex === -1) return;
 
     const element = e.target
@@ -116,6 +145,22 @@ export default function App() {
   
       element.style.left = `${newX}px`;
       element.style.top = `${newY}px`;
+
+      const updatedStyle = {
+        ...crntElement.style,
+        left: `${newX}px`,
+        top: `${newY}px`,
+      };
+
+      const updatedElement = {
+        ...crntElement,
+        style: updatedStyle,
+        component: React.cloneElement(crntElement.component, { style: updatedStyle }),
+      };
+
+      const newElements =  elements.map((el) => el.id === crntElement.id ? updatedElement : el)
+
+      setElements(newElements);
     };
   
     const endDrag = () => {
@@ -125,6 +170,10 @@ export default function App() {
       document.removeEventListener('mouseup', endDrag);
       document.removeEventListener('touchmove', move);
       document.removeEventListener('touchend', endDrag);
+
+      saveHistory(elements);
+      setChangingStyle(false);
+      setCurrentElement(null);
     };
   
     document.addEventListener('mousemove', move);
@@ -135,7 +184,6 @@ export default function App() {
   //Handling style submit
   const handleSubmit = (e) => {
     e.preventDefault()
-
     const formData = new FormData(e.target)
     const data = Object.fromEntries(formData.entries())
     const formattedStyle = {
@@ -147,12 +195,16 @@ export default function App() {
         borderWidth: data.borderWidth + 'px',
         borderRadius: data.borderRadius + 'px',
         borderColor: data.borderColor,
+        position: currentElement.id.startsWith('editor') ? 'relative' : 'absolute',
+        left: currentElement.id.startsWith('editor') && chngStyle.changing === true ? 0 : currentElement.style.left,
+        top: currentElement.id.startsWith('editor') ? 0 : currentElement.style.top
         }
-        if (currentElement) {
+        if (currentElement && !currentElement.id.startsWith('editor')) {
           const updatedElement = {
             ...currentElement,
             style: formattedStyle,
             component: React.cloneElement(currentElement.component, { style: formattedStyle }),
+            page: currentPage
           };
           const newElements = chngStyle.changing
           ? elements.map((el) =>
@@ -164,6 +216,13 @@ export default function App() {
         saveHistory(newElements);
         setChangingStyle(false);
         setCurrentElement(null);
+        } else if(currentElement){
+          Object.keys(formattedStyle).forEach(key => {
+            editorRef.current.style[key] = formattedStyle[key];
+            
+        });
+        setChangingStyle(false);
+        setCurrentElement(null);
         }
     e.target.reset()
     dialogRef.current.close()
@@ -171,6 +230,7 @@ export default function App() {
 
   const changeStyle = (id, e) => {
     e.preventDefault()
+    e.stopPropagation();
     dialogRef.current.querySelector('#width').value = parseInt(e.target.style.width)
     dialogRef.current.querySelector('#height').value = parseInt(e.target.style.height)
     dialogRef.current.querySelector('#fontSize').value = parseInt(e.target.style.fontSize)
@@ -181,8 +241,15 @@ export default function App() {
     dialogRef.current.querySelector('#borderColor').value = rgbToHex(e.target.style.borderColor)
 
     setChangingStyle({changing: true, id})
-    dialogRef.current.querySelector('.deleteButton').removeAttribute('disabled')
-    const elementToUpdate = elements.find(element => element.id === id);
+    if(!id.startsWith('editor')) {
+      dialogRef.current.querySelector('#content').removeAttribute('disabled')
+      dialogRef.current.querySelector('#width').removeAttribute('disabled')
+      dialogRef.current.querySelector('#borderWidth').removeAttribute('disabled')
+      dialogRef.current.querySelector('#borderRadius').removeAttribute('disabled')
+      dialogRef.current.querySelector('#fontSize').removeAttribute('disabled')
+      dialogRef.current.querySelector('#imageContent').removeAttribute('disabled')
+      dialogRef.current.querySelector('.deleteButton').removeAttribute('disabled')
+      const elementToUpdate = elements.find(element => element.id === id);
 
     if (elementToUpdate) {
       setCurrentElement({
@@ -190,7 +257,22 @@ export default function App() {
          component: elementToUpdate.component,
          style: elementToUpdate.style
     });
-}
+  } 
+} else if(id.startsWith( 'editor')){
+  dialogRef.current.querySelector('#content').setAttribute('disabled', 'true')
+  dialogRef.current.querySelector('#width').setAttribute('disabled', 'true')
+  dialogRef.current.querySelector('#borderWidth').setAttribute('disabled', 'true')
+  dialogRef.current.querySelector('#borderRadius').setAttribute('disabled', 'true')
+  dialogRef.current.querySelector('#fontSize').setAttribute('disabled', 'true')
+  dialogRef.current.querySelector('#imageContent').setAttribute('disabled', 'true')
+  dialogRef.current.querySelector('.deleteButton').setAttribute('disabled', 'true')
+
+  setCurrentElement({
+      id,
+      component: editorRef.current,
+      style: editorRef.current.style
+    })
+  }
     
     dialogRef.current.showModal()
   }
@@ -233,6 +315,27 @@ export default function App() {
     dialogRef.current.close();
   }
 
+  const saveDesign = () => {
+    if (editorRef.current) {
+      editorRef.current.style.boxShadow = ''
+      html2canvas(editorRef.current).then(canvas => {
+        const link = document.createElement('a');
+        link.download = 'div-image.png';
+        link.href = canvas.toDataURL('image/png');
+        link.click();
+      });
+    }
+    editorRef.current.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.5)'
+  };
+
+  const addNewPage = () => {
+    setPage((prevPages) => {
+      const nextPage = parseInt(prevPages) + 1;
+      setCurrentPage(nextPage);
+      return nextPage;
+    });
+  }
+
   return (
     <>
       <div className='toolBar'>
@@ -243,9 +346,20 @@ export default function App() {
         <button onClick={redoFunction} disabled={historyIndex === history.length - 1}>
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><title>redo</title><path d="M18.4,10.6C16.55,9 14.15,8 11.5,8C6.85,8 2.92,11.03 1.54,15.22L3.9,16C4.95,12.81 7.95,10.5 11.5,10.5C13.45,10.5 15.23,11.22 16.62,12.38L13,16H22V7L18.4,10.6Z" /></svg>
         </button>
+        <button onClick={saveDesign}>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><title>check</title><path d="M21,7L9,19L3.5,13.5L4.91,12.09L9,16.17L19.59,5.59L21,7Z" /></svg>
+        </button>
         </div>
-        <span>Page: 1/1</span>
-        <button>New Page</button>
+        <div className='pages'>
+        <div onClick={() => {if(currentPage > 1) setCurrentPage(currentPage - 1)}}>
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><title>chevron-left</title><path d="M15.41,16.58L10.83,12L15.41,7.41L14,6L8,12L14,18L15.41,16.58Z" /></svg>
+        </div>
+          <span>Page: {currentPage}/{pages}</span>
+          <div onClick={() => {if(currentPage < pages) setCurrentPage(currentPage + 1)}}>
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><title>chevron-right</title><path d="M8.59,16.58L13.17,12L8.59,7.41L10,6L16,12L10,18L8.59,16.58Z" /></svg>
+          </div>
+        </div>
+        <button onClick={addNewPage}>New Page</button>
       </div>
       <div className='sideElementsBar'>
         <div className='text' onClick={() => addElement(Text)}>Text</div>
@@ -280,15 +394,16 @@ export default function App() {
         </div>
       </div>
       <div className='editorContainer'>
-        <div className='editor'>
+        <div className='editor' style={editorStyle} id={`editor ${currentPage}`} ref={editorRef} onContextMenu={(e) => changeStyle(editorRef.current.id, e)}>
          {elements.map((el) => (
-            <div
+          el.page === currentPage &&
+            (<div
               key={el.id}
               onMouseDown={(e) => handleDragStart(el.id, e)}
               onContextMenu={(e) => changeStyle(el.id, e)}
             >
               {el.component}
-            </div>
+            </div>)
           ))}
         </div>
       </div>
@@ -323,7 +438,7 @@ export default function App() {
     <input type="color" name="bgColor" id="bgColor" />
     
     <label htmlFor="borderWidth">Border Width:</label>
-    <input type="number" name="borderWidth" id="borderWidth" min={0} defaultValue={1}/>
+    <input type="number" name="borderWidth" id="borderWidth" min={0} defaultValue={0}/>
     
     <label htmlFor="borderColor">Border Color:</label>
     <input type="color" name="borderColor" id="borderColor" />

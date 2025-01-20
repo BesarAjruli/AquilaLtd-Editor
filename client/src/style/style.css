@@ -1,6 +1,9 @@
 body,html{
     margin: 0;
 }
+#root{
+  background-color: #f9f9f9;
+}
 .sideElementsBar{
     width: 10%;
     display: flex;
@@ -84,19 +87,8 @@ top: 3px;
     justify-content: center;
     place-items: center;
 }
-.editor{
-    width: 1280px;
-    height: 520px;
-    border: 1px solid #000;
-    border-radius: 10px;
-    margin-bottom: 30px;
-    position: relative;
-    overflow: hidden;
-}
 .editor * {
     position: absolute;
-    top: 0;
-    left: 0;
     user-select: none;
 }
 .toolBar{
@@ -243,7 +235,7 @@ top: 3px;
 
   .history{
     display: flex;
-    gap: 50px;
+    gap: 10px;
     flex-grow: 1;
   }
   .history button{
@@ -260,4 +252,18 @@ top: 3px;
   }
   .history button:disabled>svg{
     fill: #6b6b6b;
+  }
+
+  .pages{
+    display: flex;
+    place-items: center;
+    gap: 10px;
+  }
+  .pages div{
+    width: 25px;
+    height: 25px;
+    cursor: pointer;
+  }
+  .pages div svg{
+    fill: #333;
   }
