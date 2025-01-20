@@ -15,11 +15,21 @@ body,html{
     border-radius: 15px;
     position: fixed;
     top: 10px;
-    left: -12.5%;
     z-index: 2;
 }
-.sideElementsBar:hover {
+.left{
+  left: -12.5%;
+  right: auto;
+}
+.right{
+  right: -12.5%;
+  left: auto;
+}
+.sideElementsBar.left:hover {
     left: 0px;
+}
+.sideElementsBar.right:hover {
+  right: 0px;
 }
 .sideElementsBar *{
     cursor: pointer;
@@ -37,6 +47,10 @@ bottom: 45%;
     height: 8px;
     border-radius: 100%;
     background-color: #c0c0c0;
+}
+.rightDots{
+  right: auto;
+  left: 10px;
 }
 .sideElementsBar hr {
     width: 40%;

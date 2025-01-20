@@ -11,7 +11,7 @@ const Audio = ({style}) => <audio className='edit' style={style} src=""></audio>
 const Gallery = ({style}) => <img className='edit' style={style} src="https://t3.ftcdn.net/jpg/04/19/92/88/360_F_419928833_w7HrdbjTCl1zGIBY1YljW6feoWx90ETm.jpg" alt="Gallery" />;
 const Section = ({style}) => <div className='edit' style={style}></div>;
 const Link = ({style}) => <a className='edit' style={style} href="" disabled>https://links.com</a>;
-const List = ({style}) => (
+const List = ({style}) => {return (
   <div className='edit' style={style}>
     <ul >
       <strong><em>List1</em></strong>
@@ -19,7 +19,8 @@ const List = ({style}) => (
       <li>Item2</li>
     </ul>
   </div>
-);
+);}
+
 
 export default function App() {
   const [elements, setElements] = useState([]);
@@ -117,8 +118,6 @@ export default function App() {
     const elementIndex = elements.findIndex((el) => el.id === id);
     const crntElement = elements[elementIndex];
 
-    console.log(elements)
-
     if (elementIndex === -1) return;
 
     const element = e.target
@@ -172,8 +171,6 @@ export default function App() {
       document.removeEventListener('touchend', endDrag);
 
       saveHistory(elements);
-      setChangingStyle(false);
-      setCurrentElement(null);
     };
   
     document.addEventListener('mousemove', move);
@@ -241,6 +238,7 @@ export default function App() {
     dialogRef.current.querySelector('#borderColor').value = rgbToHex(e.target.style.borderColor)
 
     setChangingStyle({changing: true, id})
+
     if(!id.startsWith('editor')) {
       dialogRef.current.querySelector('#content').removeAttribute('disabled')
       dialogRef.current.querySelector('#width').removeAttribute('disabled')
@@ -361,7 +359,7 @@ export default function App() {
         </div>
         <button onClick={addNewPage}>New Page</button>
       </div>
-      <div className='sideElementsBar'>
+      <div className='sideElementsBar left'>
         <div className='text' onClick={() => addElement(Text)}>Text</div>
         <hr />
         <div className='button' onClick={() => addElement(Button)}><button>Button</button></div>
@@ -392,6 +390,14 @@ export default function App() {
             <li>Item2</li>
           </ul>
         </div>
+      </div>
+      <div className='sideElementsBar right'>
+        
+        <div className='dots rightDots'>
+            <div></div>
+            <div></div>
+            <div></div>
+          </div>
       </div>
       <div className='editorContainer'>
         <div className='editor' style={editorStyle} id={`editor ${currentPage}`} ref={editorRef} onContextMenu={(e) => changeStyle(editorRef.current.id, e)}>
