@@ -2,24 +2,27 @@ import React, { useState, useRef } from 'react';
 import './style/style.css';
 import html2canvas from 'html2canvas'
 
-const Text = ({style}) => <span className='edit' style={style}>Text</span>;
-const Button = ({style}) => <button className='edit' style={style}>Button</button>;
-const Input = ({style}) => <input className='edit' style={style} type="text"/>;
-const Image = ({style}) => <img className='edit' style={style} src="https://img.icons8.com/skeuomorphism/64/image.png" alt="Picture" />;
+const Text = ({style, content}) => <span className='edit' style={style}>{content}</span>;
+const Button = ({style, content}) => <button className='edit' style={style}>{content}</button>;
+const Input = ({style, content}) => <input className='edit' style={style} type="text" placeholder={content}/>;
+const ImageCmp = ({style, content}) => <img className='edit' style={style} src={content || "https://img.icons8.com/skeuomorphism/64/image.png"} alt="Picture" />;
 const Video = ({style}) => <img className='edit' style={style} src="https://img.icons8.com/skeuomorphism/64/video.png" alt="Video" />;
-const Audio = ({style}) => <audio className='edit' style={style} src=""></audio>;
+const Audio = ({style}) => <img className='edit' style={style} src="https://png.pngtree.com/png-vector/20230408/ourmid/pngtree-sound-waves-equalizer-audio-radio-signal-music-recording-vector-png-image_6678910.png" alt="audio" />;
 const Gallery = ({style}) => <img className='edit' style={style} src="https://t3.ftcdn.net/jpg/04/19/92/88/360_F_419928833_w7HrdbjTCl1zGIBY1YljW6feoWx90ETm.jpg" alt="Gallery" />;
 const Section = ({style}) => <div className='edit' style={style}></div>;
-const Link = ({style}) => <a className='edit' style={style} href="" disabled>https://links.com</a>;
+const Link = ({style, content}) => <a className='edit' style={style}>{content}</a>;
 const List = ({style}) => {return (
   <div className='edit' style={style}>
-    <ul >
+    <ul style={{pointerEvents: 'none'}}>
       <strong><em>List1</em></strong>
       <li>Item1</li>
       <li>Item2</li>
     </ul>
   </div>
 );}
+const Pie = ({style}) => <img className='edit' style={style} src='https://img.icons8.com/skeuomorphism/64/pie-chart.png'/>
+const Charts = ({style}) => <img className='edit' style={style} src='https://img.icons8.com/skeuomorphism/64/bar-chart.png'/>
+const Menu = ({style}) => <img className='edit' style={style} src='https://img.icons8.com/material-rounded/64/menu--v1.png'/>
 
 
 export default function App() {
@@ -32,6 +35,7 @@ export default function App() {
   const editorRef = useRef(null)
   const [pages, setPage] = useState([1])
   const [currentPage, setCurrentPage] = useState(1)
+  const [imageSrc, setImageSrc] = useState(null);
 
   const uniqueId = () => `element-${Date.now()}-${Math.random()}`;
 
@@ -75,9 +79,9 @@ export default function App() {
     const id = uniqueId();
     const newElement = {
       id,
-      component: <Component key={id} style={{}} />,
+      component: <Component key={id} style={{}} content='' />,
       style: {},
-      page: currentPage
+      page: currentPage,
     }
     setCurrentElement(newElement)
 
@@ -95,7 +99,7 @@ export default function App() {
       dialogRef.current.querySelector('#fontSize').removeAttribute('disabled')
       dialogRef.current.querySelector('#imageContent').removeAttribute('disabled')
 
-    if( type === 'Image'){
+    if( type === 'ImageCmp'){
       content.style.display = 'none'
       contentLabel.style.display = 'none'
 
@@ -108,6 +112,35 @@ export default function App() {
       content.style.display = 'block'
       contentLabel.style.display = 'block'
     }
+
+    switch(type){
+      
+      case 'Button': 
+      dialogRef.current.querySelector('#height').value = 30
+      dialogRef.current.querySelector('#bgColor').value = '#94c3df'
+      dialogRef.current.querySelector('#fontColor').value = '#ffffff'
+      break;
+      case 'Input': 
+      dialogRef.current.querySelector('#width').value = 120
+      dialogRef.current.querySelector('#height').value = 25
+      dialogRef.current.querySelector('#bgColor').value = '#e9e0e9'
+      dialogRef.current.querySelector('#borderWidth').value = 1
+      dialogRef.current.querySelector('#borderRadius').value = 15
+      dialogRef.current.querySelector('#borderColor').value = '#c2c2c2';
+      break;
+      case 'Link':
+        dialogRef.current.querySelector('#fontColor').value = '#0000EE';
+        break;
+      case 'Menu':
+        dialogRef.current.querySelector('#width').value = 30
+        dialogRef.current.querySelector('#height').value = 30
+        break;
+
+      default:
+        dialogRef.current.querySelector('#width').value = 100
+        dialogRef.current.querySelector('#height').value = 50
+    }
+
     dialogRef.current.showModal()
     }
   };
@@ -183,6 +216,7 @@ export default function App() {
     e.preventDefault()
     const formData = new FormData(e.target)
     const data = Object.fromEntries(formData.entries())
+
     const formattedStyle = {
         width: data.width + 'px',
         height: data.height + 'px',
@@ -200,8 +234,8 @@ export default function App() {
           const updatedElement = {
             ...currentElement,
             style: formattedStyle,
-            component: React.cloneElement(currentElement.component, { style: formattedStyle }),
-            page: currentPage
+            component: React.cloneElement(currentElement.component, { style: formattedStyle, content: imageSrc ? imageSrc : data.content }),
+            page: currentPage,
           };
           const newElements = chngStyle.changing
           ? elements.map((el) =>
@@ -209,6 +243,7 @@ export default function App() {
             )
           : [...elements, updatedElement];
   
+        setImageSrc(null)
         setElements(newElements);
         saveHistory(newElements);
         setChangingStyle(false);
@@ -222,12 +257,13 @@ export default function App() {
         setCurrentElement(null);
         }
     e.target.reset()
-    dialogRef.current.close()
+    closeDialog()
   }
 
   const changeStyle = (id, e) => {
     e.preventDefault()
     e.stopPropagation();
+    dialogRef.current.querySelector('#content').value = e.target.textContent
     dialogRef.current.querySelector('#width').value = parseInt(e.target.style.width)
     dialogRef.current.querySelector('#height').value = parseInt(e.target.style.height)
     dialogRef.current.querySelector('#fontSize').value = parseInt(e.target.style.fontSize)
@@ -314,17 +350,29 @@ export default function App() {
   }
 
   const saveDesign = () => {
-    if (editorRef.current) {
-      editorRef.current.style.boxShadow = ''
-      html2canvas(editorRef.current).then(canvas => {
+    editorRef.current.style.boxShadow = ''
+    const images = editorRef.current.querySelectorAll('img');
+    const promises = Array.from(images).map((img) => {
+      return new Promise((resolve) => {
+        if (img.complete) {
+          resolve();
+        } else {
+          img.onload = resolve;
+        }
+      });
+    });
+  
+    Promise.all(promises).then(() => {
+      html2canvas(editorRef.current, { useCORS: true }).then((canvas) => {
         const link = document.createElement('a');
         link.download = 'div-image.png';
         link.href = canvas.toDataURL('image/png');
         link.click();
+        editorRef.current.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.5)'
       });
-    }
-    editorRef.current.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.5)'
+    });
   };
+  
 
   const addNewPage = () => {
     setPage((prevPages) => {
@@ -333,6 +381,23 @@ export default function App() {
       return nextPage;
     });
   }
+
+  const handleImageChange = (event) => {
+    const file = event.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const img = new Image();
+        img.onload = () => {
+          dialogRef.current.querySelector('#width').value = img.naturalWidth;
+          dialogRef.current.querySelector('#height').value = img.naturalHeight ;
+          }; // Get original dimensions
+        img.src = e.target.result
+        setImageSrc(e.target.result); // Set the image source to the data URL
+      };
+      reader.readAsDataURL(file); // Read the file as a data URL
+    }
+  };
 
   return (
     <>
@@ -348,6 +413,7 @@ export default function App() {
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><title>check</title><path d="M21,7L9,19L3.5,13.5L4.91,12.09L9,16.17L19.59,5.59L21,7Z" /></svg>
         </button>
         </div>
+        <button>Use templates</button>
         <div className='pages'>
         <div onClick={() => {if(currentPage > 1) setCurrentPage(currentPage - 1)}}>
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><title>chevron-left</title><path d="M15.41,16.58L10.83,12L15.41,7.41L14,6L8,12L14,18L15.41,16.58Z" /></svg>
@@ -366,7 +432,7 @@ export default function App() {
         <hr />
         <div className='input' onClick={() => addElement(Input)}><span>|</span></div>
         <hr />
-        <div className='image' onClick={() => addElement(Image)}><img src="https://img.icons8.com/skeuomorphism/64/image.png" alt="image" /></div>
+        <div className='image' onClick={() => addElement(ImageCmp)}><img src="https://img.icons8.com/skeuomorphism/64/image.png" alt="image" /></div>
         <hr />
         <div className='video' onClick={() => addElement(Video)}><img src="https://img.icons8.com/skeuomorphism/64/video.png" alt="video" /></div>
         <hr />
@@ -392,7 +458,10 @@ export default function App() {
         </div>
       </div>
       <div className='sideElementsBar right'>
-        
+        <div onClick={() => addElement(Pie)}><img src="https://img.icons8.com/skeuomorphism/64/pie-chart.png" alt="pie chart" /></div>
+        <div onClick={() => addElement(Charts)}><img src="https://img.icons8.com/skeuomorphism/64/bar-chart.png" alt="charts" /></div>
+        <div onClick={() => addElement(Menu)}><img src="https://img.icons8.com/material-rounded/64/menu--v1.png" alt="more menu" /></div>
+
         <div className='dots rightDots'>
             <div></div>
             <div></div>
@@ -423,7 +492,7 @@ export default function App() {
     <input type="text" name="content" id="content" />
     
     <label htmlFor="imageContent">Select Image:</label>
-    <input type="file" name="imageContent" id="imageContent" />
+    <input type="file" name="imageContent" id="imageContent" accept="image/*" onChange={handleImageChange}/>
     
     <label htmlFor="width">Width:</label>
     <div>
@@ -438,10 +507,10 @@ export default function App() {
     <input type="number" name="fontSize" id="fontSize" min={1} defaultValue={14}/>
     
     <label htmlFor="fontColor">Font Color:</label>
-    <input type="color" name="fontColor" id="fontColor" defaultValue="#ffffff" />
+    <input type="color" name="fontColor" id="fontColor" />
     
     <label htmlFor="bgColor">Background Color:</label>
-    <input type="color" name="bgColor" id="bgColor" />
+    <input type="color" name="bgColor" id="bgColor" defaultValue="#ffffff"/>
     
     <label htmlFor="borderWidth">Border Width:</label>
     <input type="number" name="borderWidth" id="borderWidth" min={0} defaultValue={0}/>
