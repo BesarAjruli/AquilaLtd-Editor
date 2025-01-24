@@ -1,6 +1,8 @@
 import React, { useState, useRef } from 'react';
 import './style/style.css';
 import html2canvas from 'html2canvas'
+import loginComp1 from './Templates/login1'
+import loginTemplate1 from '../public/TemplatesThumbnail/loginTemplate1.png'
 
 const Text = ({style, content}) => <span className='edit' style={style}>{content}</span>;
 const Button = ({style, content}) => <button className='edit' style={style}>{content}</button>;
@@ -36,6 +38,7 @@ export default function App() {
   const [pages, setPage] = useState([1])
   const [currentPage, setCurrentPage] = useState(1)
   const [imageSrc, setImageSrc] = useState(null);
+  const templatesRef = useRef(null)
 
   const uniqueId = () => `element-${Date.now()}-${Math.random()}`;
 
@@ -74,7 +77,7 @@ export default function App() {
     }
   };
 
-  // Adding new elements to the state and managing drag logic
+  // Adding new elements to the state
   const addElement = (Component) => {
     const id = uniqueId();
     const newElement = {
@@ -256,6 +259,7 @@ export default function App() {
         setChangingStyle(false);
         setCurrentElement(null);
         }
+        console.log(elements)
     e.target.reset()
     closeDialog()
   }
@@ -263,7 +267,19 @@ export default function App() {
   const changeStyle = (id, e) => {
     e.preventDefault()
     e.stopPropagation();
-    dialogRef.current.querySelector('#content').value = e.target.textContent
+    if(e.target.tagName === 'IMG'){
+      dialogRef.current.querySelector('#content').style.display = 'none'
+      dialogRef.current.querySelector('label[for="content"]').style.display = 'none'
+      dialogRef.current.querySelector('label[for="imageContent"]').style.display = 'block'
+      dialogRef.current.querySelector('#imageContent').style.display = 'block'
+      setImageSrc(e.target.src)
+    } else{
+      dialogRef.current.querySelector('#imageContent').style.display = 'none'
+      dialogRef.current.querySelector('label[for="imageContent"]').style.display = 'none'
+      dialogRef.current.querySelector('#content').style.display = 'block'
+      dialogRef.current.querySelector('label[for="content"]').style.display = 'block'
+      dialogRef.current.querySelector('#content').value = e.target.textContent
+    }
     dialogRef.current.querySelector('#width').value = parseInt(e.target.style.width)
     dialogRef.current.querySelector('#height').value = parseInt(e.target.style.height)
     dialogRef.current.querySelector('#fontSize').value = parseInt(e.target.style.fontSize)
@@ -399,6 +415,8 @@ export default function App() {
     }
   };
 
+  let saveTemplate = []
+
   return (
     <>
       <div className='toolBar'>
@@ -413,7 +431,13 @@ export default function App() {
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><title>check</title><path d="M21,7L9,19L3.5,13.5L4.91,12.09L9,16.17L19.59,5.59L21,7Z" /></svg>
         </button>
         </div>
-        <button>Use templates</button>
+        <button onClick={() => {
+          saveTemplate = elements
+          navigator.clipboard.writeText(JSON.stringify(saveTemplate))
+          console.log(saveTemplate)
+          }}>Save template</button>
+
+        <button onClick={() => templatesRef.current.showModal()}>Use templates</button>
         <div className='pages'>
         <div onClick={() => {if(currentPage > 1) setCurrentPage(currentPage - 1)}}>
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><title>chevron-left</title><path d="M15.41,16.58L10.83,12L15.41,7.41L14,6L8,12L14,18L15.41,16.58Z" /></svg>
@@ -474,7 +498,7 @@ export default function App() {
           el.page === currentPage &&
             (<div
               key={el.id}
-              onMouseDown={(e) => handleDragStart(el.id, e)}
+              onMouseDown={(e) => handleDragStart(el.id, e)} 
               onContextMenu={(e) => changeStyle(el.id, e)}
             >
               {el.component}
@@ -482,6 +506,12 @@ export default function App() {
           ))}
         </div>
       </div>
+      <dialog ref={templatesRef} className='templateDialog'>
+          <div className='tmeplateDiv'>
+            <img src={loginTemplate1} alt="Login template 1"  onClick={() => console.log(...loginComp1)}/>
+            <img src={loginTemplate1} alt="" />
+          </div>
+      </dialog>
       <dialog ref={dialogRef} className="custom-dialog">
   <header className="dialog-header">
     <h3>Customize</h3>
