@@ -77,7 +77,6 @@ export default function App() {
     }
   };
 
-  // Adding new elements to the state
   const addElement = (Component) => {
     const id = uniqueId();
     const newElement = {
@@ -214,7 +213,7 @@ export default function App() {
     document.addEventListener('touchmove', move);
     document.addEventListener('touchend', endDrag);
   };
-  //Handling style submit
+
   const handleSubmit = (e) => {
     e.preventDefault()
     const formData = new FormData(e.target)
@@ -233,6 +232,7 @@ export default function App() {
         left: currentElement.id.startsWith('editor') && chngStyle.changing === true ? 0 : currentElement.style.left,
         top: currentElement.id.startsWith('editor') ? 0 : currentElement.style.top
         }
+
         if (currentElement && !currentElement.id.startsWith('editor')) {
           const updatedElement = {
             ...currentElement,
@@ -259,7 +259,6 @@ export default function App() {
         setChangingStyle(false);
         setCurrentElement(null);
         }
-        console.log(elements)
     e.target.reset()
     closeDialog()
   }
@@ -415,7 +414,106 @@ export default function App() {
     }
   };
 
-  let saveTemplate = []
+  const serializeTemplate = (elements) => {
+    return elements.map(({ id, style, component }) => ({
+      id,
+      style,
+      type: component.type.name,
+      content: component.props.content,
+    }));
+  };
+
+  const saveTemplate = (elements) => {
+    const serialized = serializeTemplate(elements);
+    localStorage.setItem('template', JSON.stringify(serialized));
+  };
+
+  const deserializeTemplate = (serializedElements) => {
+  return serializedElements.map(({ id, style, type, content }) => {
+    let Component;
+
+    // Dynamically select the component based on the type
+    switch (type) {
+      case 'Text':
+        Component = Text;
+        break;
+      case 'Button':
+        Component = Button;
+        break;
+      case 'Input':
+        Component = Input;
+        break;
+      case 'ImageCmp':
+        Component = ImageCmp;
+        break;
+      case 'Video':
+        Component = Video;
+        break;
+      case 'Audio':
+        Component = Audio;
+        break;
+      case 'Gallery':
+        Component = Gallery;
+        break;
+      case 'Section':
+        Component = Section;
+        break;
+      case 'Link':
+        Component = Link;
+        break;
+      case 'List':
+        Component = List;
+        break;
+      case 'Pie':
+        Component = Pie;
+        break;
+      case 'Charts':
+        Component = Charts;
+        break;
+      case 'Menu':
+        Component = Menu;
+        break;
+      default:
+        throw new Error(`Unknown component type: ${type}`);
+    }
+
+    return {
+      id,
+      style,
+      component: (
+        <Component key={id} style={style} content={content} />
+      ),
+    };
+  });
+};
+
+
+ const loadTemplate = () => {
+  const serialized = JSON.parse(localStorage.getItem('template') || '[]');
+  const deserializedElements = deserializeTemplate(serialized);
+  
+  const newElements = deserializedElements.map(element => {
+    const updatedElement = {
+      ...element,
+      style: element.style,
+      component: React.cloneElement(element.component, {
+        style: element.style, 
+        content: element.component.props.content,
+      }),
+      page: currentPage,
+    };
+    return updatedElement;
+  });
+
+  setElements(prevElements => {
+    const allElements = [...prevElements, ...newElements];
+    saveHistory(allElements); 
+    return allElements;
+  });
+
+  templatesRef.current.close();
+};
+
 
   return (
     <>
@@ -431,11 +529,7 @@ export default function App() {
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><title>check</title><path d="M21,7L9,19L3.5,13.5L4.91,12.09L9,16.17L19.59,5.59L21,7Z" /></svg>
         </button>
         </div>
-        <button onClick={() => {
-          saveTemplate = elements
-          navigator.clipboard.writeText(JSON.stringify(saveTemplate))
-          console.log(saveTemplate)
-          }}>Save template</button>
+        <button onClick={() => saveTemplate(elements)}>Save template</button>
 
         <button onClick={() => templatesRef.current.showModal()}>Use templates</button>
         <div className='pages'>
@@ -508,7 +602,7 @@ export default function App() {
       </div>
       <dialog ref={templatesRef} className='templateDialog'>
           <div className='tmeplateDiv'>
-            <img src={loginTemplate1} alt="Login template 1"  onClick={() => console.log(...loginComp1)}/>
+            <img src={loginTemplate1} alt="Login template 1"  onClick={loadTemplate}/>
             <img src={loginTemplate1} alt="" />
           </div>
       </dialog>
