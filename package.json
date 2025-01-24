@@ -20,5 +20,9 @@
   "bugs": {
     "url": "https://github.com/BesarAjruli/AquilaLtd-Editor/issues"
   },
-  "homepage": "https://github.com/BesarAjruli/AquilaLtd-Editor#readme"
+  "homepage": "https://github.com/BesarAjruli/AquilaLtd-Editor#readme",
+  "dependencies": {
+    "@mdi/js": "^7.4.47",
+    "@mdi/react": "^1.6.1"
+  }
 }

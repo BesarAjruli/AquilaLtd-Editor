@@ -2,6 +2,8 @@ import React, { useState, useRef } from 'react';
 import './style/style.css';
 import html2canvas from 'html2canvas'
 import Thumbnails from './Templates/templatesThumbnail'
+import Icon from '@mdi/react';
+import { mdiContentCopy } from '@mdi/js';
 
 const Text = ({style, content}) => <span className='edit' style={style}>{content}</span>;
 const Button = ({style, content}) => <button className='edit' style={style}>{content}</button>;
@@ -142,6 +144,8 @@ export default function App() {
         dialogRef.current.querySelector('#height').value = 50
     }
 
+    dialogRef.current.querySelector('.duplicate').style.display = 'none'
+
     dialogRef.current.showModal()
     }
   };
@@ -278,6 +282,9 @@ export default function App() {
       dialogRef.current.querySelector('label[for="content"]').style.display = 'block'
       dialogRef.current.querySelector('#content').value = e.target.textContent
     }
+    if(e.target.tagName === 'INPUT'){
+      dialogRef.current.querySelector('#content').value = e.target.placeholder
+    }
     dialogRef.current.querySelector('#width').value = parseInt(e.target.style.width)
     dialogRef.current.querySelector('#height').value = parseInt(e.target.style.height)
     dialogRef.current.querySelector('#fontSize').value = parseInt(e.target.style.fontSize)
@@ -298,7 +305,7 @@ export default function App() {
       dialogRef.current.querySelector('#imageContent').removeAttribute('disabled')
       dialogRef.current.querySelector('.deleteButton').removeAttribute('disabled')
       const elementToUpdate = elements.find(element => element.id === id);
-
+      dialogRef.current.querySelector('.duplicate').style.display = 'block'
     if (elementToUpdate) {
       setCurrentElement({
          id,
@@ -401,8 +408,6 @@ export default function App() {
     }
   };
   
-  
-
   const addNewPage = () => {
     setPage((prevPages) => {
       const nextPage = parseInt(prevPages) + 1;
@@ -543,6 +548,23 @@ export default function App() {
   templatesRef.current.close();
 };
 
+const duplicate = () => {
+  const updatedElement = {
+    ...currentElement,
+    style: currentElement.style,
+    component: React.cloneElement(currentElement.component, { style: currentElement.syle, content:  currentElement.component.props.content }),
+    page: currentPage,
+    id: uniqueId()
+  };
+  const newElements =  [...elements, updatedElement];
+  setElements(newElements);
+  saveHistory(newElements);
+  setChangingStyle(false);
+  setCurrentElement(null);
+
+  closeDialog()
+}
+
 
   return (
     <>
@@ -573,25 +595,25 @@ export default function App() {
         <button onClick={addNewPage}>New Page</button>
       </div>
       <div className='sideElementsBar left'>
-        <div className='text' onClick={() => addElement(Text)}>Text</div>
+        <div className='text' title='Text' onClick={() => addElement(Text)}>Text</div>
         <hr />
-        <div className='button' onClick={() => addElement(Button)}><button>Button</button></div>
+        <div className='button' title='Button' onClick={() => addElement(Button)}><button>Button</button></div>
         <hr />
-        <div className='input' onClick={() => addElement(Input)}><span>|</span></div>
+        <div className='input' title='Input' onClick={() => addElement(Input)}><span>|</span></div>
         <hr />
-        <div className='image' onClick={() => addElement(ImageCmp)}><img src="https://img.icons8.com/skeuomorphism/64/image.png" alt="image" /></div>
+        <div className='image' title='Image' onClick={() => addElement(ImageCmp)}><img src="https://img.icons8.com/skeuomorphism/64/image.png" alt="image" /></div>
         <hr />
-        <div className='video' onClick={() => addElement(Video)}><img src="https://img.icons8.com/skeuomorphism/64/video.png" alt="video" /></div>
+        <div className='video' title='Video' onClick={() => addElement(Video)}><img src="https://img.icons8.com/skeuomorphism/64/video.png" alt="video" /></div>
         <hr />
-        <div className='audio' onClick={() => addElement(Audio)}><img src="https://img.icons8.com/skeuomorphism/64/circled-play.png" alt="audio" /></div>
+        <div className='audio' title='Audio' onClick={() => addElement(Audio)}><img src="https://img.icons8.com/skeuomorphism/64/circled-play.png" alt="audio" /></div>
         <hr />
-        <div className='gallery' onClick={() => addElement(Gallery)}><img src="https://img.icons8.com/skeuomorphism/64/stack-of-photos.png" alt="gallery" /></div>
+        <div className='gallery' title='Gallery' onClick={() => addElement(Gallery)}><img src="https://img.icons8.com/skeuomorphism/64/stack-of-photos.png" alt="gallery" /></div>
         <hr />
-        <div className='section' onClick={() => addElement(Section)}></div>
+        <div className='section' title='Section (Header,footer...)' onClick={() => addElement(Section)}></div>
         <hr />
-        <div className='link' onClick={() => addElement(Link)}>https://link.com</div>
+        <div className='link' title='Link' onClick={() => addElement(Link)}>https://link.com</div>
         <hr />
-        <div className='list' onClick={() => addElement(List)}>
+        <div className='list' title='List' onClick={() => addElement(List)}>
           <div className='dots'>
             <div></div>
             <div></div>
@@ -605,9 +627,9 @@ export default function App() {
         </div>
       </div>
       <div className='sideElementsBar right'>
-        <div onClick={() => addElement(Pie)}><img src="https://img.icons8.com/skeuomorphism/64/pie-chart.png" alt="pie chart" /></div>
-        <div onClick={() => addElement(Charts)}><img src="https://img.icons8.com/skeuomorphism/64/bar-chart.png" alt="charts" /></div>
-        <div onClick={() => addElement(Menu)}><img src="https://img.icons8.com/material-rounded/64/menu--v1.png" alt="more menu" /></div>
+        <div title='Pie Charts' onClick={() => addElement(Pie)}><img src="https://img.icons8.com/skeuomorphism/64/pie-chart.png" alt="pie chart" /></div>
+        <div title='Charts' onClick={() => addElement(Charts)}><img src="https://img.icons8.com/skeuomorphism/64/bar-chart.png" alt="charts" /></div>
+        <div title='Menu' onClick={() => addElement(Menu)}><img src="https://img.icons8.com/material-rounded/64/menu--v1.png" alt="more menu" /></div>
 
         <div className='dots rightDots'>
             <div></div>
@@ -637,7 +659,8 @@ export default function App() {
       <dialog ref={dialogRef} className="custom-dialog">
   <header className="dialog-header">
     <h3>Customize</h3>
-    <i onClick={closeDialog} className="close-icon">✖</i>
+    <Icon path={mdiContentCopy} size={0.8} title='duplicate' className='close-icon duplicate' onClick={duplicate}/>
+    <i onClick={closeDialog} className="close-icon" title='close'>✖</i>
   </header>
   <form onSubmit={handleSubmit} className="dialog-form">
     <label htmlFor="content">Content:</label>
