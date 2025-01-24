@@ -1,8 +1,7 @@
 import React, { useState, useRef } from 'react';
 import './style/style.css';
 import html2canvas from 'html2canvas'
-import loginComp1 from './Templates/login1'
-import loginTemplate1 from '../public/TemplatesThumbnail/loginTemplate1.png'
+import Thumbnails from './Templates/templatesThumbnail'
 
 const Text = ({style, content}) => <span className='edit' style={style}>{content}</span>;
 const Button = ({style, content}) => <button className='edit' style={style}>{content}</button>;
@@ -364,8 +363,9 @@ export default function App() {
     dialogRef.current.close();
   }
 
-  const saveDesign = () => {
-    editorRef.current.style.boxShadow = ''
+  const saveDesign = async (template = false) => {
+    editorRef.current.style.boxShadow = '';
+    
     const images = editorRef.current.querySelectorAll('img');
     const promises = Array.from(images).map((img) => {
       return new Promise((resolve) => {
@@ -377,16 +377,30 @@ export default function App() {
       });
     });
   
-    Promise.all(promises).then(() => {
-      html2canvas(editorRef.current, { useCORS: true }).then((canvas) => {
-        const link = document.createElement('a');
-        link.download = 'div-image.png';
-        link.href = canvas.toDataURL('image/png');
-        link.click();
-        editorRef.current.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.5)'
-      });
-    });
+    await Promise.all(promises);
+  
+    const canvas = await html2canvas(editorRef.current, { useCORS: true });
+    const base64Image = canvas.toDataURL('image/png');
+  
+    if (template) {
+      const blob = await (await fetch(base64Image)).blob();
+      const file = new File([blob], 'design-image.png', { type: 'image/png' });
+      const formData = new FormData();
+      formData.append('image', file);
+  
+      editorRef.current.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.5)';
+  
+      return formData;
+    } else {
+      const link = document.createElement('a');
+      link.download = 'div-image.png';
+      link.href = base64Image;
+      link.click();
+  
+      editorRef.current.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.5)';
+    }
   };
+  
   
 
   const addNewPage = () => {
@@ -423,9 +437,20 @@ export default function App() {
     }));
   };
 
-  const saveTemplate = (elements) => {
+  const saveTemplate = async (elements) => {
     const serialized = serializeTemplate(elements);
-    localStorage.setItem('template', JSON.stringify(serialized));
+    const formData = await saveDesign(true)
+
+    formData.append('template', JSON.stringify(serialized));
+    
+    fetch("http://localhost:5000/api/saveTemplate", {
+      method: 'POST',
+      body: formData
+    }).then((response) => {
+      if(response.ok){
+        alert('Success')
+      }
+    })
   };
 
   const deserializeTemplate = (serializedElements) => {
@@ -487,10 +512,14 @@ export default function App() {
   });
 };
 
-
- const loadTemplate = () => {
-  const serialized = JSON.parse(localStorage.getItem('template') || '[]');
-  const deserializedElements = deserializeTemplate(serialized);
+ const loadTemplate = async (templateNr) => {
+  let serialized = ''
+  await fetch('http://localhost:5000/api/saveTemplate')
+  .then((response) => response.json())
+  .then((data => {
+   serialized = JSON.parse(data[templateNr].template)
+  }))
+  const deserializedElements = deserializeTemplate(JSON.parse(serialized));
   
   const newElements = deserializedElements.map(element => {
     const updatedElement = {
@@ -525,7 +554,7 @@ export default function App() {
         <button onClick={redoFunction} disabled={historyIndex === history.length - 1}>
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><title>redo</title><path d="M18.4,10.6C16.55,9 14.15,8 11.5,8C6.85,8 2.92,11.03 1.54,15.22L3.9,16C4.95,12.81 7.95,10.5 11.5,10.5C13.45,10.5 15.23,11.22 16.62,12.38L13,16H22V7L18.4,10.6Z" /></svg>
         </button>
-        <button onClick={saveDesign}>
+        <button onClick={() => saveDesign(false)}>
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><title>check</title><path d="M21,7L9,19L3.5,13.5L4.91,12.09L9,16.17L19.59,5.59L21,7Z" /></svg>
         </button>
         </div>
@@ -602,8 +631,7 @@ export default function App() {
       </div>
       <dialog ref={templatesRef} className='templateDialog'>
           <div className='tmeplateDiv'>
-            <img src={loginTemplate1} alt="Login template 1"  onClick={loadTemplate}/>
-            <img src={loginTemplate1} alt="" />
+            <Thumbnails onThumbnailClick={(e) => loadTemplate(e)}/>
           </div>
       </dialog>
       <dialog ref={dialogRef} className="custom-dialog">
