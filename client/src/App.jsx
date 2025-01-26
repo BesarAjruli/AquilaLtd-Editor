@@ -4,6 +4,7 @@ import html2canvas from 'html2canvas'
 import Thumbnails from './Templates/templatesThumbnail'
 import Icon from '@mdi/react';
 import { mdiContentCopy } from '@mdi/js';
+import SaveTemplateDialog from './Components/Dialogs/saveTemplate'
 
 const Text = ({style, content}) => <span className='edit' style={style}>{content}</span>;
 const Button = ({style, content}) => <button className='edit' style={style}>{content}</button>;
@@ -303,7 +304,6 @@ if(mediaQuery.matches){
         } else if(currentElement){
           Object.keys(formattedStyle).forEach(key => {
             editorRef.current.style[key] = formattedStyle[key];
-            
         });
         setChangingStyle(false);
         setCurrentElement(null);
@@ -420,43 +420,59 @@ if(mediaQuery.matches){
     dialogRef.current.close();
   }
 
-  const saveDesign = async (template = false) => {
-    editorRef.current.style.boxShadow = '';
-    
-    const images = editorRef.current.querySelectorAll('img');
-    const promises = Array.from(images).map((img) => {
-      return new Promise((resolve) => {
-        if (img.complete) {
-          resolve();
-        } else {
-          img.onload = resolve;
-        }
+  const saveDesign = async (totalPages, template = false) => {
+    const savedImages = [];
+    const originalPage = currentPage;
+  
+    for (let page = 1; page <= totalPages; page++) {
+      setCurrentPage(page); 
+      await new Promise((resolve) => setTimeout(resolve, 100)); // Wait for React to render the page
+  
+      editorRef.current.style.boxShadow = ''; // Temporarily remove shadow cause it messes with the images
+  
+      const images = editorRef.current.querySelectorAll('img');
+      const promises = Array.from(images).map((img) => {
+        return new Promise((resolve) => {
+          if (img.complete) {
+            resolve();
+          } else {
+            img.onload = resolve;
+          }
+        });
       });
-    });
   
-    await Promise.all(promises);
+      await Promise.all(promises);
   
-    const canvas = await html2canvas(editorRef.current, { useCORS: true });
-    const base64Image = canvas.toDataURL('image/png');
-  
-    if (template) {
-      const blob = await (await fetch(base64Image)).blob();
-      const file = new File([blob], 'design-image.png', { type: 'image/png' });
-      const formData = new FormData();
-      formData.append('image', file);
-  
-      editorRef.current.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.5)';
-  
-      return formData;
-    } else {
-      const link = document.createElement('a');
-      link.download = 'div-image.png';
-      link.href = base64Image;
-      link.click();
+      const canvas = await html2canvas(editorRef.current, { useCORS: true });
+      const base64Image = canvas.toDataURL('image/png');
+      savedImages.push(base64Image);
   
       editorRef.current.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.5)';
     }
+  
+    setCurrentPage(originalPage);
+  
+    if (template) {
+      for (const base64Image of savedImages) {
+        const blob = await (await fetch(base64Image)).blob();
+        const file = new File([blob], 'design-image.png', { type: 'image/png' });
+        const formData = new FormData();
+        formData.append('image', file);
+        
+        editorRef.current.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.5)';
+
+        return formData
+      }
+    } else {
+      savedImages.forEach((image, index) => {
+        const link = document.createElement('a');
+        link.download = `editor-${index + 1}.png`;
+        link.href = image;
+        link.click();
+      });
+    }
   };
+  
   
   const addNewPage = () => {
     setPage((prevPages) => {
@@ -483,19 +499,23 @@ if(mediaQuery.matches){
     }
   };
 
-  const serializeTemplate = (elements) => {
-    return elements.map(({ id, style, component }) => ({
+  const serializeTemplate = (elements, editorStyle) => {
+    return {
+      editorStyle,
+      elements: elements.map(({ id, style, component }) => ({
       id,
       style,
       type: component.type.name,
       content: component.props.content,
-    }));
+    }))
+  }
   };
 
   const saveTemplate = async (elements, e) => {
     e.preventDefault()
-    const serialized = serializeTemplate(elements);
-    const formData = await saveDesign(true)
+    const editorStyle = getStyleAsObject(editorRef.current)
+    const serialized = serializeTemplate(elements, editorStyle);
+    const formData = await saveDesign(1, true)
     const saveTempFormData = new FormData(e.target)
     const data = Object.fromEntries(saveTempFormData.entries())
 
@@ -511,99 +531,118 @@ if(mediaQuery.matches){
     }).then((response) => {
       if(response.ok){
         alert('Success')
+        saveTempRef.current.close()
       }
     })
   };
 
-  const deserializeTemplate = (serializedElements) => {
-  return serializedElements.map(({ id, style, type, content }) => {
-    let Component;
-
-    // Dynamically select the component based on the type
-    switch (type) {
-      case 'Text':
-        Component = Text;
-        break;
-      case 'Button':
-        Component = Button;
-        break;
-      case 'Input':
-        Component = Input;
-        break;
-      case 'ImageCmp':
-        Component = ImageCmp;
-        break;
-      case 'Video':
-        Component = Video;
-        break;
-      case 'Audio':
-        Component = Audio;
-        break;
-      case 'Gallery':
-        Component = Gallery;
-        break;
-      case 'Section':
-        Component = Section;
-        break;
-      case 'Link':
-        Component = Link;
-        break;
-      case 'List':
-        Component = List;
-        break;
-      case 'Pie':
-        Component = Pie;
-        break;
-      case 'Charts':
-        Component = Charts;
-        break;
-      case 'Menu':
-        Component = Menu;
-        break;
-      default:
-        throw new Error(`Unknown component type: ${type}`);
-    }
-
-    return {
-      id,
-      style,
-      component: (
-        <Component key={id} style={style} content={content} />
-      ),
-    };
-  });
-};
-
- const loadTemplate = async (templateNr) => {
-  let serialized = ''
-  await fetch(`${backendUrl}/api/saveTemplate`)
-  .then((response) => response.json())
-  .then((data => {
-   serialized = JSON.parse(data[templateNr].template)
-  }))
-  const deserializedElements = deserializeTemplate(JSON.parse(serialized));
+  const deserializeTemplate = (serializedData) => {
+    const { editorStyle, elements } = JSON.parse(serializedData); 
   
-  const newElements = deserializedElements.map(element => {
-    const updatedElement = {
-      ...element,
-      style: element.style,
-      component: React.cloneElement(element.component, {
-        style: element.style, 
-        content: element.component.props.content,
-      }),
-      page: currentPage,
-    };
-    return updatedElement;
-  });
+    const deserializedElements = elements.map(({ id, style, type, content }) => {
+      let Component;
+  
+      // Dynamically select the component based on the type
+      switch (type) {
+        case 'Text':
+          Component = Text;
+          break;
+        case 'Button':
+          Component = Button;
+          break;
+        case 'Input':
+          Component = Input;
+          break;
+        case 'ImageCmp':
+          Component = ImageCmp;
+          break;
+        case 'Video':
+          Component = Video;
+          break;
+        case 'Audio':
+          Component = Audio;
+          break;
+        case 'Gallery':
+          Component = Gallery;
+          break;
+        case 'Section':
+          Component = Section;
+          break;
+        case 'Link':
+          Component = Link;
+          break;
+        case 'List':
+          Component = List;
+          break;
+        case 'Pie':
+          Component = Pie;
+          break;
+        case 'Charts':
+          Component = Charts;
+          break;
+        case 'Menu':
+          Component = Menu;
+          break;
+        default:
+          throw new Error(`Unknown component type: ${type}`);
+      }
+  
+      return {
+        id,
+        style,
+        component: (
+          <Component key={id} style={style} content={content} />
+        ),
+      };
+    });
+  
+    return { editorStyle, deserializedElements }; 
+  };
+  
 
-  setElements(prevElements => {
-    const allElements = [...prevElements, ...newElements];
-    saveHistory(allElements); 
-    return allElements;
-  });
-
-  templatesRef.current.close();
-};
+  const loadTemplate = async (templateNr) => {
+    let serialized = '';
+    await fetch(`${backendUrl}/api/saveTemplate`)
+      .then((response) => response.json())
+      .then((data) => {
+        serialized = JSON.parse(data[templateNr].template);
+      });
+  
+    const { editorStyle, deserializedElements } = deserializeTemplate(serialized);
+  
+    const newElements = deserializedElements.map((element) => {
+      const updatedElement = {
+        ...element,
+        style: element.style,
+        component: React.cloneElement(element.component, {
+          style: element.style,
+          content: element.component.props.content,
+        }),
+        page: currentPage,
+      };
+      return updatedElement;
+    });
+  
+    setElements((prevElements) => {
+      const allElements = [...prevElements, ...newElements];
+      saveHistory(allElements);
+      return allElements;
+    });
+  
+      Object.keys(editorStyle).forEach(key => {
+       editorRef.current.style[key] = editorStyle[key];
+      });
+  
+    templatesRef.current.close();
+  };
+  
+  const getStyleAsObject = (element) => {
+    const computedStyle = window.getComputedStyle(element);
+    return Array.from(computedStyle).reduce((styleObj, property) => {
+      styleObj[property] = computedStyle.getPropertyValue(property);
+      return styleObj;
+    }, {});
+  };
 
 const duplicate = () => {
   const updatedElement = {
@@ -655,7 +694,7 @@ const handleMobileContextMenu = (id, e) => {
         <button onClick={redoFunction} disabled={historyIndex === history.length - 1}>
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><title>redo</title><path d="M18.4,10.6C16.55,9 14.15,8 11.5,8C6.85,8 2.92,11.03 1.54,15.22L3.9,16C4.95,12.81 7.95,10.5 11.5,10.5C13.45,10.5 15.23,11.22 16.62,12.38L13,16H22V7L18.4,10.6Z" /></svg>
         </button>
-        <button onClick={() => saveDesign(false)}>
+        <button onClick={() => saveDesign( pages,false)}>
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><title>check</title><path d="M21,7L9,19L3.5,13.5L4.91,12.09L9,16.17L19.59,5.59L21,7Z" /></svg>
         </button>
         </div>
@@ -816,28 +855,7 @@ const handleMobileContextMenu = (id, e) => {
     <button type="submit" className="submit-button">Submit</button>
   </form>
       </dialog>
-      <dialog className='saveTemp' ref={saveTempRef} onSubmit={(e) => saveTemplate(elements, e)}>
-      <i onClick={() => saveTempRef.current.close()} className="close-icon" title='close'>✖</i>
-        <form>
-          <label htmlFor="category">Category</label>
-          <select name='category' id='category'>
-            <option value='login'>Login</option>
-            <option value="signup">SignUp</option>
-            <option value="homepage">Home Page</option>
-            <option value="productpage">Product Page</option>
-          </select>
-          <label htmlFor="deviceType">Device Type</label>
-          <select name="deviceType" id="deviceType">
-            <option value="pc">PC</option>
-            <option value="tablet">Tablet</option>
-            <option value="mobile">Mobile</option>
-          </select>
-          <label htmlFor="userId">User ID</label>
-          <input type="number" name="userId" id="userId" defaultValue={1}/>
-          <button className="submit-button">Submit</button>
-        </form>
-      </dialog>
-
+      <SaveTemplateDialog ref={saveTempRef} saveTemplate={(elements, e) => saveTemplate(elements, e)} elements={elements}/>
     </>
   );
 }
