@@ -41,8 +41,11 @@ export default function App() {
   const [imageSrc, setImageSrc] = useState(null);
   const templatesRef = useRef(null)
   const saveTempRef = useRef(null)
+  const [templateCategory, setTemplateCat] = useState('all')
+  const [tempDeviceType, setTempDeviceType] = useState('pc')
 
   const uniqueId = () => `element-${Date.now()}-${Math.random()}`;
+  const backendUrl = import.meta.env.VITE_BACKEND_URL;
 
   const mediaQuery = window.matchMedia('(max-width: 768px)');
 
@@ -61,7 +64,7 @@ export default function App() {
 }
 if(mediaQuery.matches){
   editorStyle.width = '300px'
-  editorStyle.height = '666px'
+  editorStyle.height = '600px'
 }
 
   //History (undo/redo functions)
@@ -184,8 +187,10 @@ if(mediaQuery.matches){
       clearTimeout(pressTimer);
     };
 
+    if(mediaQuery.matches){
     document.body.style.overflow = 'hidden';
     document.documentElement.style.overflow = 'hidden';
+  }
     const preventScroll = (scrollEvent) => {
       scrollEvent.preventDefault();
     };
@@ -500,7 +505,7 @@ if(mediaQuery.matches){
       formData.append(key, value);
     }
     
-    fetch("http://localhost:5000/api/saveTemplate", {
+    fetch(`${backendUrl}/api/saveTemplate`, {
       method: 'POST',
       body: formData
     }).then((response) => {
@@ -571,7 +576,7 @@ if(mediaQuery.matches){
 
  const loadTemplate = async (templateNr) => {
   let serialized = ''
-  await fetch('http://localhost:5000/api/saveTemplate')
+  await fetch(`${backendUrl}/api/saveTemplate`)
   .then((response) => response.json())
   .then((data => {
    serialized = JSON.parse(data[templateNr].template)
@@ -735,9 +740,37 @@ const handleMobileContextMenu = (id, e) => {
         </div>
       </div>
       <dialog ref={templatesRef} className='templateDialog'>
-          <div className='tmeplateDiv'>
-            <Thumbnails onThumbnailClick={(e) => loadTemplate(e)}/>
+        <div className='templateCategory'>
+          <div>
+            <label htmlFor="category">Category:</label>
+            <select 
+            name='category' 
+            id='category'
+            onChange={(e) => {
+              setTemplateCat(e.target.value)
+            }}
+            >
+              <option value="all">All</option>
+              <option value='login'>Login</option>
+              <option value="signup">SignUp</option>
+              <option value="homepage">Home Page</option>
+              <option value="productpage">Product Page</option>
+            </select>
           </div>
+          <div>
+            <label htmlFor="deviceType">Device Type:</label>
+            <select name="deviceType" id="deviceType" onChange={(e) => setTempDeviceType(e.target.value)}>
+              <option value="pc">PC</option>
+              <option value="tablet">Tablet</option>
+              <option value="mobile">Mobile</option>
+            </select>
+          </div>
+          <i onClick={() => templatesRef.current.close()} className="close-icon" title='close'>✖</i>
+        </div>
+
+        <div className='tmeplateDiv'>
+          <Thumbnails onThumbnailClick={(e) => loadTemplate(e)} category={templateCategory} deviceType={tempDeviceType}/>
+        </div>
       </dialog>
       <dialog ref={dialogRef} className="custom-dialog">
   <header className="dialog-header">
@@ -783,7 +816,8 @@ const handleMobileContextMenu = (id, e) => {
     <button type="submit" className="submit-button">Submit</button>
   </form>
       </dialog>
-      <dialog ref={saveTempRef} onSubmit={(e) => saveTemplate(elements, e)}>
+      <dialog className='saveTemp' ref={saveTempRef} onSubmit={(e) => saveTemplate(elements, e)}>
+      <i onClick={() => saveTempRef.current.close()} className="close-icon" title='close'>✖</i>
         <form>
           <label htmlFor="category">Category</label>
           <select name='category' id='category'>
@@ -798,9 +832,9 @@ const handleMobileContextMenu = (id, e) => {
             <option value="tablet">Tablet</option>
             <option value="mobile">Mobile</option>
           </select>
-          <label htmlFor="userId">userId</label>
-          <input type="number" name="userId" id="userId" />
-          <button>Submit</button>
+          <label htmlFor="userId">User ID</label>
+          <input type="number" name="userId" id="userId" defaultValue={1}/>
+          <button className="submit-button">Submit</button>
         </form>
       </dialog>
 

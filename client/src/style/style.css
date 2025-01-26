@@ -287,14 +287,16 @@ top: 3px;
   }
 
   .templateDialog{
-    padding: 20px;
+    width: 1038px;
+    padding: 10px 20px 20px 20px;
+    max-height: 510px;
     border: 2px solid #ddd;
     border-radius: 8px;
     max-width: 1100px;
     background: #fefefe;
     font-family: Arial, sans-serif;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-    overflow: hidden;
+    overflow: scroll;
   }
   .tmeplateDiv{
     display: grid;
@@ -307,6 +309,67 @@ top: 3px;
     border: 2px solid #a7a6a6;
     border-radius: 10px;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+  }
+  .templateCategory{
+    display: flex;
+    flex-grow: 1;
+    justify-content: center;
+    place-items: center;
+    gap: 50px;
+    height: 50px;
+    margin-bottom: 15px;
+    background-color: #e9e0e9;
+    border-radius: 15px;
+  }
+  .templateCategory div *{
+    margin-left: 10px;
+  }
+  .templateCategory div select{
+    background-color: #6b6b6b;
+    color: #fff;
+    border: 0;
+    border-radius: 10px;
+    width: 150px;
+    height: 30px;
+    font-weight: 900;
+  }
+  .templateCategory .close-icon{
+    position: absolute;
+    right: 70px;
+  }
+
+  .saveTemp{
+    width: 500px;
+    padding: 20px;
+    border: 2px solid #ddd;
+    border-radius: 8px;
+    background: #fefefe;
+    font-family: Arial, sans-serif;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+  }
+  .saveTemp form{
+    display: grid;
+    grid-template-columns: 1fr 2fr;
+    gap: 16px 12px;
+    align-items: center;
+  }
+  .saveTemp form select,input{
+    padding: 3px 3px;
+    height: 30px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 1rem;
+    outline: none;
+    transition: border 0.2s;
+  }
+  .saveTemp form .submit-button{
+    grid-column: span 2;
+    margin-left: 200px;
+  }
+  .saveTemp .close-icon{
+    float: right;
+    margin-left: 20px;
   }
   .duplicate{
     margin-left: 50%;
@@ -340,33 +403,6 @@ top: 3px;
     font-size: 12px;
     font-weight: 500;
 }
-  
-    /* Dialog Styles */
-  .custom-dialog {
-      padding: 20px;
-      border: 2px solid #ddd;
-      border-radius: 8px;
-      max-width: 480px;
-      background: #fefefe;
-      font-family: Arial, sans-serif;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-    }
-    
-    /* Header */
-    .dialog-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 20px;
-    }
-    
-    .dialog-header h3 {
-      margin: 0;
-      font-size: 1.6rem;
-    }
-    
-    
-    
     .dialog-form input[type="file"]{
       width: 200px;
     }
@@ -374,7 +410,6 @@ top: 3px;
       display: flex;
       grid-column: span 3;
     }
-  
     .history{
       display: flex;
       gap: 10px;
@@ -382,28 +417,33 @@ top: 3px;
       grid-column: span 3;
     }
     .templateDialog{
-      padding: 20px;
-      border: 2px solid #ddd;
-      border-radius: 8px;
-      max-width: 1100px;
-      background: #fefefe;
-      font-family: Arial, sans-serif;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-      overflow: hidden;
+      width: 300px;
     }
     .tmeplateDiv{
-      display: grid;
-      grid-template-columns: repeat(2,1fr) ;
-      overflow: hidden;
+      display: flex;
+      flex-direction: column;
       gap: 30px;
+      justify-content: center;
+      place-items: center;
     }
     .tmeplateDiv img{
-      width: 500px;
+      width: 95%;
       border: 2px solid #a7a6a6;
       border-radius: 10px;
       box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
     }
-    .duplicate{
-      margin-left: 50%;
+    .templateCategory{
+      padding: 10px 0;
+      position: sticky;
+      display: grid;
+      grid-template-columns: 1fr;
+      grid-template-rows: auto;
+      gap: 0px;
+      height: 80px;
+    }
+    .templateCategory .close-icon{
+      position: absolute;
+      right: 5px;
+      top: 15px;
     }
 }
