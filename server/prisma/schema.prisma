@@ -17,4 +17,15 @@ model Template {
   id Int @id @default(autoincrement())
   template String
   path String
+  category String
+  device_type String
+  author User @relation(fields: [authorId], references: [id])
+  authorId Int
+}
+
+model User{
+  id Int @id @default(autoincrement())
+  templates Template[]
+  email String
+  password String
 }

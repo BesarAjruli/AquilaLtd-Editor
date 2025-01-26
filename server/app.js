@@ -34,7 +34,10 @@ app.post('/api/saveTemplate',upload.single('image'), async (req, res) => {
         const newTemplate = await prisma.template.create({
           data: {
             template: JSON.stringify(req.body.template),
-            path: imagePath
+            path: imagePath,
+            category: req.body.category,
+            device_type: req.body.deviceType,
+            authorId: parseInt(req.body.userId)
           }
         });
         res.status(201).json({success: true});
@@ -48,6 +51,7 @@ app.get('/api/saveTemplate', async (req, res) => {
     res.json(data)
 })
 
-app.listen(5000, () => {
-    console.log('Listneing on port 5000')
+const port = process.env.PORT || 5000
+app.listen(port, () => {
+    console.log(`Listneing on port ${port}`)
 })

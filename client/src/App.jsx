@@ -40,10 +40,13 @@ export default function App() {
   const [currentPage, setCurrentPage] = useState(1)
   const [imageSrc, setImageSrc] = useState(null);
   const templatesRef = useRef(null)
+  const saveTempRef = useRef(null)
 
   const uniqueId = () => `element-${Date.now()}-${Math.random()}`;
 
-  const editorStyle = {
+  const mediaQuery = window.matchMedia('(max-width: 768px)');
+
+  let editorStyle = {
     width: '1280px',
     height: '520px',
     borderWidth: '0',
@@ -55,6 +58,10 @@ export default function App() {
     color: '#000',
     boxShadow: '0 4px 12px rgba(0, 0, 0, 0.5)',
     backgroundColor: '#fff'
+}
+if(mediaQuery.matches){
+  editorStyle.width = '300px'
+  editorStyle.height = '666px'
 }
 
   //History (undo/redo functions)
@@ -152,6 +159,11 @@ export default function App() {
 
   const handleDragStart = (id, e) => {
     e.preventDefault();
+    e.stopPropagation();
+
+    const longClickThreshold = 500;
+  let pressTimer;
+  let isLongClick = false;
 
     const elementIndex = elements.findIndex((el) => el.id === id);
     const crntElement = elements[elementIndex];
@@ -160,14 +172,36 @@ export default function App() {
 
     const element = e.target
     const rect = element.getBoundingClientRect();
-    let offsetX = e.clientX - rect.left;
-    let offsetY = e.clientY - rect.top;
+
+    const startPress = () => {
+      pressTimer = setTimeout(() => {
+        isLongClick = true;
+        changeStyle(id, e)
+      }, longClickThreshold);
+    };
+  
+    const cancelPress = () => {
+      clearTimeout(pressTimer);
+    };
+
+    document.body.style.overflow = 'hidden';
+    document.documentElement.style.overflow = 'hidden';
+    const preventScroll = (scrollEvent) => {
+      scrollEvent.preventDefault();
+    };
+
+    let offsetX = (e.clientX || e.touches[0].clientX) - rect.left;
+    let offsetY = (e.clientY || e.touches[0].clientY) - rect.top;
     
     element.classList.add('dragging')
+
+    startPress()
   
     const move = (moveEvent) => {
-      const clientX = moveEvent.clientX;
-      const clientY = moveEvent.clientY;
+      moveEvent.preventDefault()
+      cancelPress()
+      const clientX = moveEvent.clientX || moveEvent.touches[0].clientX;
+      const clientY = moveEvent.clientY || moveEvent.touches[0].clientY;
   
       const elementContainer = element.parentElement;
       const parent = elementContainer.parentElement;
@@ -182,7 +216,6 @@ export default function App() {
   
       element.style.left = `${newX}px`;
       element.style.top = `${newY}px`;
-
       const updatedStyle = {
         ...crntElement.style,
         left: `${newX}px`,
@@ -203,18 +236,26 @@ export default function App() {
     const endDrag = () => {
       element.classList.remove('dragging');
 
+      document.body.style.overflow = '';
+      document.documentElement.style.overflow = '';
+
       document.removeEventListener('mousemove', move);
       document.removeEventListener('mouseup', endDrag);
       document.removeEventListener('touchmove', move);
       document.removeEventListener('touchend', endDrag);
 
+      document.removeEventListener('touchmove', preventScroll);
+
       saveHistory(elements);
+      cancelPress()
     };
   
     document.addEventListener('mousemove', move);
     document.addEventListener('mouseup', endDrag);
     document.addEventListener('touchmove', move);
     document.addEventListener('touchend', endDrag);
+
+    document.addEventListener('touchmove', preventScroll, { passive: false });
   };
 
   const handleSubmit = (e) => {
@@ -232,8 +273,8 @@ export default function App() {
         borderRadius: data.borderRadius + 'px',
         borderColor: data.borderColor,
         position: currentElement.id.startsWith('editor') ? 'relative' : 'absolute',
-        left: currentElement.id.startsWith('editor') && chngStyle.changing === true ? 0 : currentElement.style.left,
-        top: currentElement.id.startsWith('editor') ? 0 : currentElement.style.top
+        left: currentElement.id.startsWith('editor') && chngStyle.changing === true ? 0 : currentElement.style.left || 0,
+        top: currentElement.id.startsWith('editor') ? 0 : currentElement.style.top || 0
         }
 
         if (currentElement && !currentElement.id.startsWith('editor')) {
@@ -339,7 +380,11 @@ export default function App() {
 
   const setWidthMax = (e) => {
     e.preventDefault()
-    dialogRef.current.querySelector('#width').value = 1280 
+    if(mediaQuery.matches){
+      dialogRef.current.querySelector('#width').value = 300 
+    } else {
+      dialogRef.current.querySelector('#width').value = 1280 
+    }
   }
 
   function rgbToHex(rgb) {
@@ -442,11 +487,18 @@ export default function App() {
     }));
   };
 
-  const saveTemplate = async (elements) => {
+  const saveTemplate = async (elements, e) => {
+    e.preventDefault()
     const serialized = serializeTemplate(elements);
     const formData = await saveDesign(true)
+    const saveTempFormData = new FormData(e.target)
+    const data = Object.fromEntries(saveTempFormData.entries())
 
     formData.append('template', JSON.stringify(serialized));
+
+    for (const [key, value] of Object.entries(data)) {
+      formData.append(key, value);
+    }
     
     fetch("http://localhost:5000/api/saveTemplate", {
       method: 'POST',
@@ -565,6 +617,28 @@ const duplicate = () => {
   closeDialog()
 }
 
+// editor only
+const handleMobileContextMenu = (id, e) => {
+  e.preventDefault()
+  let pressTimer; 
+  let isLongClick = false;
+
+  const startPress = () => {
+    pressTimer = setTimeout(() => {
+      isLongClick = true;
+      changeStyle(id, e);
+    }, 500);
+  };
+
+  const cancelPress = () => {
+    clearTimeout(pressTimer);
+  };
+
+  e.target.addEventListener('touchend', cancelPress);
+  e.target.addEventListener('touchcancel', cancelPress);
+
+  startPress();
+}
 
   return (
     <>
@@ -580,9 +654,10 @@ const duplicate = () => {
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><title>check</title><path d="M21,7L9,19L3.5,13.5L4.91,12.09L9,16.17L19.59,5.59L21,7Z" /></svg>
         </button>
         </div>
-        <button onClick={() => saveTemplate(elements)}>Save template</button>
-
-        <button onClick={() => templatesRef.current.showModal()}>Use templates</button>
+        <div className='templatesButton'>
+          <button onClick={() => saveTempRef.current.showModal()}>Save template</button>
+          <button onClick={() => templatesRef.current.showModal()}>Use templates</button>
+        </div>
         <div className='pages'>
         <div onClick={() => {if(currentPage > 1) setCurrentPage(currentPage - 1)}}>
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><title>chevron-left</title><path d="M15.41,16.58L10.83,12L15.41,7.41L14,6L8,12L14,18L15.41,16.58Z" /></svg>
@@ -638,13 +713,21 @@ const duplicate = () => {
           </div>
       </div>
       <div className='editorContainer'>
-        <div className='editor' style={editorStyle} id={`editor ${currentPage}`} ref={editorRef} onContextMenu={(e) => changeStyle(editorRef.current.id, e)}>
+        <div 
+        className='editor'
+        style={editorStyle}
+        id={`editor ${currentPage}`} 
+        ref={editorRef}
+        onContextMenu={(e) => changeStyle(editorRef.current.id, e)}
+        onTouchStart={(e) => handleMobileContextMenu(editorRef.current.id, e)}
+        >
          {elements.map((el) => (
           el.page === currentPage &&
             (<div
               key={el.id}
               onMouseDown={(e) => handleDragStart(el.id, e)} 
               onContextMenu={(e) => changeStyle(el.id, e)}
+              onTouchStart={(e) => handleDragStart(el.id, e)} 
             >
               {el.component}
             </div>)
@@ -671,7 +754,7 @@ const duplicate = () => {
     
     <label htmlFor="width">Width:</label>
     <div>
-      <input type="number" id="width" name="width" min={1} defaultValue={100} max={1280} required/>
+      <input type="number" id="width" name="width" min={1} defaultValue={100} max={mediaQuery.matches ? 300: 1280} required/>
       <button className='maxWidth' onClick={setWidthMax}>Max</button>
     </div>
     
@@ -699,8 +782,27 @@ const duplicate = () => {
     <button className='deleteButton' type='button' onClick={deleteElement}>Delete</button>
     <button type="submit" className="submit-button">Submit</button>
   </form>
-</dialog>
-
+      </dialog>
+      <dialog ref={saveTempRef} onSubmit={(e) => saveTemplate(elements, e)}>
+        <form>
+          <label htmlFor="category">Category</label>
+          <select name='category' id='category'>
+            <option value='login'>Login</option>
+            <option value="signup">SignUp</option>
+            <option value="homepage">Home Page</option>
+            <option value="productpage">Product Page</option>
+          </select>
+          <label htmlFor="deviceType">Device Type</label>
+          <select name="deviceType" id="deviceType">
+            <option value="pc">PC</option>
+            <option value="tablet">Tablet</option>
+            <option value="mobile">Mobile</option>
+          </select>
+          <label htmlFor="userId">userId</label>
+          <input type="number" name="userId" id="userId" />
+          <button>Submit</button>
+        </form>
+      </dialog>
 
     </>
   );
