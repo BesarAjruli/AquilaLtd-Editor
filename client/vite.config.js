@@ -6,6 +6,7 @@ const backendUrl = process.env.VITE_BACKEND_URL;
 export default defineConfig({
   plugins: [react()],
   server: {
+    host: true,
     proxy: {
       '/api': backendUrl,
     },

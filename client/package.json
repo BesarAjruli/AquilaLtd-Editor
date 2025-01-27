@@ -2,9 +2,8 @@
   "name": "aquila-ltd-editor-client",
   "private": true,
   "version": "1.0.0",
-  "proxy": "http://localhost:5000",
+  "proxy": "https://oral-christy-aquilaltd-62b0039d.koyeb.app",
   "type": "module",
-  "homepage": "https://besarajruli.github.io/Aquila-Editor",
   "scripts": {
     "start": "vite",
     "dev": "vite",
