@@ -13,6 +13,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@mdi/js": "^7.4.47",
     "@mdi/react": "^1.6.1",
     "dotenv": "^16.4.7",
     "html2canvas": "^1.4.1",
