@@ -13,7 +13,6 @@ const prisma = new PrismaClient()
 const app = express()
 
 app.use(cors({
-    origin: 'https://aquilaltd-editor-production.up.railway.app/',
     methods: 'GET,POST,PUT,DELETE',
     allowedHeaders: 'Content-Type,Authorization',
 }));
