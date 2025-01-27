@@ -10,4 +10,9 @@ export default defineConfig({
       '/api': backendUrl,
     },
   },
+  build: {
+    rollupOptions: {
+      external: ['@mdi/react']
+    }
+  }
 })
