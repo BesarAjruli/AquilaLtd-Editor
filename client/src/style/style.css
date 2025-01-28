@@ -372,7 +372,20 @@ top: 3px;
     margin-left: 20px;
   }
   .duplicate{
-    margin-left: 50%;
+    margin-left: 10%;
+  }
+  .layers{
+    width: 20px;
+    height: 20px;
+    fill: #888;
+  }
+  .layers:hover{
+    fill: #333;
+  }
+  .layersCOntainer{
+    gap: 20px;
+    display: flex;
+    margin-left: 20%;
   }
   @media (max-width: 768px) {
     .sideElementsBar{

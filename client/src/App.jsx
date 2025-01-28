@@ -1,9 +1,9 @@
 import React, { useState, useRef } from 'react';
 import './style/style.css';
 import html2canvas from 'html2canvas'
-import Thumbnails from './Templates/templatesThumbnail'
 import SaveTemplateDialog from './Components/Dialogs/saveTemplate'
 import EditorDialog from './Components/Dialogs/editComponents';
+import SelectTemplate from './Components/Dialogs/selectTemplate';
 
 const Text = ({style, content}) => <span className='edit' style={style}>{content}</span>;
 const Button = ({style, content}) => <button className='edit' style={style}>{content}</button>;
@@ -41,8 +41,8 @@ export default function App() {
   const [imageSrc, setImageSrc] = useState(null);
   const templatesRef = useRef(null)
   const saveTempRef = useRef(null)
-  const [templateCategory, setTemplateCat] = useState('all')
-  const [tempDeviceType, setTempDeviceType] = useState('pc')
+  const [layer, setLayer]= useState(null)
+
 
   const uniqueId = () => `element-${Date.now()}-${Math.random()}`;
   const backendUrl = import.meta.env.VITE_BACKEND_URL;
@@ -155,6 +155,7 @@ if(mediaQuery.matches){
     }
 
     dialogRef.current.querySelector('.duplicate').style.display = 'none'
+    dialogRef.current.querySelector('.layersCOntainer').style.display = 'none'
 
     dialogRef.current.showModal()
     }
@@ -279,7 +280,8 @@ if(mediaQuery.matches){
         borderColor: data.borderColor,
         position: currentElement.id.startsWith('editor') ? 'relative' : 'absolute',
         left: currentElement.id.startsWith('editor') && chngStyle.changing === true ? 0 : currentElement.style.left || 0,
-        top: currentElement.id.startsWith('editor') ? 0 : currentElement.style.top || 0
+        top: currentElement.id.startsWith('editor') ? 0 : currentElement.style.top || 0,
+        zIndex: chngStyle.changing ? layer ? layer : currentElement.style.zIndex : elements.length 
         }
 
         if (currentElement && !currentElement.id.startsWith('editor')) {
@@ -306,6 +308,7 @@ if(mediaQuery.matches){
         });
         setChangingStyle(false);
         setCurrentElement(null);
+        setLayer(null)
         }
     e.target.reset()
     closeDialog()
@@ -472,7 +475,6 @@ if(mediaQuery.matches){
     }
   };
   
-  
   const addNewPage = () => {
     setPage((prevPages) => {
       const nextPage = parseInt(prevPages) + 1;
@@ -598,7 +600,6 @@ if(mediaQuery.matches){
     return { editorStyle, deserializedElements }; 
   };
   
-
   const loadTemplate = async (templateNr) => {
     let serialized = '';
     await fetch(`${backendUrl}/api/saveTemplate`)
@@ -681,6 +682,26 @@ const handleMobileContextMenu = (id, e) => {
   e.target.addEventListener('touchcancel', cancelPress);
 
   startPress();
+}
+
+const bringForward = () => {
+  let layers = layer ? layer : currentElement.style.zIndex
+  if(layers !== elements.length){
+  dialogRef.current.querySelectorAll('.layers')[1].style.cursor = 'default'
+    setLayer(layers+=1)
+  }else {
+    dialogRef.current.querySelectorAll('.layers')[1].style.cursor = 'not-allowed'
+  }
+}
+
+const sendBackward = () => {
+  let layers = layer? layer : currentElement.style.zIndex
+  if(layers !== 0){
+    dialogRef.current.querySelectorAll('.layers')[0].style.cursor = 'default'
+    setLayer(layers-=1)
+  }else {
+    dialogRef.current.querySelectorAll('.layers')[0].style.cursor = 'not-allowed'
+  }
 }
 
   return (
@@ -777,41 +798,11 @@ const handleMobileContextMenu = (id, e) => {
           ))}
         </div>
       </div>
-      <dialog ref={templatesRef} className='templateDialog'>
-        <div className='templateCategory'>
-          <div>
-            <label htmlFor="category">Category:</label>
-            <select 
-            name='category' 
-            id='category'
-            onChange={(e) => {
-              setTemplateCat(e.target.value)
-            }}
-            >
-              <option value="all">All</option>
-              <option value='login'>Login</option>
-              <option value="signup">SignUp</option>
-              <option value="homepage">Home Page</option>
-              <option value="productpage">Product Page</option>
-            </select>
-          </div>
-          <div>
-            <label htmlFor="deviceType">Device Type:</label>
-            <select name="deviceType" id="deviceType" onChange={(e) => setTempDeviceType(e.target.value)}>
-              <option value="pc">PC</option>
-              <option value="tablet">Tablet</option>
-              <option value="mobile">Mobile</option>
-            </select>
-          </div>
-          <i onClick={() => templatesRef.current.close()} className="close-icon" title='close'>✖</i>
-        </div>
-        <div className='tmeplateDiv'>
-          <Thumbnails onThumbnailClick={(e) => loadTemplate(e)} category={templateCategory} deviceType={tempDeviceType}/>
-        </div>
-      </dialog>
+      <SelectTemplate ref={templatesRef} loadTemplate={(e) => loadTemplate(e)}/>
       <EditorDialog ref={dialogRef} mediaQuery={mediaQuery}
       duplicate={duplicate} closeDialog={closeDialog} handleSubmit={handleSubmit}
-       handleImageChange={handleImageChange} setWidthMax={setWidthMax} deleteElement={deleteElement}/>
+       handleImageChange={handleImageChange} setWidthMax={setWidthMax} deleteElement={deleteElement}
+       bringForward={bringForward} sendBackward={sendBackward}/>
       <SaveTemplateDialog ref={saveTempRef} saveTemplate={(elements, e) => saveTemplate(elements, e)} elements={elements}/>
     </>
   );

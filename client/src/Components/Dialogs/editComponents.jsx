@@ -2,13 +2,31 @@ import { forwardRef } from "react"
 import Icon from '@mdi/react';
 import { mdiContentCopy } from '@mdi/js';
 
-const EditorDialog = forwardRef(({mediaQuery,duplicate,closeDialog,handleSubmit, handleImageChange, setWidthMax, deleteElement}, ref) => {
+const EditorDialog = forwardRef(({mediaQuery,duplicate,closeDialog,handleSubmit, handleImageChange, setWidthMax, deleteElement, bringForward, sendBackward}, ref) => {
     return (
         <>
         <dialog ref={ref} className="custom-dialog">
   <header className="dialog-header">
     <h3>Customize</h3>
+    <div className="layersCOntainer">
+      <svg 
+      className="layers"
+      onClick={sendBackward}
+      xmlns="http://www.w3.org/2000/svg" 
+      viewBox="0 0 24 24">
+        <title>send-backward</title>
+        <path d="M2,2H16V16H2V2M22,8V22H8V18H18V8H22M4,4V14H14V4H4Z" />
+        </svg>
+      <svg
+       className='layers' xmlns="http://www.w3.org/2000/svg"
+       onClick={bringForward}
+        viewBox="0 0 24 24">
+          <title>bring-forward</title>
+          <path d="M2,2H16V16H2V2M22,8V22H8V18H10V20H20V10H18V8H22Z" />
+          </svg>
+    </div>
     <Icon path={mdiContentCopy} size={0.8} title='duplicate' className='close-icon duplicate' onClick={duplicate}/>
+    
     <i onClick={closeDialog} className="close-icon" title='close'>✖</i>
   </header>
   <form onSubmit={handleSubmit} className="dialog-form">
