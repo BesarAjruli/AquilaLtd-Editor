@@ -354,6 +354,7 @@ if(mediaQuery.matches){
       dialogRef.current.querySelector('.deleteButton').removeAttribute('disabled')
       const elementToUpdate = elements.find(element => element.id === id);
       dialogRef.current.querySelector('.duplicate').style.display = 'block'
+      dialogRef.current.querySelector('.layersCOntainer').style.display = 'block'
     if (elementToUpdate) {
       setCurrentElement({
          id,
