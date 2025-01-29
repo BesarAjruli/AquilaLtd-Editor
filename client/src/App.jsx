@@ -6,6 +6,7 @@ import EditorDialog from './Components/Dialogs/editComponents';
 import SelectTemplate from './Components/Dialogs/selectTemplate';
 import IconsSelector from './Components/Dialogs/iconsSelector';
 import { Icon } from '@iconify-icon/react';
+import Toolbar from './Components/Toolbar';
 
 
 const Text = ({style, content}) => <span className='edit' style={style}>{content}</span>;
@@ -39,7 +40,6 @@ export default function App() {
   const [history, setHistory] = useState([[]]); 
   const [historyIndex, setHistoryIndex] = useState(0);
   const editorRef = useRef(null)
-  const [pages, setPage] = useState([1])
   const [currentPage, setCurrentPage] = useState(1)
   const [imageSrc, setImageSrc] = useState(null);
   const templatesRef = useRef(null)
@@ -76,20 +76,6 @@ if(mediaQuery.matches){
     const newHistory = history.slice(0, historyIndex + 1); // Truncate redo history
     setHistory([...newHistory, newElements]);
     setHistoryIndex(newHistory.length);
-  };
-
-  const undoFunction = () => {
-    if (historyIndex > 0) {
-      setHistoryIndex(historyIndex - 1);
-      setElements(history[historyIndex - 1]);
-    }
-  };
-
-  const redoFunction = () => {
-    if (historyIndex < history.length - 1) {
-      setHistoryIndex(historyIndex + 1);
-      setElements(history[historyIndex + 1]);
-    }
   };
 
   const addElement = (Component) => {
@@ -496,14 +482,6 @@ if(mediaQuery.matches){
       });
     }
   };
-  
-  const addNewPage = () => {
-    setPage((prevPages) => {
-      const nextPage = parseInt(prevPages) + 1;
-      setCurrentPage(nextPage);
-      return nextPage;
-    });
-  }
 
   const handleImageChange = (event) => {
     const file = event.target.files[0];
@@ -727,33 +705,12 @@ const sendBackward = () => {
 
   return (
     <>
-      <div className='toolBar'>
-        <div className='history'>
-        <button onClick={undoFunction} disabled={historyIndex === 0}>
-          <svg  xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><title>undo</title><path d="M12.5,8C9.85,8 7.45,9 5.6,10.6L2,7V16H11L7.38,12.38C8.77,11.22 10.54,10.5 12.5,10.5C16.04,10.5 19.05,12.81 20.1,16L22.47,15.22C21.08,11.03 17.15,8 12.5,8Z" /></svg>
-        </button>
-        <button onClick={redoFunction} disabled={historyIndex === history.length - 1}>
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><title>redo</title><path d="M18.4,10.6C16.55,9 14.15,8 11.5,8C6.85,8 2.92,11.03 1.54,15.22L3.9,16C4.95,12.81 7.95,10.5 11.5,10.5C13.45,10.5 15.23,11.22 16.62,12.38L13,16H22V7L18.4,10.6Z" /></svg>
-        </button>
-        <button onClick={() => saveDesign( pages,false)}>
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><title>check</title><path d="M21,7L9,19L3.5,13.5L4.91,12.09L9,16.17L19.59,5.59L21,7Z" /></svg>
-        </button>
-        </div>
-        <div className='templatesButton'>
-          <button onClick={() => saveTempRef.current.showModal()}>Save template</button>
-          <button onClick={() => templatesRef.current.showModal()}>Use templates</button>
-        </div>
-        <div className='pages'>
-        <div onClick={() => {if(currentPage > 1) setCurrentPage(currentPage - 1)}}>
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><title>chevron-left</title><path d="M15.41,16.58L10.83,12L15.41,7.41L14,6L8,12L14,18L15.41,16.58Z" /></svg>
-        </div>
-          <span>Page: {currentPage}/{pages}</span>
-          <div onClick={() => {if(currentPage < pages) setCurrentPage(currentPage + 1)}}>
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><title>chevron-right</title><path d="M8.59,16.58L13.17,12L8.59,7.41L10,6L16,12L10,18L8.59,16.58Z" /></svg>
-          </div>
-        </div>
-        <button onClick={addNewPage}>New Page</button>
-      </div>
+      <Toolbar 
+       historyIndex={historyIndex} saveDesign={saveDesign}
+       saveTempRef={saveTempRef} templatesRef={templatesRef}
+       currentPage={currentPage} setCurrentPage={setCurrentPage}
+       history={history} setHistoryIndex={setHistoryIndex} 
+       setElements={setElements} editorRef={editorRef}/>
       <div className='sideElementsBar left'>
         <div className='text' title='Text' onClick={() => addElement(Text)}>Text</div>
         <hr />
