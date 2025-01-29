@@ -7,6 +7,7 @@ const Toolbar = ({
  }) => {
 
   const [pages, setPage] = useState([1])
+  const mediaQuery = window.matchMedia('(max-width: 768px)');
 
     const undoFunction = () => {
         if (historyIndex > 0) {
@@ -70,7 +71,7 @@ const Toolbar = ({
             </svg>
           </button>
         </div>
-        <div className="container">
+        {!mediaQuery.matches && <div className="container">
           <div className="tabs">
             <input type="radio" id="radio-1" name="tabs" defaultChecked="" onChange={changeResponsivnes} />
             <label className="tab" htmlFor="radio-1">
@@ -86,7 +87,7 @@ const Toolbar = ({
             </label>
             <span className="glider"></span>
           </div>
-        </div>
+        </div>}
         <div className="templatesButton">
           <button onClick={() => saveTempRef.current.showModal()}>
             Save template
