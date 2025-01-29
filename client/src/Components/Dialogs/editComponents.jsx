@@ -32,6 +32,7 @@ const EditorDialog = forwardRef(({mediaQuery,duplicate,closeDialog,handleSubmit,
   <form onSubmit={handleSubmit} className="dialog-form">
     <label htmlFor="content">Content:</label>
     <input type="text" name="content" id="content" />
+    <input type="hidden" name="content" id="hiddenContent"/>
     
     <label htmlFor="imageContent">Select Image:</label>
     <input type="file" name="imageContent" id="imageContent" accept="image/*" onChange={handleImageChange}/>
@@ -62,6 +63,8 @@ const EditorDialog = forwardRef(({mediaQuery,duplicate,closeDialog,handleSubmit,
     
     <label htmlFor="borderRadius">Border Radius:</label>
     <input type="number" name="borderRadius" id="borderRadius" min={0} defaultValue={10} />
+    <label htmlFor="opacity">Opacity</label>
+    <input type="number" name="opacity" id="opacity"  min={0} defaultValue={100}/>
     
     <button className='deleteButton' type='button' onClick={deleteElement}>Delete</button>
     <button type="submit" className="submit-button">Submit</button>

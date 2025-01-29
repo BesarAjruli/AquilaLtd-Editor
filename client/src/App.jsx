@@ -4,6 +4,9 @@ import html2canvas from 'html2canvas'
 import SaveTemplateDialog from './Components/Dialogs/saveTemplate'
 import EditorDialog from './Components/Dialogs/editComponents';
 import SelectTemplate from './Components/Dialogs/selectTemplate';
+import IconsSelector from './Components/Dialogs/iconsSelector';
+import { Icon } from '@iconify-icon/react';
+
 
 const Text = ({style, content}) => <span className='edit' style={style}>{content}</span>;
 const Button = ({style, content}) => <button className='edit' style={style}>{content}</button>;
@@ -26,7 +29,7 @@ const List = ({style}) => {return (
 const Pie = ({style}) => <img className='edit' style={style} src='https://img.icons8.com/skeuomorphism/64/pie-chart.png'/>
 const Charts = ({style}) => <img className='edit' style={style} src='https://img.icons8.com/skeuomorphism/64/bar-chart.png'/>
 const Menu = ({style}) => <img className='edit' style={style} src='https://img.icons8.com/material-rounded/64/menu--v1.png'/>
-
+const Icons = ({style, content}) => <Icon className='edit' icon={`mdi-light:${content}`} style={style}/>
 
 export default function App() {
   const [elements, setElements] = useState([]);
@@ -42,7 +45,8 @@ export default function App() {
   const templatesRef = useRef(null)
   const saveTempRef = useRef(null)
   const [layer, setLayer]= useState(null)
-
+  const iconsDialog = useRef(null)
+  const [iconConent, setIconName] = useState(null)
 
   const uniqueId = () => `element-${Date.now()}-${Math.random()}`;
   const backendUrl = import.meta.env.VITE_BACKEND_URL;
@@ -107,6 +111,7 @@ if(mediaQuery.matches){
     dialogRef.current.querySelector('.deleteButton').setAttribute('disabled', 'true')
     dialogRef.current.querySelector('#content').removeAttribute('disabled')
       dialogRef.current.querySelector('#width').removeAttribute('disabled')
+      dialogRef.current.querySelector('#height').removeAttribute('disabled')
       dialogRef.current.querySelector('#borderWidth').removeAttribute('disabled')
       dialogRef.current.querySelector('#borderRadius').removeAttribute('disabled')
       dialogRef.current.querySelector('#fontSize').removeAttribute('disabled')
@@ -148,7 +153,14 @@ if(mediaQuery.matches){
         dialogRef.current.querySelector('#width').value = 30
         dialogRef.current.querySelector('#height').value = 30
         break;
-
+      case 'Icons':
+        dialogRef.current.querySelector('#content').value = iconConent
+        dialogRef.current.querySelector('#hiddenContent').value = iconConent
+        dialogRef.current.querySelector('#content').setAttribute('disabled', 'true')
+        dialogRef.current.querySelector('#width').setAttribute('disabled', 'true')
+        dialogRef.current.querySelector('#height').setAttribute('disabled', 'true')
+        dialogRef.current.querySelector('#fontSize').value = 50
+        break;
       default:
         dialogRef.current.querySelector('#width').value = 100
         dialogRef.current.querySelector('#height').value = 50
@@ -281,9 +293,10 @@ if(mediaQuery.matches){
         position: currentElement.id.startsWith('editor') ? 'relative' : 'absolute',
         left: currentElement.id.startsWith('editor') && chngStyle.changing === true ? 0 : currentElement.style.left || 0,
         top: currentElement.id.startsWith('editor') ? 0 : currentElement.style.top || 0,
-        zIndex: chngStyle.changing ? layer ? layer : currentElement.style.zIndex : elements.length 
+        zIndex: chngStyle.changing ? layer ? layer : currentElement.style.zIndex : elements.length ,
+        opacity: data.opacity / 100
         }
-
+        console.log(data)
         if (currentElement && !currentElement.id.startsWith('editor')) {
           const updatedElement = {
             ...currentElement,
@@ -312,6 +325,7 @@ if(mediaQuery.matches){
         }
     e.target.reset()
     closeDialog()
+    iconsDialog.current.close()
   }
 
   const changeStyle = (id, e) => {
@@ -345,8 +359,15 @@ if(mediaQuery.matches){
     setChangingStyle({changing: true, id})
 
     if(!id.startsWith('editor')) {
+      if(e.target.tagName === 'ICONIFY-ICON'){
+        dialogRef.current.querySelector('#content').setAttribute('disabled', 'true')
+        dialogRef.current.querySelector('#width').setAttribute('disabled', 'true')
+        dialogRef.current.querySelector('#height').setAttribute('disabled', 'true')
+    } else {
       dialogRef.current.querySelector('#content').removeAttribute('disabled')
       dialogRef.current.querySelector('#width').removeAttribute('disabled')
+      dialogRef.current.querySelector('#height').removeAttribute('disabled')
+    }
       dialogRef.current.querySelector('#borderWidth').removeAttribute('disabled')
       dialogRef.current.querySelector('#borderRadius').removeAttribute('disabled')
       dialogRef.current.querySelector('#fontSize').removeAttribute('disabled')
@@ -354,7 +375,7 @@ if(mediaQuery.matches){
       dialogRef.current.querySelector('.deleteButton').removeAttribute('disabled')
       const elementToUpdate = elements.find(element => element.id === id);
       dialogRef.current.querySelector('.duplicate').style.display = 'block'
-      dialogRef.current.querySelector('.layersCOntainer').style.display = 'block'
+      dialogRef.current.querySelector('.layersCOntainer').style.display = 'flex'
     if (elementToUpdate) {
       setCurrentElement({
          id,
@@ -661,7 +682,6 @@ const duplicate = () => {
 
   closeDialog()
 }
-
 // editor only
 const handleMobileContextMenu = (id, e) => {
   e.preventDefault()
@@ -770,6 +790,11 @@ const sendBackward = () => {
         <div title='Pie Charts' onClick={() => addElement(Pie)}><img src="https://img.icons8.com/skeuomorphism/64/pie-chart.png" alt="pie chart" /></div>
         <div title='Charts' onClick={() => addElement(Charts)}><img src="https://img.icons8.com/skeuomorphism/64/bar-chart.png" alt="charts" /></div>
         <div title='Menu' onClick={() => addElement(Menu)}><img src="https://img.icons8.com/material-rounded/64/menu--v1.png" alt="more menu" /></div>
+        <div title='Icons' onClick={() => iconsDialog.current.showModal()}>
+          <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24">
+	          <path fill="currentColor" d="M5 13v-1h6V6h1v6h6v1h-6v6h-1v-6z" />
+          </svg>
+        </div>
 
         <div className='dots rightDots'>
             <div></div>
@@ -805,6 +830,8 @@ const sendBackward = () => {
        handleImageChange={handleImageChange} setWidthMax={setWidthMax} deleteElement={deleteElement}
        bringForward={bringForward} sendBackward={sendBackward}/>
       <SaveTemplateDialog ref={saveTempRef} saveTemplate={(elements, e) => saveTemplate(elements, e)} elements={elements}/>
+      <IconsSelector ref={iconsDialog} addElement={() => addElement(Icons)} 
+        sendIconName={(value) => setIconName(value)}/>
     </>
   );
 }
