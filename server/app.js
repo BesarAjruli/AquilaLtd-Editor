@@ -75,7 +75,6 @@ app.post('/api/saveTemplate',upload.single('image'), async (req, res) => {
       }
 })
 app.get('/api/saveTemplate', async (req, res) => {
-  console.log(req.user)
     const data = await prisma.template.findMany()  
     res.json(data)
 })
