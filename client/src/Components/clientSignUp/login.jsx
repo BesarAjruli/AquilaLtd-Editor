@@ -2,6 +2,8 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import '../../style/signup.css';
 
+const backendUrl = import.meta.env.VITE_BACKEND_URL;
+
 export default function LogIn(){
     const [error, setError] = useState("");
     const navigate = useNavigate()
@@ -12,7 +14,7 @@ export default function LogIn(){
         const data = Object.fromEntries(formData.entries())
 
         try{
-           const resposne = await fetch("http://localhost:5000/api/login", {
+           const resposne = await fetch(`${backendUrl}/api/login`, {
             method: 'POST',
             headers: {"Content-Type": "application/json"},
             body: JSON.stringify(data),

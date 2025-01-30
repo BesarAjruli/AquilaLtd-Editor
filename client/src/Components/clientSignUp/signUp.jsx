@@ -2,6 +2,8 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import '../../style/signup.css';
 
+const backendUrl = import.meta.env.VITE_BACKEND_URL;
+
 export default function SignUp() {
   const [error, setError] = useState("");
   const navigate = useNavigate();
@@ -17,7 +19,7 @@ export default function SignUp() {
     }
 
     try {
-      const response = await fetch("http://localhost:5000/api/sign-up", {
+      const response = await fetch(`${backendUrl}/api/sign-up`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data),
