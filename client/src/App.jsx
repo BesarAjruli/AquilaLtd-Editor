@@ -8,7 +8,7 @@ import SelectTemplate from './Components/Dialogs/selectTemplate';
 import IconsSelector from './Components/Dialogs/iconsSelector';
 import { Icon } from '@iconify-icon/react';
 import Toolbar from './Components/Toolbar';
-
+import Loading from './Components/Loading';
 
 const Text = ({style, content}) => <span className='edit' style={style}>{content}</span>;
 const Button = ({style, content}) => <button className='edit' style={style}>{content}</button>;
@@ -50,6 +50,7 @@ export default function App() {
   const [iconConent, setIconName] = useState(null)
   const [userId, setUserId] = useState(null)
   const navigate = useNavigate()
+  const [loading, setLoading] = useState(true)
 
   const uniqueId = () => `element-${Date.now()}-${Math.random()}`;
   const backendUrl = import.meta.env.VITE_BACKEND_URL;
@@ -63,7 +64,9 @@ export default function App() {
       if (!response.ok) {
         console.error('Network response was not ok', response.statusText);
         return;
+        setLoading(false)
       }
+        setLoading(false)
         const data = await response.json();
         setUserId(data.user.id)
     } catch(error){
@@ -450,6 +453,7 @@ if(mediaQuery.matches){
   }
 
   const saveDesign = async (totalPages, template = false) => {
+    setLoading(true)
     const savedImages = [];
     const originalPage = currentPage;
   
@@ -489,7 +493,8 @@ if(mediaQuery.matches){
         formData.append('image', file);
         
         editorRef.current.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.5)';
-
+        setLoading(false)
+        
         return formData
       }
     } else {
@@ -499,6 +504,7 @@ if(mediaQuery.matches){
         link.href = image;
         link.click();
       });
+      setLoading(false)
     }
   };
 
@@ -533,9 +539,9 @@ if(mediaQuery.matches){
 
   const saveTemplate = async (elements, e) => {
     e.preventDefault()
-    console.log(userId)
+    saveTempRef.current.close()
+    setLoading(true)
     if(userId){
-      console.log(userId)
     const editorStyle = getStyleAsObject(editorRef.current)
     const serialized = serializeTemplate(elements, editorStyle);
     const formData = await saveDesign(1, true)
@@ -554,7 +560,7 @@ if(mediaQuery.matches){
     }).then((response) => {
       if(response.ok){
         alert('Success')
-        saveTempRef.current.close()
+        setLoading(false)
       }
     })
   } else{
@@ -626,11 +632,14 @@ if(mediaQuery.matches){
   };
   
   const loadTemplate = async (templateNr) => {
+    templatesRef.current.close();
+    setLoading(true)
     let serialized = '';
     await fetch(`${backendUrl}/api/saveTemplate`)
       .then((response) => response.json())
       .then((data) => {
         serialized = JSON.parse(data[templateNr].template);
+        setLoading(false)
       });
   
     const { editorStyle, deserializedElements } = deserializeTemplate(serialized);
@@ -658,7 +667,6 @@ if(mediaQuery.matches){
        editorRef.current.style[key] = editorStyle[key];
       });
   
-    templatesRef.current.close();
   };
   
   const getStyleAsObject = (element) => {
@@ -730,6 +738,7 @@ const sendBackward = () => {
 
   return (
     <>
+      {loading && <Loading/>}
       <Toolbar 
        historyIndex={historyIndex} saveDesign={saveDesign}
        saveTempRef={saveTempRef} templatesRef={templatesRef}
