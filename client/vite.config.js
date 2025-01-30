@@ -9,7 +9,7 @@ export default defineConfig({
     host: true,
     proxy: {
       '/api': backendUrl,
-    },
+},
   },
   build: {
     minify: 'terser',
