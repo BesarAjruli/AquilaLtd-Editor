@@ -22,7 +22,7 @@ const prisma = new PrismaClient()
 const app = express()
 
 app.use(cors({
-    origin: 'http://localhost:5173', 
+    origin: ['http://localhost:5173', 'https://aquilaltd-editor-production.up.railway.app/'],
     methods: 'GET,POST,PUT,DELETE',
     allowedHeaders: 'Content-Type,Authorization',
     credentials: true
@@ -41,7 +41,8 @@ app.use(session({
     maxAge: 30 * 24 * 60 * 60 * 1000, //30 days
     httpOnly: true,
     secure: false,//process.env.NODE_ENV === 'production',
-    sameSite: 'none'
+    sameSite: 'None',
+    domain: '.koyeb.app'
   }
 }))
 app.use(passport.initialize())
