@@ -99,6 +99,10 @@ app.post('/api/login', passport.authenticate('local'), (req, res) => {
   res.json({success: true, redirect: `/`});
   })
 
+app.get('/', (req,res) => {
+  res.json({user: req.user})
+})
+
 //Passport
 passport.use(
   new LocalStrategy(async (username, password, done) => {

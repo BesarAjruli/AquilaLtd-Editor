@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import './style/style.css';
 import html2canvas from 'html2canvas'
 import SaveTemplateDialog from './Components/Dialogs/saveTemplate'
@@ -47,6 +47,16 @@ export default function App() {
   const [layer, setLayer]= useState(null)
   const iconsDialog = useRef(null)
   const [iconConent, setIconName] = useState(null)
+
+  useEffect(async () => {
+    try{
+      const response = await fetch(`${backendUrl}/`);
+        const data = await response.json();
+        console.log(data)
+    } catch(error){
+      console.error(error)
+    }
+  },[])
 
   const uniqueId = () => `element-${Date.now()}-${Math.random()}`;
   const backendUrl = import.meta.env.VITE_BACKEND_URL;
