@@ -5,18 +5,10 @@ const backendUrl = process.env.VITE_BACKEND_URL;
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [react()],
-  define: {
-    'process.env.NODE_ENV': JSON.stringify('production'), 
-  },
   server: {
     host: true,
     proxy: {
       '/api': backendUrl,
     },
   },
-  build: {
-    rollupOptions: {
-      external: ['@mdi/react']
-    }
-  }
 })
