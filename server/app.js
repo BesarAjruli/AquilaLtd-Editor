@@ -99,9 +99,10 @@ app.post('/api/login', passport.authenticate('local'), (req, res) => {
   res.json({success: true, redirect: `/`});
   })
 
-app.get('/', (req,res) => {
-  res.json({user: req.user})
-})
+  app.get('/api', (req, res) => {
+    res.json({ user: req.user || "No user found" });
+  });
+  
 
 //Passport
 passport.use(

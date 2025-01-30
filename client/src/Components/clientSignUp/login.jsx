@@ -14,7 +14,7 @@ export default function LogIn(){
         const data = Object.fromEntries(formData.entries())
 
         try{
-           const resposne = await fetch(`${backendUrl}/api/login`, {
+           const resposne = await fetch(`http://localhost:5000/api/login`, {
             method: 'POST',
             headers: {"Content-Type": "application/json"},
             body: JSON.stringify(data),

@@ -47,15 +47,19 @@ export default function App() {
   const [layer, setLayer]= useState(null)
   const iconsDialog = useRef(null)
   const [iconConent, setIconName] = useState(null)
+  const [userId, setUserId] = useState(null)
 
-  useEffect(async () => {
+  useEffect(() => {
+    async function getUser() {
     try{
-      const response = await fetch(`${backendUrl}/`);
+      const response = await fetch(`http://localhost:5000/api`,{method: 'GET', credentials: 'include'});
+      console.log(response)
         const data = await response.json();
-        console.log(data)
+        setUserId(data.user.id)
     } catch(error){
       console.error(error)
-    }
+    }}
+    getUser()
   },[])
 
   const uniqueId = () => `element-${Date.now()}-${Math.random()}`;
