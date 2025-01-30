@@ -11,4 +11,8 @@ export default defineConfig({
       '/api': backendUrl,
     },
   },
+  build: {
+    minify: 'terser',
+    sourcemap: false
+  }
 })
