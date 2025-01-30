@@ -63,13 +63,14 @@ export default function App() {
       const response = await fetch(`${backendUrl}/api`,{method: 'GET', credentials: 'include'});
       if (!response.ok) {
         console.error('Network response was not ok', response.statusText);
-        return;
         setLoading(false)
+        return;
       }
         setLoading(false)
         const data = await response.json();
         setUserId(data.user.id)
     } catch(error){
+      setLoading(false)
       console.error(error)
     }}
     getUser()
@@ -494,7 +495,7 @@ if(mediaQuery.matches){
         
         editorRef.current.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.5)';
         setLoading(false)
-        
+
         return formData
       }
     } else {
