@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import '../../style/signup.css';
 
 const backendUrl = import.meta.env.VITE_BACKEND_URL;
@@ -50,6 +50,7 @@ export default function SignUp() {
             <button type="submit" className="submit-button-signup">
               Sign Up
             </button>
+            <Link to='/login' className="redirectLink">Log in</Link>
           </form>
         </div>
       </div>

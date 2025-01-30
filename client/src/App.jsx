@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import './style/style.css';
 import html2canvas from 'html2canvas'
+import { useNavigate } from "react-router-dom";
 import SaveTemplateDialog from './Components/Dialogs/saveTemplate'
 import EditorDialog from './Components/Dialogs/editComponents';
 import SelectTemplate from './Components/Dialogs/selectTemplate';
@@ -48,13 +49,14 @@ export default function App() {
   const iconsDialog = useRef(null)
   const [iconConent, setIconName] = useState(null)
   const [userId, setUserId] = useState(null)
+  const navigate = useNavigate()
 
   useEffect(() => {
     async function getUser() {
     try{
-      const response = await fetch(`http://localhost:5000/api`,{method: 'GET', credentials: 'include'});
-      console.log(response)
+      const response = await fetch(`${backendUrl}/api`,{method: 'GET', credentials: 'include'});
         const data = await response.json();
+        console.log(data)
         setUserId(data.user.id)
     } catch(error){
       console.error(error)
@@ -528,6 +530,9 @@ if(mediaQuery.matches){
 
   const saveTemplate = async (elements, e) => {
     e.preventDefault()
+    console.log(userId)
+    if(userId){
+      console.log(userId)
     const editorStyle = getStyleAsObject(editorRef.current)
     const serialized = serializeTemplate(elements, editorStyle);
     const formData = await saveDesign(1, true)
@@ -549,6 +554,9 @@ if(mediaQuery.matches){
         saveTempRef.current.close()
       }
     })
+  } else{
+    navigate('/signup')
+  }
   };
 
   const deserializeTemplate = (serializedData) => {
