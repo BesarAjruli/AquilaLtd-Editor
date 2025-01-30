@@ -26,6 +26,7 @@ export default function LogIn(){
            }
         }catch(err){
             console.log(err)
+            setError(err)
         }
     }
 

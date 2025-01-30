@@ -22,7 +22,7 @@ const prisma = new PrismaClient()
 const app = express()
 
 app.use(cors({
-    origin: 'http://localhost:5173',
+    origin: 'http://localhost:5173', //development only
     methods: 'GET,POST,PUT,DELETE',
     allowedHeaders: 'Content-Type,Authorization',
     credentials: true
@@ -40,7 +40,7 @@ app.use(session({
   cookie: {
     maxAge: 30 * 24 * 60 * 60 * 1000, //30 days
     httpOnly: true, //development only
-    secure: false, //developent only
+    secure: process.env.NODE_ENV === 'production',
   }
 }))
 app.use(passport.initialize())
@@ -100,6 +100,7 @@ app.post('/api/login', passport.authenticate('local'), (req, res) => {
   })
 
   app.get('/api', (req, res) => {
+    console.log(req.user)
     res.json({ user: req.user || "No user found" });
   });
   

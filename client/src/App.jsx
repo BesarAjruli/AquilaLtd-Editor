@@ -51,10 +51,19 @@ export default function App() {
   const [userId, setUserId] = useState(null)
   const navigate = useNavigate()
 
+  const uniqueId = () => `element-${Date.now()}-${Math.random()}`;
+  const backendUrl = import.meta.env.VITE_BACKEND_URL;
+
+  const mediaQuery = window.matchMedia('(max-width: 768px)');
+
   useEffect(() => {
     async function getUser() {
     try{
       const response = await fetch(`${backendUrl}/api`,{method: 'GET', credentials: 'include'});
+      if (!response.ok) {
+        console.error('Network response was not ok', response.statusText);
+        return;
+      }
         const data = await response.json();
         console.log(data)
         setUserId(data.user.id)
@@ -63,11 +72,6 @@ export default function App() {
     }}
     getUser()
   },[])
-
-  const uniqueId = () => `element-${Date.now()}-${Math.random()}`;
-  const backendUrl = import.meta.env.VITE_BACKEND_URL;
-
-  const mediaQuery = window.matchMedia('(max-width: 768px)');
 
   let editorStyle = {
     width: '1280px',
