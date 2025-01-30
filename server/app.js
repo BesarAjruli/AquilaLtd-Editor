@@ -96,10 +96,12 @@ app.post('/api/sign-up', async (req, res) => {
 })
 //Log in
 app.post('/api/login', passport.authenticate('local'), (req, res) => {
+  console.log(req.user, 99)
   res.json({success: true, redirect: `/`});
   })
 
   app.get('/api', (req, res) => {
+    console.log(req.user, 104)
     res.json({ user: req.user || "No user found" });
   });
   
