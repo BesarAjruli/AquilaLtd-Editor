@@ -54,30 +54,34 @@ app.use(express.static(path.join(__dirname, '../client/dist')));
 app.use(express.json({limit: '50mb'}));
 app.set('trust proxy', true)
 
-app.post('/api/saveTemplate',upload.single('image'), async (req, res) => {
-   try {
-    const thumbnailDir = path.join(__dirname, 'thumbnails')
-    if (!fs.existsSync(thumbnailDir)) {
-        fs.mkdirSync(thumbnailDir, {recursive: true});
-      }
-    const imagePath = `/thumbnails/${Date.now()}-${req.file.originalname}`;
-    fs.promises.writeFileSync(path.join(__dirname, imagePath), req.file.buffer);
+app.post('/api/saveTemplate', upload.single('image'), async (req, res) => {
+  try {
+     const thumbnailDir = path.join(__dirname, 'thumbnails');
 
-        const newTemplate = await prisma.template.create({
-          data: {
-            template: JSON.stringify(req.body.template),
-            path: imagePath,
-            category: req.body.category,
-            device_type: req.body.deviceType,
-            authorId: parseInt(req.body.userId)
-          }
-        });
-        res.status(201).json({success: true});
-      } catch (error) {
-        console.error(error);
-        res.status(500).json({ error: 'Failed to save template' });
-      }
-})
+     // Ensure the directory exists
+     await fs.promises.mkdir(thumbnailDir, { recursive: true });
+
+     const imagePath = `/thumbnails/${Date.now()}-${req.file.originalname}`;
+     await fs.promises.writeFile(path.join(__dirname, imagePath), req.file.buffer);
+
+     // Save to database
+     const newTemplate = await prisma.template.create({
+        data: {
+           template: JSON.stringify(req.body.template),
+           path: imagePath,
+           category: req.body.category,
+           device_type: req.body.deviceType,
+           authorId: parseInt(req.body.userId)
+        }
+     });
+
+     res.status(201).json({ success: true });
+  } catch (error) {
+     console.error("Error:", error);
+     res.status(500).json({ error: 'Failed to save template' });
+  }
+});
+
 app.get('/api/saveTemplate', async (req, res) => {
     const data = await prisma.template.findMany()  
     res.json(data)
