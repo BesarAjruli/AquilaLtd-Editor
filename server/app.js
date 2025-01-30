@@ -22,19 +22,7 @@ const prisma = new PrismaClient()
 const app = express()
 
 app.use(cors({
-  origin: function (origin, callback) {
-    // Allow requests from both production and development origins
-    const allowedOrigins = [
-      'https://aquilaltd-editor-production.up.railway.app',
-      'http://localhost:5173'
-    ];
-
-    if (allowedOrigins.indexOf(origin) !== -1 || !origin) {
-      callback(null, true);
-    } else {
-      callback(new Error('Not allowed by CORS'), false);
-    }
-  },    
+    origin: 'https://aquilaltd-editor-production.up.railway.app/', 
     methods: 'GET,POST,PUT,DELETE',
     allowedHeaders: 'Content-Type,Authorization',
     credentials: true
