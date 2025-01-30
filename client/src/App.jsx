@@ -65,7 +65,6 @@ export default function App() {
         return;
       }
         const data = await response.json();
-        console.log(data)
         setUserId(data.user.id)
     } catch(error){
       console.error(error)

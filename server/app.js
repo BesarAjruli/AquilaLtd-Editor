@@ -71,7 +71,9 @@ app.post('/api/saveTemplate', upload.single('image'), async (req, res) => {
            path: imagePath,
            category: req.body.category,
            device_type: req.body.deviceType,
-           authorId: parseInt(req.body.userId)
+           authorId: parseInt(req.body.userId),
+           premium: false,
+           verified: false,
         }
      });
 
