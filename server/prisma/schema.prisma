@@ -21,6 +21,8 @@ model Template {
   device_type String
   author User @relation(fields: [authorId], references: [id])
   authorId Int
+  premium Boolean
+  verified Boolean
 }
 
 model User{
