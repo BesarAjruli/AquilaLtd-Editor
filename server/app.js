@@ -22,7 +22,19 @@ const prisma = new PrismaClient()
 const app = express()
 
 app.use(cors({
-    origin: 'http://localhost:5173', //development only
+  origin: function (origin, callback) {
+    // Allow requests from both production and development origins
+    const allowedOrigins = [
+      'https://aquilaltd-editor-production.up.railway.app',
+      'http://localhost:5173'
+    ];
+
+    if (allowedOrigins.indexOf(origin) !== -1 || !origin) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'), false);
+    }
+  },    
     methods: 'GET,POST,PUT,DELETE',
     allowedHeaders: 'Content-Type,Authorization',
     credentials: true
@@ -96,12 +108,10 @@ app.post('/api/sign-up', async (req, res) => {
 })
 //Log in
 app.post('/api/login', passport.authenticate('local'), (req, res) => {
-  console.log(req.user, 99)
   res.json({success: true, redirect: `/`});
   })
 
   app.get('/api', (req, res) => {
-    console.log(req.user, 104)
     res.json({ user: req.user || "No user found" });
   });
   
