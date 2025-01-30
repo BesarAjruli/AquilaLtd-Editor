@@ -282,7 +282,7 @@ if(mediaQuery.matches){
         zIndex: chngStyle.changing ? layer ? layer : currentElement.style.zIndex : elements.length ,
         opacity: data.opacity / 100
         }
-        console.log(data)
+        
         if (currentElement && !currentElement.id.startsWith('editor')) {
           const updatedElement = {
             ...currentElement,

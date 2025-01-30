@@ -28,6 +28,8 @@ model Template {
 model User{
   id Int @id @default(autoincrement())
   templates Template[]
-  email String
+  username String
   password String
+
+  @@unique( name: "usernameId",fields: [username,id])
 }
