@@ -165,6 +165,7 @@ if(mediaQuery.matches){
         break;
       case 'Icons':
         dialogRef.current.querySelector('#content').value = iconConent
+        dialogRef.current.querySelector('#hiddenContent').removeAttribute('disabled')
         dialogRef.current.querySelector('#hiddenContent').value = iconConent
         dialogRef.current.querySelector('#content').setAttribute('disabled', 'true')
         dialogRef.current.querySelector('#width').setAttribute('disabled', 'true')
@@ -341,6 +342,7 @@ if(mediaQuery.matches){
   const changeStyle = (id, e) => {
     e.preventDefault()
     e.stopPropagation();
+    dialogRef.current.querySelector('#hiddenContent').setAttribute('disabled', 'true')
     if(e.target.tagName === 'IMG'){
       dialogRef.current.querySelector('#content').style.display = 'none'
       dialogRef.current.querySelector('label[for="content"]').style.display = 'none'
