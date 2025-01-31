@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import '../style/approve.css'
 const backendUrl = import.meta.env.VITE_BACKEND_URL;
 
 const Thumbnails = ({onThumbnailClick, category, deviceType}) => {
@@ -8,22 +9,24 @@ const Thumbnails = ({onThumbnailClick, category, deviceType}) => {
       try {
         const response = await fetch(`${backendUrl}/api/saveTemplate/`);
         const data = await response.json();
+        console.log(data)
         const paths = data.map((element) => {
           switch(category){
             case 'all':
-              if(element.device_type === deviceType) return `${backendUrl}${element.path}`;
+              if(element.device_type === deviceType && element.verified === true) return element.path;
             case 'login':
             case 'signup':
             case 'homepage':
             case 'productpage':
-              if (element.category === category && element.device_type === deviceType) {
-                return `${backendUrl}${element.path}`;
+              if (element.category === category && element.device_type === deviceType && element.verified === true) {
+                return element.path;
               }
             return undefined; // Explicitly return undefined if condition isn't met
             default:
               return undefined;
           }
-        });  
+        });
+        console.log(paths)  
         setThumbnails(paths);
       } catch (error) {
         console.error('Error fetching thumbnails:', error);

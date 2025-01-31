@@ -9,17 +9,24 @@ const passport = require('passport')
 const session = require('express-session')
 const LocalStrategy = require('passport-local').Strategy
 const {Pool} = require('pg')
+const cloudinary = require('cloudinary').v2
 const cookieParser = require('cookie-parser');
 const db = new Pool({
   connectionString: process.env.DATABASE_URL + '?sslmode=require'
 })
 
-const upload = multer()
+const upload = multer({dest: 'uploads/'})
 
 require("dotenv").config();
 
 const prisma = new PrismaClient()
 const app = express()
+
+cloudinary.config({
+  cloud_name: 'dnatydh3w',
+  api_key: process.env.API_KEY_CLOUDINARY,
+  api_secret: process.env.API_CLOUDINARY,
+});
 
 app.use(cors({
     origin: ['http://localhost:5173', 'https://aquilaltd-editor-production.up.railway.app'],
@@ -56,31 +63,31 @@ app.set('trust proxy', true)
 
 app.post('/api/saveTemplate', upload.single('image'), async (req, res) => {
   try {
-     const thumbnailDir = path.join(__dirname, 'thumbnails');
+    if (!req.file) {
+      return res.status(400).json({ error: 'No file uploaded' });
+    }
 
-     // Ensure the directory exists
-     await fs.promises.mkdir(thumbnailDir, { recursive: true });
+    const result = await cloudinary.uploader.upload(req.file.path, {
+      folder: 'thumbnails',
+      public_id: `${Date.now()}-${req.file.originalname}`,
+    });
 
-     const imagePath = `/thumbnails/${Date.now()}-${req.file.originalname}`;
-     await fs.promises.writeFile(path.join(__dirname, imagePath), req.file.buffer);
+    const newTemplate = await prisma.template.create({
+      data: {
+        template: JSON.stringify(req.body.template),
+        path: result.secure_url,
+        category: req.body.category,
+        device_type: req.body.deviceType,
+        authorId: parseInt(req.body.userId),
+        premium: false,
+        verified: false,
+      }
+    });
 
-     // Save to database
-     const newTemplate = await prisma.template.create({
-        data: {
-           template: JSON.stringify(req.body.template),
-           path: imagePath,
-           category: req.body.category,
-           device_type: req.body.deviceType,
-           authorId: parseInt(req.body.userId),
-           premium: false,
-           verified: false,
-        }
-     });
-
-     res.status(201).json({ success: true });
+    res.status(201).json({ success: true });
   } catch (error) {
-     console.error("Error:", error);
-     res.status(500).json({ error: 'Failed to save template' });
+    console.error("Error:", error);
+    res.status(500).json({ error: 'Failed to save template' });
   }
 });
 
@@ -89,7 +96,16 @@ app.get('/api/saveTemplate', async (req, res) => {
     res.json(data)
 })
 //Sign up
-app.post('/api/sign-up', async (req, res) => {
+app.post('/api/sign-up',[
+  body('password')
+  .isLength({min: 8})
+  .withMessage('Password must be at least 8 chaacters long!')
+  .matches(/[A-Z]/)
+  .withMessage('Password must contain one uppercase letter!'),
+  body('confirmPass').custom((value, {req}) => {
+      return value === req.body.password
+  }).withMessage('Password didn\'t match')
+], async (req, res) => {
   bcrypt.hash(req.body.password, 10, async (err, hashedPass) => {
     try {
       await prisma.user.create({
@@ -112,6 +128,26 @@ app.post('/api/login', passport.authenticate('local'), (req, res) => {
   app.get('/api', (req, res) => {
     res.json({ user: req.user || "No user found" });
   });
+
+//Delete thumbnail
+app.delete('/api/delete/:id', async (req, res) => {
+const id = req.params.id
+await prisma.template.delete({where: {id: parseInt(id)}})
+const response = await prisma.template.findMany()
+res.json(response)
+})
+//Update thumbnail
+app.put('/api/update/:id', async (req, res) => {
+  const id = req.params.id
+  await prisma.template.update({
+    where: { id: parseInt(id) },
+    data: {
+      verified: true
+    }
+  })
+  const response = await prisma.template.findMany()
+  res.json(response)
+})
   
 
 //Passport

@@ -3,7 +3,8 @@ import { createRoot } from 'react-dom/client'
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import App from './App.jsx'
 import SingUp from './Components/clientSignUp/signUp.jsx'
-import LogIn from './Components/clientSignUp/login.jsx';
+import LogIn from './Components/clientSignUp/login.jsx'
+import Approved from './Components/approve.jsx';
 
 const router = createBrowserRouter([
   {
@@ -17,7 +18,11 @@ const router = createBrowserRouter([
   {
     path: '/login',
     element: <LogIn/>
-  } 
+  },
+  {
+    path: 'verify',
+    element: <Approved/>
+  }, 
 ])
 
 createRoot(document.getElementById('root')).render(
