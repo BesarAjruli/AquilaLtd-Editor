@@ -5,7 +5,7 @@ import Loading from '../Components/Loading';
 const backendUrl = import.meta.env.VITE_BACKEND_URL;
 
 const Approved = () => {
-    const [thumbnails, setThumbnails] = useState([]);
+    const [thumbnails, setThumbnails] = useState([])
     const navigate = useNavigate()
     const [loading, setLoading] = useState(true)
 
