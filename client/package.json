@@ -5,6 +5,7 @@
   "proxy": "https://oral-christy-aquilaltd-62b0039d.koyeb.app",
   "type": "module",
   "scripts": {
+    "start": "vite",
     "dev": "vite",
     "build": "vite build",
     "lint": "eslint .",
