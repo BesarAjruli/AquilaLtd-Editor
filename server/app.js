@@ -7,6 +7,7 @@ const { PrismaClient } = require("@prisma/client");
 const bcrypt = require('bcryptjs')
 const passport = require('passport')
 const session = require('express-session')
+const { body, validationResult } = require('express-validator');
 const LocalStrategy = require('passport-local').Strategy
 const {Pool} = require('pg')
 const cloudinary = require('cloudinary').v2
