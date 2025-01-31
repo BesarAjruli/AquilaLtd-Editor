@@ -125,6 +125,7 @@ if(mediaQuery.matches){
       dialogRef.current.querySelector('#borderRadius').removeAttribute('disabled')
       dialogRef.current.querySelector('#fontSize').removeAttribute('disabled')
       dialogRef.current.querySelector('#imageContent').removeAttribute('disabled')
+      dialogRef.current.querySelector('#hiddenContent').setAttribute('disabled', 'true')
 
     if( type === 'ImageCmp'){
       content.style.display = 'none'
