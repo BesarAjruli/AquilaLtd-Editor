@@ -1,15 +1,19 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import '../../style/signup.css';
+import Loading from '../../Components/Loading';
+
 
 const backendUrl = import.meta.env.VITE_BACKEND_URL;
 
 export default function LogIn(){
     const [error, setError] = useState("");
     const navigate = useNavigate()
+    const [loading, setLoading] = useState(false)
 
     const handleSubmit = async (event) => {
         event.preventDefault()
+        setLoading(ture)
         const formData = new FormData(event.target)
         const data = Object.fromEntries(formData.entries())
 
@@ -21,10 +25,12 @@ export default function LogIn(){
             credentials: 'include',
            })
            const results = await resposne.json()
+           setLoading(false)
            if(results.success){
             navigate(results.redirect)
            }
         }catch(err){
+          setLoading(false)
             console.log(err)
             setError(err)
         }
@@ -33,6 +39,7 @@ export default function LogIn(){
     //Have used the same stylesheet as signup
     return (
         <>
+              {loading && <Loading/>}
           <div className="body">
             <div className="signup-container">
               <h2>Login</h2>

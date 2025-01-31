@@ -738,7 +738,7 @@ const sendBackward = () => {
   }else {
     dialogRef.current.querySelectorAll('.layers')[0].style.cursor = 'not-allowed'
   }
-}
+}  
 
   return (
     <>

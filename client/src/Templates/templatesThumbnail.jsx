@@ -1,15 +1,19 @@
 import React, { useEffect, useState } from 'react';
 import '../style/approve.css'
 const backendUrl = import.meta.env.VITE_BACKEND_URL;
+import Loading from '../Components/Loading';
+
 
 const Thumbnails = ({onThumbnailClick, category, deviceType}) => {
   const [thumbnails, setThumbnails] = useState([]);
+  const [loading, setLoading] = useState(true)
+
   useEffect(() => {
     const getThumbnails = async () => {
       try {
         const response = await fetch(`${backendUrl}/api/saveTemplate/`);
         const data = await response.json();
-        console.log(data)
+        
         const paths = data.map((element) => {
           switch(category){
             case 'all':
@@ -26,16 +30,18 @@ const Thumbnails = ({onThumbnailClick, category, deviceType}) => {
               return undefined;
           }
         });
-        console.log(paths)  
         setThumbnails(paths);
+        setLoading(false)
       } catch (error) {
         console.error('Error fetching thumbnails:', error);
+        setLoading(false)
       }
     };
     getThumbnails();
   }, [category, deviceType]); 
   return (
     <>
+          {loading && <Loading/>}
       {thumbnails.length > 0 ? (
         thumbnails.map((thumbnail, index) => (
           thumbnail &&

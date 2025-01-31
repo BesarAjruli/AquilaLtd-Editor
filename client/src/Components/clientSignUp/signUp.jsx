@@ -1,20 +1,25 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import '../../style/signup.css';
+import Loading from '../../Components/Loading';
+
 
 const backendUrl = import.meta.env.VITE_BACKEND_URL;
 
 export default function SignUp() {
   const [error, setError] = useState("");
   const navigate = useNavigate();
+  const [loading, setLoading] = useState(false)
 
   const handleSubmit = async (event) => {
     event.preventDefault();
+    setLoading(true)
     const formData = new FormData(event.target);
     const data = Object.fromEntries(formData.entries());
 
     if (!data.username || !data.password) {
       setError("Both fields are required!");
+      setLoading(false)
       return;
     }
 
@@ -25,15 +30,18 @@ export default function SignUp() {
         body: JSON.stringify(data),
       });
       const results = await response.json();
+      setLoading(false)
       if (results.success) {
         navigate("/login");
       }
     } catch (error) {
+      setLoading(false)
       return <p>Failed to send data: {error}</p>;
     }
   };
   return (
     <>
+          {loading && <Loading/>}
       <div className="body">
         <div className="signup-container">
           <h2>Sign Up</h2>
