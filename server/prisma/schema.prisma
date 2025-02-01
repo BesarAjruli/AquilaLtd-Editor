@@ -20,6 +20,7 @@ model Template {
   category String
   device_type String
   author User @relation(fields: [authorId], references: [id])
+  publicId String
   authorId Int
   premium Boolean
   verified Boolean
@@ -28,7 +29,7 @@ model Template {
 model User{
   id Int @id @default(autoincrement())
   templates Template[]
-  username String
+  username String @unique
   password String
 
   @@unique( name: "usernameId",fields: [username,id])

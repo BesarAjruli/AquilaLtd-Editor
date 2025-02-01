@@ -77,6 +77,7 @@ app.post('/api/saveTemplate', upload.single('image'), async (req, res) => {
       data: {
         template: JSON.stringify(req.body.template),
         path: result.secure_url,
+        publicId:result.public_id,
         category: req.body.category,
         device_type: req.body.deviceType,
         authorId: parseInt(req.body.userId),
@@ -133,7 +134,10 @@ app.post('/api/login', passport.authenticate('local'), (req, res) => {
 //Delete thumbnail
 app.delete('/api/delete/:id', async (req, res) => {
 const id = req.params.id
+const retriveImage = await prisma.template.findFirst({where: { id: parseInt(id)}})
+const imagePublicId = retriveImage.publicId
 await prisma.template.delete({where: {id: parseInt(id)}})
+await cloudinary.uploader.destroy(imagePublicId);
 const response = await prisma.template.findMany()
 res.json(response)
 })
