@@ -62,6 +62,11 @@ app.use(express.static(path.join(__dirname, '../client/dist')));
 app.use(express.json({limit: '50mb'}));
 app.set('trust proxy', true)
 
+app.get('/health', (req, res) => {
+  res.status(200).send('OK');
+});
+
+
 app.post('/api/saveTemplate', upload.single('image'), async (req, res) => {
   try {
     if (!req.file) {
