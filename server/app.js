@@ -40,7 +40,7 @@ app.use(cookieParser())
 app.use(session({
   store: new (require('connect-pg-simple')(session))({
     pool: db,
-    tableName: 'user-session',
+    tableName: 'user_session',
     createTableIfMissing: true
   }),
   secret: process.env.SESSION_SECRET,
