@@ -549,6 +549,9 @@ if(mediaQuery.matches){
     const editorStyle = getStyleAsObject(editorRef.current)
     const serialized = serializeTemplate(elements, editorStyle);
     const formData = await saveDesign(1, true)
+
+    formData.append('userId', userId)
+    
     const saveTempFormData = new FormData(e.target)
     const data = Object.fromEntries(saveTempFormData.entries())
 
@@ -566,7 +569,10 @@ if(mediaQuery.matches){
         alert('Success')
       }
       setLoading(false)
-    }).catch(error => alert(`Failed ${error}`))
+    }).catch(error => {
+      alert(`Failed ${error}`)
+      setLoading(false)
+    })
   } else{
     navigate('/signup')
   }

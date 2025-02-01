@@ -22,8 +22,6 @@ const SaveTemplateDialog = forwardRef(({saveTemplate, elements}, ref) => {
             <option value="tablet">Tablet</option>
             <option value="mobile">Mobile</option>
           </select>
-          <label htmlFor="userId">User ID</label>
-          <input type="number" name="userId" id="userId" defaultValue={1}/>
           <button className="submit-button">Submit</button>
         </form>
       </dialog>
