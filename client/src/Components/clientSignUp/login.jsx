@@ -28,7 +28,9 @@ export default function LogIn(){
            setLoading(false)
 
            if (!results.success) {
-            throw new Error(data.message || 'Login failed');
+            setError('Login failed')
+            throw new Error('Login failed');
+            
           }
 
            if(results.success){
@@ -41,6 +43,8 @@ export default function LogIn(){
         }
     }
 
+    console.log(error)
+
     //Have used the same stylesheet as signup
     return (
         <>
@@ -48,7 +52,7 @@ export default function LogIn(){
           <div className="body">
             <div className="signup-container">
               <h2>Login</h2>
-              {error && <p className="error-message">{JSON.stringify(error)}</p>}
+              {error && <p className="error-message">{error.SyntaxError}</p>}
                 <form onSubmit={handleSubmit}>
                 <div className="input-container-signup">
                   <label htmlFor="username">Email</label>

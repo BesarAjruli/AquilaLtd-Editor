@@ -498,21 +498,20 @@ if(mediaQuery.matches){
         formData.append('image', file);
         
         formDataList.push(formData);
-        console.log(formDataList)
         editorRef.current.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.5)';
       }
       setLoading(false)
       return formDataList[formDataList.length - 1]
     } else {
       for (const [index, image] of savedImages.entries()) { 
-        console.log(image)       
         const blob = await (await fetch(image)).blob();
         const file = new File([blob], `editor-${index + 1}.png`, { type: 'image/png'});
 
         const formData = new FormData()
+        formData.append('userId', userId)
         formData.append('image', file);
 
-        const result = await fetch(`http://localhost:5000/api/to-do`, {
+        const result = await fetch(`${backendUrl}/api/to-do`, {
           method: 'POST',
           body: formData
         })

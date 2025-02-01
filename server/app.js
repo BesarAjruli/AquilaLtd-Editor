@@ -85,7 +85,7 @@ app.post('/api/saveTemplate', upload.single('image'), async (req, res) => {
         publicId:result.public_id,
         category: req.body.category,
         device_type: req.body.deviceType,
-        authorId: parseInt(req.user.id),
+        authorId: parseInt(req.body.userId),
         premium: false,
         verified: false,
       }
@@ -158,7 +158,7 @@ app.put('/api/update/:id', async (req, res) => {
   const response = await prisma.template.findMany()
   res.json(response)
 })
-
+//get to do
 app.post('/api/to-do', upload.single('image'), async (req, res) => {
     try {
       if (!req.file) {
@@ -174,7 +174,7 @@ app.post('/api/to-do', upload.single('image'), async (req, res) => {
         data: {
           path: result.secure_url,
           publicId:result.public_id,
-          authorId: parseInt(req.user.id),
+          authorId: parseInt(req.body.userId),
           finished: false,
         }
       });
