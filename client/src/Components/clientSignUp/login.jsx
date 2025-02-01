@@ -13,7 +13,7 @@ export default function LogIn(){
 
     const handleSubmit = async (event) => {
         event.preventDefault()
-        setLoading(ture)
+        setLoading(true)
         const formData = new FormData(event.target)
         const data = Object.fromEntries(formData.entries())
 

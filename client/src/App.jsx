@@ -564,9 +564,9 @@ if(mediaQuery.matches){
     }).then((response) => {
       if(response.ok){
         alert('Success')
-        setLoading(false)
       }
-    })
+      setLoading(false)
+    }).catch(error => alert(`Failed ${error}`))
   } else{
     navigate('/signup')
   }
