@@ -490,25 +490,39 @@ if(mediaQuery.matches){
     setCurrentPage(originalPage);
   
     if (template) {
+      const formDataList = [];
       for (const base64Image of savedImages) {
         const blob = await (await fetch(base64Image)).blob();
-        const file = new File([blob], 'design-image.png', { type: 'image/png' });
+        const file = new File([blob], `design-image-${formDataList.length}.png`, { type: 'image/png' });
         const formData = new FormData();
         formData.append('image', file);
         
+        formDataList.push(formData);
+        console.log(formDataList)
         editorRef.current.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.5)';
-        setLoading(false)
-
-        return formData
       }
-    } else {
-      savedImages.forEach((image, index) => {
-        const link = document.createElement('a');
-        link.download = `editor-${index + 1}.png`;
-        link.href = image;
-        link.click();
-      });
       setLoading(false)
+      return formDataList[formDataList.length - 1]
+    } else {
+      for (const [index, image] of savedImages.entries()) { 
+        console.log(image)       
+        const blob = await (await fetch(image)).blob();
+        const file = new File([blob], `editor-${index + 1}.png`, { type: 'image/png'});
+
+        const formData = new FormData()
+        formData.append('image', file);
+
+        const result = await fetch(`http://localhost:5000/api/to-do`, {
+          method: 'POST',
+          body: formData
+        })
+        if (!result.ok) {
+          console.error(`Upload failed for page ${index + 1}`);
+        }
+        editorRef.current.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.5)';
+      setLoading(false)
+      };
+      
     }
   };
 
@@ -548,10 +562,10 @@ if(mediaQuery.matches){
     if(userId){
     const editorStyle = getStyleAsObject(editorRef.current)
     const serialized = serializeTemplate(elements, editorStyle);
-    const formData = await saveDesign(1, true)
+    const formData = await saveDesign(currentPage, true)
 
     formData.append('userId', userId)
-    
+
     const saveTempFormData = new FormData(e.target)
     const data = Object.fromEntries(saveTempFormData.entries())
 

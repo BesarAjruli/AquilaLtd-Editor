@@ -43,11 +43,11 @@ export default function LogIn(){
           <div className="body">
             <div className="signup-container">
               <h2>Login</h2>
-              {error && <p className="error-message">{error}</p>}
-              <form onSubmit={handleSubmit}>
+              {error && <p className="error-message">{JSON.stringify(error)}</p>}
+                <form onSubmit={handleSubmit}>
                 <div className="input-container-signup">
-                  <label htmlFor="username">Username</label>
-                  <input type="text" id="username" name="username" required />
+                  <label htmlFor="username">Email</label>
+                  <input type="email" id="username" name="username" required />
                 </div>
                 <div className="input-container-signup">
                   <label htmlFor="password">Password</label>

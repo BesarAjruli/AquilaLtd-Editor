@@ -80,7 +80,7 @@ app.post('/api/saveTemplate', upload.single('image'), async (req, res) => {
         publicId:result.public_id,
         category: req.body.category,
         device_type: req.body.deviceType,
-        authorId: parseInt(req.body.userId),
+        authorId: parseInt(req.user.id),
         premium: false,
         verified: false,
       }
@@ -153,16 +153,43 @@ app.put('/api/update/:id', async (req, res) => {
   const response = await prisma.template.findMany()
   res.json(response)
 })
+
+app.post('/api/to-do', upload.single('image'), async (req, res) => {
+    try {
+      if (!req.file) {
+        return res.status(400).json({ error: 'No file uploaded' });
+      }
+  
+      const result = await cloudinary.uploader.upload(req.file.path, {
+        folder: 'to-do',
+        public_id: `${Date.now()}-${req.file.originalname}`,
+      });
+  
+      const newToDo = await prisma.toDo.create({
+        data: {
+          path: result.secure_url,
+          publicId:result.public_id,
+          authorId: parseInt(req.user.id),
+          finished: false,
+        }
+      });
+  
+      res.status(201).json({ success: true });
+    } catch (error) {
+      console.error("Error:", error);
+      res.status(500).json({ error: 'Failed to save template' });
+    }
+})
   
 
 //Passport
 passport.use(
-  new LocalStrategy(async (username, password, done) => {
-      const user = await prisma.user.findFirst({where: {username: username}})
+  new LocalStrategy({usernameField: 'email'},async (email, password, done) => {
+      const user = await prisma.user.findFirst({where: {username: email}})
 
           try{
               if(!user){
-                  return done(null,false, {message: 'Incorrecr username'})
+                  return done(null,false, {message: 'Incorrecr email'})
               }
 
               const match = await bcrypt.compare(password, user.password)

@@ -28,3 +28,11 @@ model User {
 
   @@unique([username, id], name: "usernameId")
 }
+
+model ToDo {
+  id Int @id @default(autoincrement())
+  path String
+  authorId Int
+  finished Boolean
+  publicId String
+}
