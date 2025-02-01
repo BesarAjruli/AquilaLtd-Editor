@@ -189,9 +189,8 @@ app.post('/api/to-do', upload.single('image'), async (req, res) => {
 
 //Passport
 passport.use(
-  new LocalStrategy({usernameField: 'email'},async (email, password, done) => {
-      const user = await prisma.user.findFirst({where: {username: email}})
-
+  new LocalStrategy(async (username, password, done) => {
+      const user = await prisma.user.findFirst({where: {username: username}})
           try{
               if(!user){
                   return done(null,false, {message: 'Incorrecr email'})

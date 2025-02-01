@@ -26,6 +26,11 @@ export default function LogIn(){
            })
            const results = await resposne.json()
            setLoading(false)
+
+           if (!results.success) {
+            throw new Error(data.message || 'Login failed');
+          }
+
            if(results.success){
             navigate(results.redirect)
            }
