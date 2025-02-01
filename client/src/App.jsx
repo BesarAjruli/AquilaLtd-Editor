@@ -619,6 +619,9 @@ if(mediaQuery.matches){
         case 'Menu':
           Component = Menu;
           break;
+          case 'Icons':
+            Component = Icons;
+            break;
         default:
           throw new Error(`Unknown component type: ${type}`);
       }
