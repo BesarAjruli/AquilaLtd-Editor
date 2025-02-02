@@ -185,6 +185,31 @@ app.post('/api/to-do', upload.single('image'), async (req, res) => {
       res.status(500).json({ error: 'Failed to save template' });
     }
 })
+app.get('/api/to-do', async (req, res) => {
+  const data = await prisma.toDo.findMany()  
+  res.json(data)
+})
+app.delete('/api/remove-todo/:id', async (req, res) => {
+  const id = req.params.id
+  const retriveImage = await prisma.toDo.findFirst({where: { id: parseInt(id)}})
+  const imagePublicId = retriveImage.publicId
+  await prisma.toDo.delete({where: {id: parseInt(id)}})
+  await cloudinary.uploader.destroy(imagePublicId);
+  const response = await prisma.template.findMany()
+  res.json(response)
+  })
+  //Update thumbnail
+  app.put('/api/update-todo/:id', async (req, res) => {
+    const id = req.params.id
+    await prisma.toDo.update({
+      where: { id: parseInt(id) },
+      data: {
+        finished: true
+      }
+    })
+    const response = await prisma.template.findMany()
+    res.json(response)
+  })
   
 
 //Passport

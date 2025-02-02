@@ -51,6 +51,8 @@ export default function App() {
   const [userId, setUserId] = useState(null)
   const navigate = useNavigate()
   const [loading, setLoading] = useState(true)
+  const SNAP_THRESHOLD = 10;
+  const GRID_SIZE = 50;
 
   const uniqueId = () => `element-${Date.now()}-${Math.random()}`;
   const backendUrl = import.meta.env.VITE_BACKEND_URL;
@@ -235,13 +237,51 @@ if(mediaQuery.matches){
       const elementContainer = element.parentElement;
       const parent = elementContainer.parentElement;
       const parentRect = parent.getBoundingClientRect();
+
+      const parentCenterX = parentRect.width / 2;
+      const parentCenterY = parentRect.height / 2;
   
       let newX = clientX - offsetX;
       let newY = clientY - offsetY;
+
+      // Snapping to Grid
+      const snapX = Math.round(newX / GRID_SIZE) * GRID_SIZE;
+      const snapY = Math.round(newY / GRID_SIZE) * GRID_SIZE;
+
+      if (Math.abs(newX - snapX) < SNAP_THRESHOLD) newX = snapX;
+      if (Math.abs(newY - snapY) < SNAP_THRESHOLD) newY = snapY;
   
       // Ensure element stays within parent boundaries
       newX = Math.max(0, Math.min(newX, parentRect.width - rect.width));
       newY = Math.max(0, Math.min(newY, parentRect.height - rect.height));
+
+      // Alignment Guides
+    const guides = [];
+    elements.forEach((el) => {
+      if (el.id !== crntElement.id) {
+        if (Math.abs(el.style.left.replace('px', '') - newX) < SNAP_THRESHOLD) {
+          newX = parseInt(el.style.left);
+          guides.push({ type: 'vertical', position: newX });
+        }
+        if (Math.abs(el.style.top.replace('px', '') - newY) < SNAP_THRESHOLD) {
+          newY = parseInt(el.style.top);
+          guides.push({ type: 'horizontal', position: newY });
+        }
+      }
+    });
+
+    // Algiment guides for middle of page
+    if (Math.abs(newX + rect.width / 2 - parentCenterX) < SNAP_THRESHOLD) {
+      newX = parentCenterX - rect.width / 2;
+      guides.push({ type: 'vertical', position: parentCenterX });
+    }
+    if (Math.abs(newY + rect.height / 2 - parentCenterY) < SNAP_THRESHOLD) {
+      newY = parentCenterY - rect.height / 2;
+      guides.push({ type: 'horizontal', position: parentCenterY });
+    }
+    
+
+    renderGuides(guides);
   
       element.style.left = `${newX}px`;
       element.style.top = `${newY}px`;
@@ -275,6 +315,7 @@ if(mediaQuery.matches){
 
       document.removeEventListener('touchmove', preventScroll);
 
+      clearGuides();
       saveHistory(elements);
       cancelPress()
     };
@@ -286,6 +327,52 @@ if(mediaQuery.matches){
 
     document.addEventListener('touchmove', preventScroll, { passive: false });
   };
+
+  // Helper functions to render and clear guides
+const renderGuides = (guides) => {
+  const guideContainer = document.getElementById('guide-container') || createGuideContainer();
+
+  guideContainer.innerHTML = '';
+  guides.forEach((guide) => {
+    const line = document.createElement('div');
+    line.className = `guide ${guide.type}`;
+    line.style.position = 'absolute';
+    line.style.backgroundColor = 'rgba(0, 123, 255, 0.5)';
+    line.style.zIndex = '999';
+
+    if (guide.type === 'vertical') {
+      line.style.left = `${guide.position}px`;
+      line.style.top = '0';
+      line.style.height = '100%';
+      line.style.width = '1px';
+    } else {
+      line.style.top = `${guide.position}px`;
+      line.style.left = '0';
+      line.style.width = '100%';
+      line.style.height = '1px';
+    }
+
+    guideContainer.appendChild(line);
+  });
+};
+
+const clearGuides = () => {
+  const guideContainer = document.getElementById('guide-container');
+  if (guideContainer) guideContainer.innerHTML = '';
+};
+
+const createGuideContainer = () => {
+  const container = document.createElement('div');
+  container.id = 'guide-container';
+  container.style.position = 'absolute';
+  container.style.top = '0';
+  container.style.left = '0';
+  container.style.width = '100%';
+  container.style.height = '100%';
+  container.style.pointerEvents = 'none';
+  editorRef.current.appendChild(container);
+  return container;
+};
 
   const handleSubmit = (e) => {
     e.preventDefault()

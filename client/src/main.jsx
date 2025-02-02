@@ -5,6 +5,7 @@ import App from './App.jsx'
 import SingUp from './Components/clientSignUp/signUp.jsx'
 import LogIn from './Components/clientSignUp/login.jsx'
 import Approved from './Components/approve.jsx';
+import ToDo from './Components/todo.jsx';
 
 const router = createBrowserRouter([
   {
@@ -20,9 +21,13 @@ const router = createBrowserRouter([
     element: <LogIn/>
   },
   {
-    path: 'verify',
+    path: '/verify',
     element: <Approved/>
   }, 
+  {
+    path: '/to-do',
+    element: <ToDo/>
+  }
 ])
 
 createRoot(document.getElementById('root')).render(
