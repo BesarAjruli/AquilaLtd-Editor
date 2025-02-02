@@ -258,16 +258,18 @@ if(mediaQuery.matches){
       // Alignment Guides
     const guides = [];
     elements.forEach((el) => {
-      if (el.id !== crntElement.id) {
-        if (Math.abs(el.style.left.replace('px', '') - newX) < SNAP_THRESHOLD) {
-          newX = parseInt(el.style.left);
-          guides.push({ type: 'vertical', position: newX });
-        }
-        if (Math.abs(el.style.top.replace('px', '') - newY) < SNAP_THRESHOLD) {
-          newY = parseInt(el.style.top);
-          guides.push({ type: 'horizontal', position: newY });
-        }
+      const elLeft = parseInt(el.style.left) || 0;
+      const elTop = parseInt(el.style.top) || 0;
+
+      if (Math.abs(elLeft - newX) < SNAP_THRESHOLD) {
+        newX = elLeft;
+        guides.push({ type: 'vertical', position: elLeft });
       }
+      if (Math.abs(elTop - newY) < SNAP_THRESHOLD) {
+        newY = elTop;
+        guides.push({ type: 'horizontal', position: elTop });
+      }
+
     });
 
     // Algiment guides for middle of page
@@ -380,8 +382,8 @@ const createGuideContainer = () => {
     const data = Object.fromEntries(formData.entries())
 
     const formattedStyle = {
-        width: data.width + 'px',
-        height: data.height + 'px',
+        width: parseInt(data.autoW ) === 0 ? data.width + 'px' : 'auto',
+        height: parseInt(data.autoH) === 0 ? data.height + 'px' : 'auto',
         color: data.fontColor,
         backgroundColor: data.bgColor,
         fontSize: data.fontSize + 'px',
@@ -430,6 +432,10 @@ const createGuideContainer = () => {
     e.preventDefault()
     e.stopPropagation();
     dialogRef.current.querySelector('#hiddenContent').setAttribute('disabled', 'true')
+    dialogRef.current.querySelector('#width').removeAttribute('disabled')
+    dialogRef.current.querySelector('#height').removeAttribute('disabled')
+    dialogRef.current.querySelector('#autoW').value = 0
+    dialogRef.current.querySelector('#autoH').value = 0
     if(e.target.tagName === 'IMG'){
       dialogRef.current.querySelector('#content').style.display = 'none'
       dialogRef.current.querySelector('label[for="content"]').style.display = 'none'
@@ -504,15 +510,6 @@ const createGuideContainer = () => {
   const closeDialog = () => {
     dialogRef.current.querySelector('form').reset()
     dialogRef.current.close()
-  }
-
-  const setWidthMax = (e) => {
-    e.preventDefault()
-    if(mediaQuery.matches){
-      dialogRef.current.querySelector('#width').value = 300 
-    } else {
-      dialogRef.current.querySelector('#width').value = 1280 
-    }
   }
 
   function rgbToHex(rgb) {
@@ -667,8 +664,12 @@ const createGuideContainer = () => {
     }).then((response) => {
       if(response.ok){
         alert('Success')
+        setLoading(false)
+      } else{
+        alert('Failed')
+        setLoading(false)
       }
-      setLoading(false)
+      
     }).catch(error => {
       alert(`Failed ${error}`)
       setLoading(false)
@@ -931,7 +932,7 @@ const sendBackward = () => {
       <SelectTemplate ref={templatesRef} loadTemplate={(e) => loadTemplate(e)}/>
       <EditorDialog ref={dialogRef} mediaQuery={mediaQuery}
       duplicate={duplicate} closeDialog={closeDialog} handleSubmit={handleSubmit}
-       handleImageChange={handleImageChange} setWidthMax={setWidthMax} deleteElement={deleteElement}
+       handleImageChange={handleImageChange} deleteElement={deleteElement}
        bringForward={bringForward} sendBackward={sendBackward}/>
       <SaveTemplateDialog ref={saveTempRef} saveTemplate={(elements, e) => saveTemplate(elements, e)} elements={elements}/>
       <IconsSelector ref={iconsDialog} addElement={() => addElement(Icons)} 

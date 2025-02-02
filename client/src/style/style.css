@@ -255,6 +255,9 @@ html {
 .maxWidth:hover {
   background-color: #a7a6a6;
 }
+input[name='height']{
+  width: 165px;
+}
 
 .history {
   display: flex;

@@ -2,7 +2,46 @@ import { forwardRef } from "react"
 import Icon from '@mdi/react';
 import { mdiContentCopy } from '@mdi/js';
 
-const EditorDialog = forwardRef(({mediaQuery,duplicate,closeDialog,handleSubmit, handleImageChange, setWidthMax, deleteElement, bringForward, sendBackward}, ref) => {
+const EditorDialog = forwardRef(({
+    mediaQuery,duplicate,closeDialog,handleSubmit, handleImageChange,
+    deleteElement, bringForward, sendBackward}, ref) => {
+
+      let clicksW = 0, clicksH = 0
+
+  const setWidthMax = (e) => {
+    e.preventDefault()
+    if(mediaQuery.matches){
+      ref.current.querySelector('#width').value = 300 
+    } else {
+      ref.current.querySelector('#width').value = 1280 
+    }
+  }
+  const setAuto = (e, typ) => {
+    e.preventDefault()
+    if(typ === 'width'){
+      if(clicksW === 0){
+      ref.current.querySelector('#width').setAttribute('disabled', 'true')
+      ref.current.querySelector('#autoW').value = 1
+      clicksW+=2
+    } else{
+      ref.current.querySelector('#width').removeAttribute('disabled')
+      ref.current.querySelector('#autoW').value = 0
+      clicksW = 0
+    }
+    }
+    else{
+      if(clicksH === 0){
+        ref.current.querySelector('#height').setAttribute('disabled', 'true')
+        ref.current.querySelector('#autoH').value = 1
+        clicksH+=2
+      } else{
+        ref.current.querySelector('#height').removeAttribute('disabled')
+        ref.current.querySelector('#autoH').value = 0
+        clicksH = 0
+      }
+    }
+  }
+
     return (
         <>
         <dialog ref={ref} className="custom-dialog">
@@ -40,11 +79,17 @@ const EditorDialog = forwardRef(({mediaQuery,duplicate,closeDialog,handleSubmit,
     <label htmlFor="width">Width:</label>
     <div>
       <input type="number" id="width" name="width" min={1} defaultValue={100} max={mediaQuery.matches ? 300: 1280} required/>
+      <button className="maxWidth" onClick={(e) => setAuto(e, 'width')}>Auto</button>
       <button className='maxWidth' onClick={setWidthMax}>Max</button>
+      <input type="hidden" name="autoW" id="autoW" defaultValue={0}/>
     </div>
     
     <label htmlFor="height">Height:</label>
-    <input type="number" name="height" id="height" min={1} defaultValue={100} required/>
+    <div>
+      <input type="number" name="height" id="height" min={1} defaultValue={100} required/>
+      <button className="maxWidth" onClick={(e) => setAuto(e, 'height')}>Auto</button>
+      <input type="hidden" name="autoH" id="autoH" defaultValue={0}/>
+    </div>
     
     <label htmlFor="fontSize">Font Size:</label>
     <input type="number" name="fontSize" id="fontSize" min={1} defaultValue={14}/>
