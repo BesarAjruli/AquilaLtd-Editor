@@ -11,10 +11,8 @@
     height: 520px;
     display: flex;
     justify-content: center;
-    place-items: center;
     border: 1px solid #c9c9c9;
     border-radius: 15px;
-    overflow-x: hidden;
     overflow-y: scroll;
   }
   

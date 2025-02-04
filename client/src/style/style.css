@@ -86,6 +86,8 @@ html {
   width: 80px;
   height: 54px;
   border: 1px dotted #000;
+  border-radius: 5px;
+  background-color: #fff;
 }
 .input {
   width: 120px;
@@ -311,7 +313,15 @@ input[name='height']{
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   overflow: hidden;
+  place-items: center;
+  justify-content: center;
   gap: 30px;
+}
+.tmeplateDiv:has(> img[title='mobile']){
+  grid-template-columns: repeat(4, 1fr);
+}
+.tmeplateDiv img[title='mobile']{
+  width: 200px;
 }
 .tmeplateDiv img {
   width: 500px;
@@ -512,6 +522,9 @@ input {
 @media (max-width: 768px) {
   .tabs {
     transform: scale(0.6);
+  }
+  input[name='height']{
+    width: 125px;
   }
   .sideElementsBar {
     width: 30%;

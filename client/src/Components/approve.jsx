@@ -37,7 +37,9 @@ const Approved = () => {
               if(!element.verified){
                 return {
                     thumbnail: element.path,
-                    id: element.id
+                    id: element.id,
+                    category: element.category,
+                    authorId: element.authorId
                 };
               }
             });  
@@ -117,6 +119,9 @@ const Approved = () => {
                 <div className="imageContVer">
                     <img key={thumbnail.id} src={thumbnail.thumbnail} alt={`Thumbnail ${thumbnail.id}`} onClick={() => onThumbnailClick(index)} />
                 </div><br />
+                <div>
+                  <span>Category: ({thumbnail.category}) Author ID: ({thumbnail.authorId}) Image ID: ({thumbnail.id})</span>
+                </div>
                 <div className="aproveButtonsCont">
                     <button className="disapprove" onClick={() => disapprove(thumbnail.id)}>Disapprove</button>
                     <button className="approve" onClick={() => approve(thumbnail.id)}>Approve</button>

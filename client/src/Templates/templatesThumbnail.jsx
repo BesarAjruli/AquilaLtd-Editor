@@ -17,13 +17,13 @@ const Thumbnails = ({onThumbnailClick, category, deviceType}) => {
         const paths = data.map((element) => {
           switch(category){
             case 'all':
-              if(element.device_type === deviceType && element.verified === true) return element.path;
+              if(element.device_type === deviceType && element.verified === true) return element;
             case 'login':
             case 'signup':
             case 'homepage':
             case 'productpage':
               if (element.category === category && element.device_type === deviceType && element.verified === true) {
-                return element.path;
+                return element;
               }
             return undefined; // Explicitly return undefined if condition isn't met
             default:
@@ -45,7 +45,7 @@ const Thumbnails = ({onThumbnailClick, category, deviceType}) => {
       {thumbnails.length > 0 ? (
         thumbnails.map((thumbnail, index) => (
           thumbnail &&
-          <img key={index} src={thumbnail} alt={`Thumbnail ${index + 1}`} onClick={() => onThumbnailClick(index)} />
+          <img key={index} src={thumbnail.path} alt={`Thumbnail ${index + 1}`} title={thumbnail.device_type} onClick={() => onThumbnailClick(index)} />
 
         ))
       ) : (

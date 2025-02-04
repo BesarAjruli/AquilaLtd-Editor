@@ -15,6 +15,7 @@ const SaveTemplateDialog = forwardRef(({saveTemplate, elements}, ref) => {
             <option value="signup">SignUp</option>
             <option value="homepage">Home Page</option>
             <option value="productpage">Product Page</option>
+            <option value="header">Header</option>
           </select>
           <label htmlFor="deviceType">Device Type</label>
           <select name="deviceType" id="deviceType">

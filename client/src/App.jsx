@@ -9,6 +9,7 @@ import IconsSelector from './Components/Dialogs/iconsSelector';
 import { Icon } from '@iconify-icon/react';
 import Toolbar from './Components/Toolbar';
 import Loading from './Components/Loading';
+import ExtraInput from './Components/Dialogs/ExtraInput'
 
 const Text = ({style, content}) => <span className='edit' style={style}>{content}</span>;
 const Button = ({style, content}) => <button className='edit' style={style}>{content}</button>;
@@ -937,6 +938,7 @@ const sendBackward = () => {
       <SaveTemplateDialog ref={saveTempRef} saveTemplate={(elements, e) => saveTemplate(elements, e)} elements={elements}/>
       <IconsSelector ref={iconsDialog} addElement={() => addElement(Icons)} 
         sendIconName={(value) => setIconName(value)}/>
+      <ExtraInput/>
     </>
   );
 }
