@@ -20,12 +20,15 @@ const Audio = ({style}) => <img className='edit' style={style} src="https://png.
 const Gallery = ({style}) => <img className='edit' style={style} src="https://t3.ftcdn.net/jpg/04/19/92/88/360_F_419928833_w7HrdbjTCl1zGIBY1YljW6feoWx90ETm.jpg" alt="Gallery" />;
 const Section = ({style}) => <div className='edit' style={style}></div>;
 const Link = ({style, content}) => <a className='edit' style={style}>{content}</a>;
-const List = ({style}) => {return (
+const List = ({style, content}) => { 
+  const listItems = JSON.parse(content)
+  return (
   <div className='edit' style={style}>
     <ul style={{pointerEvents: 'none'}}>
-      <strong><em>List1</em></strong>
-      <li>Item1</li>
-      <li>Item2</li>
+      <strong><em>List</em></strong>
+      {listItems.map((item, index) => (
+          <li key={index}>{item}</li>
+        ))}
     </ul>
   </div>
 );}
@@ -52,6 +55,8 @@ export default function App() {
   const navigate = useNavigate()
   const [loading, setLoading] = useState(true)
   const extraInptRef = useRef(null)
+  const [listItems, setListItems] = useState(["Item1", "Item2"]);
+
   const SNAP_THRESHOLD = 10;
   const GRID_SIZE = 50;
 
@@ -175,6 +180,12 @@ if(mediaQuery.matches){
         dialogRef.current.querySelector('#width').setAttribute('disabled', 'true')
         dialogRef.current.querySelector('#height').setAttribute('disabled', 'true')
         dialogRef.current.querySelector('#fontSize').value = 50
+        break;
+      case 'List':
+        dialogRef.current.querySelector('#content').value = JSON.stringify(listItems)
+        dialogRef.current.querySelector('#hiddenContent').removeAttribute('disabled')
+        dialogRef.current.querySelector('#hiddenContent').value = JSON.stringify(listItems)
+        dialogRef.current.querySelector('#content').setAttribute('disabled', 'true')
         break;
       default:
         dialogRef.current.querySelector('#width').value = 100
@@ -404,11 +415,13 @@ const createGuideContainer = () => {
     }
     if(e.target.children[0] && e.target.children[0].tagName === 'UL'){
       dialogRef.current.querySelector('.advSettings').style.display = 'block'
+      dialogRef.current.querySelector('#content').value = JSON.stringify(listItems)
+      dialogRef.current.querySelector('#hiddenContent').value = JSON.stringify(listItems)
       extraInptRef.current.querySelector('#cols').setAttribute('disabled', 'true')
+      extraInptRef.current.querySelector('#rows').value = 2
     } else{
       dialogRef.current.querySelector('.advSettings').style.display = 'none'
       extraInptRef.current.querySelector('#cols').removeAttribute('disabled')
-      extraInptRef.current.querySelector('#rows').value = 2
     }
     dialogRef.current.querySelector('#width').value = parseInt(e.target.style.width)
     dialogRef.current.querySelector('#height').value = parseInt(e.target.style.height)
@@ -426,6 +439,9 @@ const createGuideContainer = () => {
         dialogRef.current.querySelector('#content').setAttribute('disabled', 'true')
         dialogRef.current.querySelector('#width').setAttribute('disabled', 'true')
         dialogRef.current.querySelector('#height').setAttribute('disabled', 'true')
+    } else if(e.target.children[0] && e.target.children[0].tagName === 'UL'){
+      dialogRef.current.querySelector('#hiddenContent').removeAttribute('disabled')
+      dialogRef.current.querySelector('#content').setAttribute('disabled', 'true')
     } else {
       dialogRef.current.querySelector('#content').removeAttribute('disabled')
       dialogRef.current.querySelector('#width').removeAttribute('disabled')
@@ -873,14 +889,14 @@ const handleMobileContextMenu = (id, e) => {
       deleteElement={deleteElement} currentElement={currentElement} chngStyle={chngStyle}
       extraEditor={extraInptRef} elements={elements}
        imageSrc={imageSrc} currentPage={currentPage} setImageSrc={setImageSrc} setElements={setElements} saveHistory={saveHistory}
-       setChangingStyle={setChangingStyle} setCurrentElement={setCurrentElement} iconsDialog={iconsDialog}/>
+       setChangingStyle={setChangingStyle} setCurrentElement={setCurrentElement} iconsDialog={iconsDialog} editorRef={editorRef}/>
 
       <SaveTemplateDialog ref={saveTempRef} saveTemplate={(elements, e) => saveTemplate(elements, e)} elements={elements}/>
 
       <IconsSelector ref={iconsDialog} addElement={() => addElement(Icons)} 
         sendIconName={(value) => setIconName(value)}/>
 
-      <ExtraInput ref={extraInptRef} currentElement={currentElement}/>
+      <ExtraInput ref={extraInptRef} currentElement={currentElement} listItems={listItems} setListItems={setListItems} dialogRef={dialogRef}/>
     </>
   );
 }

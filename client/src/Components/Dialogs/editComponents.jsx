@@ -5,8 +5,8 @@ import { mdiContentCopy } from '@mdi/js';
 const EditorDialog = forwardRef(({
     mediaQuery,duplicate,closeDialog, handleImageChange,
     deleteElement, currentElement, chngStyle, extraEditor, elements,
-     imageSrc, currentPage, setImageSrc,
-     setElements, saveHistory, setChangingStyle, setCurrentElement, iconsDialog,
+     imageSrc, currentPage, setImageSrc, setElements, saveHistory, setChangingStyle,
+    setCurrentElement, iconsDialog, editorRef
     }, ref) => {
 
       const [layer, setLayer]= useState(null)
@@ -59,7 +59,6 @@ const EditorDialog = forwardRef(({
   
   const sendBackward = () => {
     let layers = layer ?? parseInt(currentElement.style.zIndex)
-    console.log(layers)
     if(layers !== 0){
       ref.current.querySelectorAll('.layers')[0].style.cursor = 'default'
       setLayer(layers - 1);
@@ -72,7 +71,6 @@ const EditorDialog = forwardRef(({
     e.preventDefault()
     const formData = new FormData(e.target)
     const data = Object.fromEntries(formData.entries())
-    console.log(layer)
 
     const formattedStyle = {
         width: parseInt(data.autoW ) === 0 ? data.width + 'px' : 'auto',

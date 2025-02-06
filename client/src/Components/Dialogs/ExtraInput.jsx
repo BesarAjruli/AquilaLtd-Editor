@@ -1,13 +1,29 @@
-import { forwardRef } from "react";
+import { forwardRef, useEffect } from "react";
 
-const ExtraInput = forwardRef(({currentElement}, ref) =>{
+const ExtraInput = forwardRef(({currentElement, listItems, setListItems, dialogRef}, ref) =>{
+
+    useEffect(() => {
+        if (currentElement?.component.type.name === "List") {
+        dialogRef.current.querySelector('#content').value = JSON.stringify(listItems)
+        dialogRef.current.querySelector('#hiddenContent').removeAttribute('disabled')
+        dialogRef.current.querySelector('#hiddenContent').value = JSON.stringify(listItems)
+        dialogRef.current.querySelector('#content').setAttribute('disabled', 'true')
+        }
+    },[listItems])
+
     const handleSubmit = (e) => {
         e.preventDefault()
 
         const formData = new FormData(e.target)
         const data = Object.fromEntries(formData.entries())
 
-        console.log(currentElement)
+        const rows = Number(data.rows)
+
+        if(currentElement.component.type.name === 'List'){
+            setListItems(Array.from({ length: rows }, (_, i) => `Item${i + 1}`));
+        }
+
+        ref.current.close()
     }
     return (
         <>
