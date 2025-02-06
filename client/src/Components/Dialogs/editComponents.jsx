@@ -1,10 +1,15 @@
-import { forwardRef } from "react"
+import React, { forwardRef, useState } from "react"
 import Icon from '@mdi/react';
 import { mdiContentCopy } from '@mdi/js';
 
 const EditorDialog = forwardRef(({
-    mediaQuery,duplicate,closeDialog,handleSubmit, handleImageChange,
-    deleteElement, bringForward, sendBackward}, ref) => {
+    mediaQuery,duplicate,closeDialog, handleImageChange,
+    deleteElement, currentElement, chngStyle, extraEditor, elements,
+     imageSrc, currentPage, setImageSrc,
+     setElements, saveHistory, setChangingStyle, setCurrentElement, iconsDialog,
+    }, ref) => {
+
+      const [layer, setLayer]= useState(null)
 
       let clicksW = 0, clicksH = 0
 
@@ -42,11 +47,86 @@ const EditorDialog = forwardRef(({
     }
   }
 
+  const bringForward = () => {
+    let layers = layer ?? parseInt(currentElement.style.zIndex)
+    if(layers !== elements.length){
+      ref.current.querySelectorAll('.layers')[1].style.cursor = 'default'
+      setLayer(layers + 1)
+    }else {
+      ref.current.querySelectorAll('.layers')[1].style.cursor = 'not-allowed'
+    }
+  }
+  
+  const sendBackward = () => {
+    let layers = layer ?? parseInt(currentElement.style.zIndex)
+    console.log(layers)
+    if(layers !== 0){
+      ref.current.querySelectorAll('.layers')[0].style.cursor = 'default'
+      setLayer(layers - 1);
+    }else {
+      ref.current.querySelectorAll('.layers')[0].style.cursor = 'not-allowed'
+    }
+  }  
+
+  const handleSubmit = (e) => {
+    e.preventDefault()
+    const formData = new FormData(e.target)
+    const data = Object.fromEntries(formData.entries())
+    console.log(layer)
+
+    const formattedStyle = {
+        width: parseInt(data.autoW ) === 0 ? data.width + 'px' : 'auto',
+        height: parseInt(data.autoH) === 0 ? data.height + 'px' : 'auto',
+        color: data.fontColor,
+        backgroundColor: data.bgColor,
+        fontSize: data.fontSize + 'px',
+        borderWidth: data.borderWidth + 'px',
+        borderRadius: data.borderRadius + 'px',
+        borderColor: data.borderColor,
+        position: currentElement.id.startsWith('editor') ? 'relative' : 'absolute',
+        left: currentElement.id.startsWith('editor') && chngStyle.changing === true ? 0 : currentElement.style.left || 0,
+        top: currentElement.id.startsWith('editor') ? 0 : currentElement.style.top || 0,
+        zIndex: chngStyle.changing ? layer ?? currentElement.style.zIndex : elements.length ,
+        opacity: data.opacity / 100
+        }
+        
+        if (currentElement && !currentElement.id.startsWith('editor')) {
+          const updatedElement = {
+            ...currentElement,
+            style: formattedStyle,
+            component: React.cloneElement(currentElement.component, { style: formattedStyle, content: imageSrc ? imageSrc : data.content }),
+            page: currentPage,
+          };
+          const newElements = chngStyle.changing
+          ? elements.map((el) =>
+              el.id === currentElement.id ? updatedElement : el
+            )
+          : [...elements, updatedElement];
+  
+        setImageSrc(null)
+        setElements(newElements);
+        saveHistory(newElements);
+        setChangingStyle(false);
+        setCurrentElement(null);
+        } else if(currentElement){
+          Object.keys(formattedStyle).forEach(key => {
+            editorRef.current.style[key] = formattedStyle[key];
+        });
+        setChangingStyle(false);
+        setCurrentElement(null);
+        setLayer(null)
+        }
+    e.target.reset()
+    closeDialog()
+    iconsDialog.current.close()
+  }
+
     return (
         <>
         <dialog ref={ref} className="custom-dialog">
   <header className="dialog-header">
     <h3>Customize</h3>
+    <span className="advSettings" onClick={() => extraEditor.current.showModal()}>+</span>
     <div className="layersCOntainer">
       <svg 
       className="layers"

@@ -46,12 +46,12 @@ export default function App() {
   const [imageSrc, setImageSrc] = useState(null);
   const templatesRef = useRef(null)
   const saveTempRef = useRef(null)
-  const [layer, setLayer]= useState(null)
   const iconsDialog = useRef(null)
   const [iconConent, setIconName] = useState(null)
   const [userId, setUserId] = useState(null)
   const navigate = useNavigate()
   const [loading, setLoading] = useState(true)
+  const extraInptRef = useRef(null)
   const SNAP_THRESHOLD = 10;
   const GRID_SIZE = 50;
 
@@ -129,6 +129,7 @@ if(mediaQuery.matches){
       dialogRef.current.querySelector('#fontSize').removeAttribute('disabled')
       dialogRef.current.querySelector('#imageContent').removeAttribute('disabled')
       dialogRef.current.querySelector('#hiddenContent').setAttribute('disabled', 'true')
+      dialogRef.current.querySelector('.advSettings').style.display = 'none'
 
     if( type === 'ImageCmp'){
       content.style.display = 'none'
@@ -377,58 +378,6 @@ const createGuideContainer = () => {
   return container;
 };
 
-  const handleSubmit = (e) => {
-    e.preventDefault()
-    const formData = new FormData(e.target)
-    const data = Object.fromEntries(formData.entries())
-
-    const formattedStyle = {
-        width: parseInt(data.autoW ) === 0 ? data.width + 'px' : 'auto',
-        height: parseInt(data.autoH) === 0 ? data.height + 'px' : 'auto',
-        color: data.fontColor,
-        backgroundColor: data.bgColor,
-        fontSize: data.fontSize + 'px',
-        borderWidth: data.borderWidth + 'px',
-        borderRadius: data.borderRadius + 'px',
-        borderColor: data.borderColor,
-        position: currentElement.id.startsWith('editor') ? 'relative' : 'absolute',
-        left: currentElement.id.startsWith('editor') && chngStyle.changing === true ? 0 : currentElement.style.left || 0,
-        top: currentElement.id.startsWith('editor') ? 0 : currentElement.style.top || 0,
-        zIndex: chngStyle.changing ? layer ? layer : currentElement.style.zIndex : elements.length ,
-        opacity: data.opacity / 100
-        }
-        
-        if (currentElement && !currentElement.id.startsWith('editor')) {
-          const updatedElement = {
-            ...currentElement,
-            style: formattedStyle,
-            component: React.cloneElement(currentElement.component, { style: formattedStyle, content: imageSrc ? imageSrc : data.content }),
-            page: currentPage,
-          };
-          const newElements = chngStyle.changing
-          ? elements.map((el) =>
-              el.id === currentElement.id ? updatedElement : el
-            )
-          : [...elements, updatedElement];
-  
-        setImageSrc(null)
-        setElements(newElements);
-        saveHistory(newElements);
-        setChangingStyle(false);
-        setCurrentElement(null);
-        } else if(currentElement){
-          Object.keys(formattedStyle).forEach(key => {
-            editorRef.current.style[key] = formattedStyle[key];
-        });
-        setChangingStyle(false);
-        setCurrentElement(null);
-        setLayer(null)
-        }
-    e.target.reset()
-    closeDialog()
-    iconsDialog.current.close()
-  }
-
   const changeStyle = (id, e) => {
     e.preventDefault()
     e.stopPropagation();
@@ -452,6 +401,14 @@ const createGuideContainer = () => {
     }
     if(e.target.tagName === 'INPUT'){
       dialogRef.current.querySelector('#content').value = e.target.placeholder
+    }
+    if(e.target.children[0] && e.target.children[0].tagName === 'UL'){
+      dialogRef.current.querySelector('.advSettings').style.display = 'block'
+      extraInptRef.current.querySelector('#cols').setAttribute('disabled', 'true')
+    } else{
+      dialogRef.current.querySelector('.advSettings').style.display = 'none'
+      extraInptRef.current.querySelector('#cols').removeAttribute('disabled')
+      extraInptRef.current.querySelector('#rows').value = 2
     }
     dialogRef.current.querySelector('#width').value = parseInt(e.target.style.width)
     dialogRef.current.querySelector('#height').value = parseInt(e.target.style.height)
@@ -830,27 +787,6 @@ const handleMobileContextMenu = (id, e) => {
 
   startPress();
 }
-
-const bringForward = () => {
-  let layers = layer ? layer : currentElement.style.zIndex
-  if(layers !== elements.length){
-  dialogRef.current.querySelectorAll('.layers')[1].style.cursor = 'default'
-    setLayer(layers+=1)
-  }else {
-    dialogRef.current.querySelectorAll('.layers')[1].style.cursor = 'not-allowed'
-  }
-}
-
-const sendBackward = () => {
-  let layers = layer? layer : currentElement.style.zIndex
-  if(layers !== 0){
-    dialogRef.current.querySelectorAll('.layers')[0].style.cursor = 'default'
-    setLayer(layers-=1)
-  }else {
-    dialogRef.current.querySelectorAll('.layers')[0].style.cursor = 'not-allowed'
-  }
-}  
-
   return (
     <>
       {loading && <Loading/>}
@@ -931,14 +867,20 @@ const sendBackward = () => {
         </div>
       </div>
       <SelectTemplate ref={templatesRef} loadTemplate={(e) => loadTemplate(e)}/>
+
       <EditorDialog ref={dialogRef} mediaQuery={mediaQuery}
-      duplicate={duplicate} closeDialog={closeDialog} handleSubmit={handleSubmit}
-       handleImageChange={handleImageChange} deleteElement={deleteElement}
-       bringForward={bringForward} sendBackward={sendBackward}/>
+      duplicate={duplicate} closeDialog={closeDialog} handleImageChange={handleImageChange} 
+      deleteElement={deleteElement} currentElement={currentElement} chngStyle={chngStyle}
+      extraEditor={extraInptRef} elements={elements}
+       imageSrc={imageSrc} currentPage={currentPage} setImageSrc={setImageSrc} setElements={setElements} saveHistory={saveHistory}
+       setChangingStyle={setChangingStyle} setCurrentElement={setCurrentElement} iconsDialog={iconsDialog}/>
+
       <SaveTemplateDialog ref={saveTempRef} saveTemplate={(elements, e) => saveTemplate(elements, e)} elements={elements}/>
+
       <IconsSelector ref={iconsDialog} addElement={() => addElement(Icons)} 
         sendIconName={(value) => setIconName(value)}/>
-      <ExtraInput/>
+
+      <ExtraInput ref={extraInptRef} currentElement={currentElement}/>
     </>
   );
 }
