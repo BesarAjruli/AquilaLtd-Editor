@@ -10,6 +10,7 @@ import { Icon } from '@iconify-icon/react';
 import Toolbar from './Components/Toolbar';
 import Loading from './Components/Loading';
 import ExtraInput from './Components/Dialogs/ExtraInput'
+import { tr } from 'date-fns/locale';
 
 const Text = ({style, content}) => <span className='edit' style={style}>{content}</span>;
 const Button = ({style, content}) => <button className='edit' style={style}>{content}</button>;
@@ -36,6 +37,32 @@ const Pie = ({style}) => <img className='edit' style={style} src='https://img.ic
 const Charts = ({style}) => <img className='edit' style={style} src='https://img.icons8.com/skeuomorphism/64/bar-chart.png'/>
 const Menu = ({style}) => <img className='edit' style={style} src='https://img.icons8.com/material-rounded/64/menu--v1.png'/>
 const Icons = ({style, content}) => <Icon className='edit' icon={`mdi-light:${content}`} style={style}/>
+const Table = ({style, content}) => {
+  const tableItems = JSON.parse(content)
+  console.log(content)
+  return(
+    <div className='edit' style={style}>
+      <table border={1} style={{pointerEvents: 'none'}}>
+      <thead>
+          <tr>
+            {tableItems[0]?.map((header, colIndex) => (
+              <th key={colIndex}>{header}</th>
+            ))}
+          </tr>
+        </thead>
+        <tbody>
+          {tableItems.slice(1).map((row, rowIndex) => (
+            <tr key={rowIndex}>
+              {row.map((_, colIndex) => (
+                <td key={colIndex}>&nbsp;</td>
+              ))}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  )
+}
 
 export default function App() {
   const [elements, setElements] = useState([]);
@@ -56,7 +83,11 @@ export default function App() {
   const [loading, setLoading] = useState(true)
   const extraInptRef = useRef(null)
   const [listItems, setListItems] = useState(["Item1", "Item2"]);
-
+  const [tableItems, setTableData] = useState([
+    ["Item1", "Item2"],
+    ["", ""],
+    ["", ""] 
+  ]);
   const SNAP_THRESHOLD = 10;
   const GRID_SIZE = 50;
 
@@ -185,6 +216,12 @@ if(mediaQuery.matches){
         dialogRef.current.querySelector('#content').value = JSON.stringify(listItems)
         dialogRef.current.querySelector('#hiddenContent').removeAttribute('disabled')
         dialogRef.current.querySelector('#hiddenContent').value = JSON.stringify(listItems)
+        dialogRef.current.querySelector('#content').setAttribute('disabled', 'true')
+        break;
+      case 'Table':
+        dialogRef.current.querySelector('#content').value = JSON.stringify(tableItems)
+        dialogRef.current.querySelector('#hiddenContent').removeAttribute('disabled')
+        dialogRef.current.querySelector('#hiddenContent').value = JSON.stringify(tableItems)
         dialogRef.current.querySelector('#content').setAttribute('disabled', 'true')
         break;
       default:
@@ -419,6 +456,14 @@ const createGuideContainer = () => {
       dialogRef.current.querySelector('#hiddenContent').value = JSON.stringify(listItems)
       extraInptRef.current.querySelector('#cols').setAttribute('disabled', 'true')
       extraInptRef.current.querySelector('#rows').value = 2
+    }else if(e.target.children[0].tagName === 'TABLE'){
+      dialogRef.current.querySelector('.advSettings').style.display = 'block'
+      dialogRef.current.querySelector('#content').value = JSON.stringify(tableItems)
+      dialogRef.current.querySelector('#hiddenContent').value = JSON.stringify(tableItems)
+      extraInptRef.current.querySelector('#cols').value = 2
+      extraInptRef.current.querySelector('#rows').value = 2
+      extraInptRef.current.querySelector('#cols').removeAttribute('disabled')
+
     } else{
       dialogRef.current.querySelector('.advSettings').style.display = 'none'
       extraInptRef.current.querySelector('#cols').removeAttribute('disabled')
@@ -439,7 +484,7 @@ const createGuideContainer = () => {
         dialogRef.current.querySelector('#content').setAttribute('disabled', 'true')
         dialogRef.current.querySelector('#width').setAttribute('disabled', 'true')
         dialogRef.current.querySelector('#height').setAttribute('disabled', 'true')
-    } else if(e.target.children[0] && e.target.children[0].tagName === 'UL'){
+    } else if(e.target.children[0] && (e.target.children[0].tagName === 'UL' || e.target.children[0].tagName === 'TABLE')){
       dialogRef.current.querySelector('#hiddenContent').removeAttribute('disabled')
       dialogRef.current.querySelector('#content').setAttribute('disabled', 'true')
     } else {
@@ -488,6 +533,9 @@ const createGuideContainer = () => {
 
   function rgbToHex(rgb) {
     // Extract the individual RGB values using a more robust regular expression
+    if(!rgb){
+      return
+    }
     var match = rgb.match(/\d+/g);
 
     // Ensure that we have three RGB values
@@ -853,6 +901,7 @@ const handleMobileContextMenu = (id, e) => {
 	          <path fill="currentColor" d="M5 13v-1h6V6h1v6h6v1h-6v6h-1v-6z" />
           </svg>
         </div>
+        <div title='Table' onClick={() => addElement(Table)}><img src="https://img.icons8.com/officel/60/table-1.png" alt="table" /></div>
 
         <div className='dots rightDots'>
             <div></div>
@@ -896,7 +945,8 @@ const handleMobileContextMenu = (id, e) => {
       <IconsSelector ref={iconsDialog} addElement={() => addElement(Icons)} 
         sendIconName={(value) => setIconName(value)}/>
 
-      <ExtraInput ref={extraInptRef} currentElement={currentElement} listItems={listItems} setListItems={setListItems} dialogRef={dialogRef}/>
+      <ExtraInput ref={extraInptRef} currentElement={currentElement} listItems={listItems} setListItems={setListItems} dialogRef={dialogRef}
+      setTableData={setTableData} tableItems={tableItems}/>
     </>
   );
 }

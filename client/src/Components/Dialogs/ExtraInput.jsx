@@ -1,15 +1,20 @@
 import { forwardRef, useEffect } from "react";
 
-const ExtraInput = forwardRef(({currentElement, listItems, setListItems, dialogRef}, ref) =>{
+const ExtraInput = forwardRef(({currentElement, listItems, setListItems, dialogRef, setTableData, tableItems}, ref) =>{
 
     useEffect(() => {
-        if (currentElement?.component.type.name === "List") {
-        dialogRef.current.querySelector('#content').value = JSON.stringify(listItems)
         dialogRef.current.querySelector('#hiddenContent').removeAttribute('disabled')
-        dialogRef.current.querySelector('#hiddenContent').value = JSON.stringify(listItems)
         dialogRef.current.querySelector('#content').setAttribute('disabled', 'true')
+
+        if (currentElement?.component.type.name === "List") {
+            dialogRef.current.querySelector('#content').value = JSON.stringify(listItems)
+            dialogRef.current.querySelector('#hiddenContent').value = JSON.stringify(listItems)
         }
-    },[listItems])
+        if(currentElement?.component.type.name === "Table"){
+            dialogRef.current.querySelector('#content').value = JSON.stringify(tableItems)
+            dialogRef.current.querySelector('#hiddenContent').value = JSON.stringify(tableItems)
+        }
+    },[listItems, tableItems])
 
     const handleSubmit = (e) => {
         e.preventDefault()
@@ -18,10 +23,18 @@ const ExtraInput = forwardRef(({currentElement, listItems, setListItems, dialogR
         const data = Object.fromEntries(formData.entries())
 
         const rows = Number(data.rows)
+        const columns = Number(data.cols)
 
         if(currentElement.component.type.name === 'List'){
             setListItems(Array.from({ length: rows }, (_, i) => `Item${i + 1}`));
         }
+
+        if (currentElement?.component.type.name === "Table") {
+            const headers = Array.from({ length: columns }, (_, i) => `Item${i + 1}`);
+            const emptyRows = Array.from({ length: rows - 1 }, () => Array(columns).fill(""));
+        
+            setTableData([headers, ...emptyRows]);
+          }
 
         ref.current.close()
     }
