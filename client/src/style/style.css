@@ -21,7 +21,7 @@ html {
   border-radius: 15px;
   position: fixed;
   top: 10px;
-  z-index: 2;
+  z-index: 90;
 }
 .left {
   left: -12.5%;
@@ -101,6 +101,11 @@ html {
   position: absolute;
   left: 15px;
   top: 3px;
+}
+
+#bgColor+.maxWidth{
+width: 100px;
+max-width: 120px;
 }
 
 .editorContainer {

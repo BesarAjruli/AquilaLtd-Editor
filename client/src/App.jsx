@@ -10,7 +10,6 @@ import { Icon } from '@iconify-icon/react';
 import Toolbar from './Components/Toolbar';
 import Loading from './Components/Loading';
 import ExtraInput from './Components/Dialogs/ExtraInput'
-import { tr } from 'date-fns/locale';
 
 const Text = ({style, content}) => <span className='edit' style={style}>{content}</span>;
 const Button = ({style, content}) => <button className='edit' style={style}>{content}</button>;
@@ -39,7 +38,6 @@ const Menu = ({style}) => <img className='edit' style={style} src='https://img.i
 const Icons = ({style, content}) => <Icon className='edit' icon={`mdi-light:${content}`} style={style}/>
 const Table = ({style, content}) => {
   const tableItems = JSON.parse(content)
-  console.log(content)
   return(
     <div className='edit' style={style}>
       <table border={1} style={{pointerEvents: 'none'}}>
@@ -63,6 +61,7 @@ const Table = ({style, content}) => {
     </div>
   )
 }
+const Calendar = ({style}) => <img className='edit' style={style} src="https://www.figma.com/community/resource/e155ded4-5d35-4474-93ef-a8c53f619ca3/thumbnail" alt="calendar" />
 
 export default function App() {
   const [elements, setElements] = useState([]);
@@ -143,98 +142,97 @@ if(mediaQuery.matches){
   const addElement = (Component) => {
     const id = uniqueId();
     const newElement = {
-      id,
-      component: <Component key={id} style={{}} content='' />,
-      style: {},
-      page: currentPage,
-    }
-    setCurrentElement(newElement)
+        id,
+        component: <Component key={id} style={{}} content='' />,
+        style: {},
+        page: currentPage,
+    };
+    setCurrentElement(newElement);
 
-    if(currentElement){
-      const type = currentElement.component.type.name
-    const content = dialogRef.current.querySelector('#content')
-    const contentLabel = dialogRef.current.querySelector('label[for="content"]')
-    const imageContent = dialogRef.current.querySelector('#imageContent')
-    const imgContLabel = dialogRef.current.querySelector('label[for="imageContent"]') 
-    dialogRef.current.querySelector('.deleteButton').setAttribute('disabled', 'true')
-    dialogRef.current.querySelector('#content').removeAttribute('disabled')
-      dialogRef.current.querySelector('#width').removeAttribute('disabled')
-      dialogRef.current.querySelector('#height').removeAttribute('disabled')
-      dialogRef.current.querySelector('#borderWidth').removeAttribute('disabled')
-      dialogRef.current.querySelector('#borderRadius').removeAttribute('disabled')
-      dialogRef.current.querySelector('#fontSize').removeAttribute('disabled')
-      dialogRef.current.querySelector('#imageContent').removeAttribute('disabled')
-      dialogRef.current.querySelector('#hiddenContent').setAttribute('disabled', 'true')
-      dialogRef.current.querySelector('.advSettings').style.display = 'none'
+    if (!currentElement) return;
 
-    if( type === 'ImageCmp'){
-      content.style.display = 'none'
-      contentLabel.style.display = 'none'
+    const dialog = dialogRef.current;
+    const type = currentElement.component.type.name;
 
-      imageContent.style.display = 'block'
-      imgContLabel.style.display = 'block'
-    }else{
-      imageContent.style.display = 'none'
-      imgContLabel.style.display = 'none'
+    // Store references to commonly used elements
+    const content = dialog.querySelector('#content');
+    const contentLabel = dialog.querySelector('label[for="content"]');
+    const imageContent = dialog.querySelector('#imageContent');
+    const imgContLabel = dialog.querySelector('label[for="imageContent"]');
 
-      content.style.display = 'block'
-      contentLabel.style.display = 'block'
-    }
+    // Disable delete button and enable relevant input fields
+    dialog.querySelector('.deleteButton').setAttribute('disabled', 'true');
+    dialog.querySelectorAll('#content, #width, #height, #borderWidth, #borderRadius, #fontSize, #imageContent')
+        .forEach(el => el.removeAttribute('disabled'));
+    dialog.querySelector('#hiddenContent').setAttribute('disabled', 'true');
+    dialog.querySelector('.advSettings').style.display = 'none';
 
-    switch(type){
-      
-      case 'Button': 
-      dialogRef.current.querySelector('#height').value = 30
-      dialogRef.current.querySelector('#bgColor').value = '#94c3df'
-      dialogRef.current.querySelector('#fontColor').value = '#ffffff'
-      break;
-      case 'Input': 
-      dialogRef.current.querySelector('#width').value = 120
-      dialogRef.current.querySelector('#height').value = 25
-      dialogRef.current.querySelector('#bgColor').value = '#e9e0e9'
-      dialogRef.current.querySelector('#borderWidth').value = 1
-      dialogRef.current.querySelector('#borderRadius').value = 15
-      dialogRef.current.querySelector('#borderColor').value = '#c2c2c2';
-      break;
-      case 'Link':
-        dialogRef.current.querySelector('#fontColor').value = '#0000EE';
-        break;
-      case 'Menu':
-        dialogRef.current.querySelector('#width').value = 30
-        dialogRef.current.querySelector('#height').value = 30
-        break;
-      case 'Icons':
-        dialogRef.current.querySelector('#content').value = iconConent
-        dialogRef.current.querySelector('#hiddenContent').removeAttribute('disabled')
-        dialogRef.current.querySelector('#hiddenContent').value = iconConent
-        dialogRef.current.querySelector('#content').setAttribute('disabled', 'true')
-        dialogRef.current.querySelector('#width').setAttribute('disabled', 'true')
-        dialogRef.current.querySelector('#height').setAttribute('disabled', 'true')
-        dialogRef.current.querySelector('#fontSize').value = 50
-        break;
-      case 'List':
-        dialogRef.current.querySelector('#content').value = JSON.stringify(listItems)
-        dialogRef.current.querySelector('#hiddenContent').removeAttribute('disabled')
-        dialogRef.current.querySelector('#hiddenContent').value = JSON.stringify(listItems)
-        dialogRef.current.querySelector('#content').setAttribute('disabled', 'true')
-        break;
-      case 'Table':
-        dialogRef.current.querySelector('#content').value = JSON.stringify(tableItems)
-        dialogRef.current.querySelector('#hiddenContent').removeAttribute('disabled')
-        dialogRef.current.querySelector('#hiddenContent').value = JSON.stringify(tableItems)
-        dialogRef.current.querySelector('#content').setAttribute('disabled', 'true')
-        break;
-      default:
-        dialogRef.current.querySelector('#width').value = 100
-        dialogRef.current.querySelector('#height').value = 50
+    // Toggle content visibility based on element type
+    const isImage = type === 'ImageCmp';
+    content.style.display = isImage ? 'none' : 'block';
+    contentLabel.style.display = isImage ? 'none' : 'block';
+    imageContent.style.display = isImage ? 'block' : 'none';
+    imgContLabel.style.display = isImage ? 'block' : 'none';
+
+    // Helper function to set values in input fields
+    const setValues = (values) => {
+        Object.entries(values).forEach(([selector, value]) => {
+            dialog.querySelector(selector).value = value;
+        });
+    };
+
+    // Apply settings based on component type
+    switch (type) {
+        case 'Button':
+            setValues({
+                '#height': 30,
+                '#bgColor': '#94c3df',
+                '#fontColor': '#ffffff',
+            });
+            break;
+        case 'Input':
+            setValues({
+                '#width': 120,
+                '#height': 25,
+                '#bgColor': '#e9e0e9',
+                '#borderWidth': 1,
+                '#borderRadius': 15,
+                '#borderColor': '#c2c2c2',
+            });
+            break;
+        case 'Link':
+            dialog.querySelector('#fontColor').value = '#0000EE';
+            break;
+        case 'Menu':
+            setValues({ '#width': 30, '#height': 30 });
+            break;
+        case 'Icons':
+            setValues({ '#content': iconConent, '#hiddenContent': iconConent, '#fontSize': 50 });
+            dialog.querySelector('#hiddenContent').removeAttribute('disabled');
+            dialog.querySelectorAll('#content, #width, #height').forEach(el => el.setAttribute('disabled', 'true'));
+            break;
+        case 'List':
+            setValues({ '#content': JSON.stringify(listItems), '#hiddenContent': JSON.stringify(listItems) });
+            dialog.querySelector('#hiddenContent').removeAttribute('disabled');
+            dialog.querySelector('#content').setAttribute('disabled', 'true');
+            break;
+        case 'Table':
+            setValues({ '#content': JSON.stringify(tableItems), '#hiddenContent': JSON.stringify(tableItems) });
+            dialog.querySelector('#hiddenContent').removeAttribute('disabled');
+            dialog.querySelector('#content').setAttribute('disabled', 'true');
+            break;
+        default:
+            setValues({ '#width': 100, '#height': 50 });
     }
 
-    dialogRef.current.querySelector('.duplicate').style.display = 'none'
-    dialogRef.current.querySelector('.layersCOntainer').style.display = 'none'
+    // Hide duplication & layers container
+    dialog.querySelector('.duplicate').style.display = 'none';
+    dialog.querySelector('.layersCOntainer').style.display = 'none';
 
-    dialogRef.current.showModal()
-    }
-  };
+    // Show modal dialog
+    dialog.showModal();
+};
+
 
   const handleDragStart = (id, e) => {
     e.preventDefault();
@@ -245,9 +243,9 @@ if(mediaQuery.matches){
   let isLongClick = false;
 
     const elementIndex = elements.findIndex((el) => el.id === id);
-    const crntElement = elements[elementIndex];
-
     if (elementIndex === -1) return;
+
+    const crntElement = elements[elementIndex];
 
     const element = e.target
     const rect = element.getBoundingClientRect();
@@ -426,105 +424,99 @@ const createGuideContainer = () => {
   return container;
 };
 
-  const changeStyle = (id, e) => {
-    e.preventDefault()
-    e.stopPropagation();
-    dialogRef.current.querySelector('#hiddenContent').setAttribute('disabled', 'true')
-    dialogRef.current.querySelector('#width').removeAttribute('disabled')
-    dialogRef.current.querySelector('#height').removeAttribute('disabled')
-    dialogRef.current.querySelector('#autoW').value = 0
-    dialogRef.current.querySelector('#autoH').value = 0
-    if(e.target.tagName === 'IMG'){
-      dialogRef.current.querySelector('#content').style.display = 'none'
-      dialogRef.current.querySelector('label[for="content"]').style.display = 'none'
-      dialogRef.current.querySelector('label[for="imageContent"]').style.display = 'block'
-      dialogRef.current.querySelector('#imageContent').style.display = 'block'
-      setImageSrc(e.target.src)
-    } else{
-      dialogRef.current.querySelector('#imageContent').style.display = 'none'
-      dialogRef.current.querySelector('label[for="imageContent"]').style.display = 'none'
-      dialogRef.current.querySelector('#content').style.display = 'block'
-      dialogRef.current.querySelector('label[for="content"]').style.display = 'block'
-      dialogRef.current.querySelector('#content').value = e.target.textContent
-    }
-    if(e.target.tagName === 'INPUT'){
-      dialogRef.current.querySelector('#content').value = e.target.placeholder
-    }
-    if(e.target.children[0] && e.target.children[0].tagName === 'UL'){
-      dialogRef.current.querySelector('.advSettings').style.display = 'block'
-      dialogRef.current.querySelector('#content').value = JSON.stringify(listItems)
-      dialogRef.current.querySelector('#hiddenContent').value = JSON.stringify(listItems)
-      extraInptRef.current.querySelector('#cols').setAttribute('disabled', 'true')
-      extraInptRef.current.querySelector('#rows').value = 2
-    }else if(e.target.children[0].tagName === 'TABLE'){
-      dialogRef.current.querySelector('.advSettings').style.display = 'block'
-      dialogRef.current.querySelector('#content').value = JSON.stringify(tableItems)
-      dialogRef.current.querySelector('#hiddenContent').value = JSON.stringify(tableItems)
-      extraInptRef.current.querySelector('#cols').value = 2
-      extraInptRef.current.querySelector('#rows').value = 2
-      extraInptRef.current.querySelector('#cols').removeAttribute('disabled')
+const changeStyle = (id, e) => {
+  e.preventDefault();
+  e.stopPropagation();
 
-    } else{
-      dialogRef.current.querySelector('.advSettings').style.display = 'none'
-      extraInptRef.current.querySelector('#cols').removeAttribute('disabled')
-    }
-    dialogRef.current.querySelector('#width').value = parseInt(e.target.style.width)
-    dialogRef.current.querySelector('#height').value = parseInt(e.target.style.height)
-    dialogRef.current.querySelector('#fontSize').value = parseInt(e.target.style.fontSize)
-    dialogRef.current.querySelector('#fontColor').value = rgbToHex(e.target.style.color)
-    dialogRef.current.querySelector('#bgColor').value = rgbToHex(e.target.style.backgroundColor)
-    dialogRef.current.querySelector('#borderWidth').value = parseInt(e.target.style.borderWidth)
-    dialogRef.current.querySelector('#borderRadius').value = parseInt(e.target.style.borderRadius)
-    dialogRef.current.querySelector('#borderColor').value = rgbToHex(e.target.style.borderColor)
+  const dialog = dialogRef.current;
+  const extraInputs = extraInptRef.current;
+  const target = e.target;
+  const isImage = target.tagName === 'IMG';
+  const isInput = target.tagName === 'INPUT';
+  const hasUL = target.children[0]?.tagName === 'UL';
+  const hasTable = target.children[0]?.tagName === 'TABLE';
+  const isIcon = target.tagName === 'ICONIFY-ICON';
+  const isEditor = id.startsWith('editor');
+  
+  // Disable/enable appropriate fields
+  dialog.querySelector('#hiddenContent').setAttribute('disabled', 'true');
+  dialog.querySelector('#width').removeAttribute('disabled');
+  dialog.querySelector('#height').removeAttribute('disabled');
+  dialog.querySelector('#autoW').value = 0;
+  dialog.querySelector('#autoH').value = 0;
 
-    setChangingStyle({changing: true, id})
+  // Handle image-specific content toggling
+  if (isImage) {
+      dialog.querySelector('#content').style.display = 'none';
+      dialog.querySelector('label[for="content"]').style.display = 'none';
+      dialog.querySelector('label[for="imageContent"]').style.display = 'block';
+      dialog.querySelector('#imageContent').style.display = 'block';
+      setImageSrc(target.src);
+  } else {
+      dialog.querySelector('#imageContent').style.display = 'none';
+      dialog.querySelector('label[for="imageContent"]').style.display = 'none';
+      dialog.querySelector('#content').style.display = 'block';
+      dialog.querySelector('label[for="content"]').style.display = 'block';
+      dialog.querySelector('#content').value = isInput ? target.placeholder : target.textContent;
+  }
+  
+  // Handle list and table elements
+  if (hasUL || hasTable) {
+      dialog.querySelector('.advSettings').style.display = 'block';
+      const data = hasUL ? JSON.stringify(listItems) : JSON.stringify(tableItems);
+      dialog.querySelector('#content').value = data;
+      dialog.querySelector('#hiddenContent').value = data;
+      extraInputs.querySelector('#cols').setAttribute('disabled', 'true');
+      extraInputs.querySelector('#rows').value = 2;
+      if (hasTable) extraInputs.querySelector('#cols').removeAttribute('disabled');
+  } else {
+      dialog.querySelector('.advSettings').style.display = 'none';
+      extraInputs.querySelector('#cols').removeAttribute('disabled');
+  }
 
-    if(!id.startsWith('editor')) {
-      if(e.target.tagName === 'ICONIFY-ICON'){
-        dialogRef.current.querySelector('#content').setAttribute('disabled', 'true')
-        dialogRef.current.querySelector('#width').setAttribute('disabled', 'true')
-        dialogRef.current.querySelector('#height').setAttribute('disabled', 'true')
-    } else if(e.target.children[0] && (e.target.children[0].tagName === 'UL' || e.target.children[0].tagName === 'TABLE')){
-      dialogRef.current.querySelector('#hiddenContent').removeAttribute('disabled')
-      dialogRef.current.querySelector('#content').setAttribute('disabled', 'true')
-    } else {
-      dialogRef.current.querySelector('#content').removeAttribute('disabled')
-      dialogRef.current.querySelector('#width').removeAttribute('disabled')
-      dialogRef.current.querySelector('#height').removeAttribute('disabled')
-    }
-      dialogRef.current.querySelector('#borderWidth').removeAttribute('disabled')
-      dialogRef.current.querySelector('#borderRadius').removeAttribute('disabled')
-      dialogRef.current.querySelector('#fontSize').removeAttribute('disabled')
-      dialogRef.current.querySelector('#imageContent').removeAttribute('disabled')
-      dialogRef.current.querySelector('.deleteButton').removeAttribute('disabled')
+  // Set style properties
+  const setStyleValue = (selector, value) => {
+      dialog.querySelector(selector).value = parseInt(value) || '';
+  };
+  
+  setStyleValue('#width', target.style.width);
+  setStyleValue('#height', target.style.height);
+  setStyleValue('#fontSize', target.style.fontSize);
+  setStyleValue('#borderWidth', target.style.borderWidth);
+  setStyleValue('#borderRadius', target.style.borderRadius);
+  setStyleValue('#opacity', target.style.opacity * 100)
+  dialog.querySelector('#fontColor').value = rgbToHex(target.style.color);
+  dialog.querySelector('#bgColor').value = rgbToHex(target.style.backgroundColor);
+  dialog.querySelector('#borderColor').value = rgbToHex(target.style.borderColor);
+
+  setChangingStyle({ changing: true, id });
+
+  if (!isEditor) {
+      if (isIcon) {
+          dialog.querySelectorAll('#content, #width, #height').forEach(el => el.setAttribute('disabled', 'true'));
+      } else if (hasUL || hasTable) {
+          dialog.querySelector('#hiddenContent').removeAttribute('disabled');
+          dialog.querySelector('#content').setAttribute('disabled', 'true');
+      } else {
+          dialog.querySelectorAll('#content, #width, #height').forEach(el => el.removeAttribute('disabled'));
+      }
+      dialog.querySelectorAll('#borderWidth, #borderRadius, #fontSize, #imageContent, .deleteButton, #opacity, #borderColor, .maxWidth ').forEach(el => el.removeAttribute('disabled'));
+
       const elementToUpdate = elements.find(element => element.id === id);
-      dialogRef.current.querySelector('.duplicate').style.display = 'block'
-      dialogRef.current.querySelector('.layersCOntainer').style.display = 'flex'
-    if (elementToUpdate) {
-      setCurrentElement({
-         id,
-         component: elementToUpdate.component,
-         style: elementToUpdate.style
-    });
-  } 
-} else if(id.startsWith( 'editor')){
-  dialogRef.current.querySelector('#content').setAttribute('disabled', 'true')
-  dialogRef.current.querySelector('#width').setAttribute('disabled', 'true')
-  dialogRef.current.querySelector('#borderWidth').setAttribute('disabled', 'true')
-  dialogRef.current.querySelector('#borderRadius').setAttribute('disabled', 'true')
-  dialogRef.current.querySelector('#fontSize').setAttribute('disabled', 'true')
-  dialogRef.current.querySelector('#imageContent').setAttribute('disabled', 'true')
-  dialogRef.current.querySelector('.deleteButton').setAttribute('disabled', 'true')
+      dialog.querySelector('.duplicate').style.display = 'block';
+      dialog.querySelector('.layersCOntainer').style.display = 'flex';
+      
+      if (elementToUpdate) {
+          setCurrentElement({ id, component: elementToUpdate.component, style: elementToUpdate.style });
+      }
+  } else {
+      // Disable fields for editor elements
+      dialog.querySelectorAll('#content, #width, #borderWidth, #borderRadius, #fontSize, #imageContent, .deleteButton, #opacity, #borderColor, .maxWidth ').forEach(el => el.setAttribute('disabled', 'true'));
+      setCurrentElement({ id, component: editorRef.current, style: editorRef.current.style });
+  }
 
-  setCurrentElement({
-      id,
-      component: editorRef.current,
-      style: editorRef.current.style
-    })
-  }
-    
-    dialogRef.current.showModal()
-  }
+  dialog.showModal();
+};
 
   const closeDialog = () => {
     dialogRef.current.querySelector('form').reset()
@@ -533,7 +525,7 @@ const createGuideContainer = () => {
 
   function rgbToHex(rgb) {
     // Extract the individual RGB values using a more robust regular expression
-    if(!rgb){
+    if(!rgb || rgb === 'transparent'){
       return
     }
     var match = rgb.match(/\d+/g);
@@ -902,6 +894,7 @@ const handleMobileContextMenu = (id, e) => {
           </svg>
         </div>
         <div title='Table' onClick={() => addElement(Table)}><img src="https://img.icons8.com/officel/60/table-1.png" alt="table" /></div>
+        <div title='Calendar' onClick={() => addElement(Calendar)}><img src='https://img.icons8.com/color/60/calendar--v1.png'/></div>
 
         <div className='dots rightDots'>
             <div></div>

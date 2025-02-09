@@ -11,7 +11,7 @@ const EditorDialog = forwardRef(({
 
       const [layer, setLayer]= useState(null)
 
-      let clicksW = 0, clicksH = 0
+      let clicksW = 0, clicksH = 0, clicksT = 0
 
   const setWidthMax = (e) => {
     e.preventDefault()
@@ -46,6 +46,19 @@ const EditorDialog = forwardRef(({
       }
     }
   }
+  const setTransparent = (e) => {
+    e.preventDefault()
+
+    if(clicksT === 0){
+      ref.current.querySelector('#bgColor').setAttribute('disabled', 'true')
+      ref.current.querySelector('#transparent').value = 1
+      clicksT+=2
+    } else{
+      ref.current.querySelector('#bgColor').removeAttribute('disabled')
+      ref.current.querySelector('#transparent').value = 0
+      clicksT = 0
+    }
+  }
 
   const bringForward = () => {
     let layers = layer ?? parseInt(currentElement.style.zIndex)
@@ -71,21 +84,23 @@ const EditorDialog = forwardRef(({
     e.preventDefault()
     const formData = new FormData(e.target)
     const data = Object.fromEntries(formData.entries())
+    console.log(data)
 
     const formattedStyle = {
         width: parseInt(data.autoW ) === 0 ? data.width + 'px' : 'auto',
         height: parseInt(data.autoH) === 0 ? data.height + 'px' : 'auto',
         color: data.fontColor,
-        backgroundColor: data.bgColor,
+        backgroundColor: parseInt(data.transparent) === 0 ? data.bgColor : 'transparent',
         fontSize: data.fontSize + 'px',
         borderWidth: data.borderWidth + 'px',
         borderRadius: data.borderRadius + 'px',
         borderColor: data.borderColor,
+        borderStyle: 'solid',
         position: currentElement.id.startsWith('editor') ? 'relative' : 'absolute',
         left: currentElement.id.startsWith('editor') && chngStyle.changing === true ? 0 : currentElement.style.left || 0,
         top: currentElement.id.startsWith('editor') ? 0 : currentElement.style.top || 0,
         zIndex: chngStyle.changing ? layer ?? currentElement.style.zIndex : elements.length ,
-        opacity: data.opacity / 100
+        opacity: parseInt(data.opacity) / 100,
         }
         
         if (currentElement && !currentElement.id.startsWith('editor')) {
@@ -176,7 +191,11 @@ const EditorDialog = forwardRef(({
     <input type="color" name="fontColor" id="fontColor" />
     
     <label htmlFor="bgColor">Background Color:</label>
-    <input type="color" name="bgColor" id="bgColor" defaultValue="#ffffff"/>
+    <div>
+      <input type="color" name="bgColor" id="bgColor" defaultValue="#ffffff"/>
+      <button className="maxWidth" onClick={(e) => setTransparent(e)}>Transparent</button>
+      <input type="hidden" name="transparent" id="transparent"  defaultValue={0}/>
+    </div>
     
     <label htmlFor="borderWidth">Border Width:</label>
     <input type="number" name="borderWidth" id="borderWidth" min={0} defaultValue={0}/>
