@@ -84,7 +84,6 @@ const EditorDialog = forwardRef(({
     e.preventDefault()
     const formData = new FormData(e.target)
     const data = Object.fromEntries(formData.entries())
-    console.log(data)
 
     const formattedStyle = {
         width: parseInt(data.autoW ) === 0 ? data.width + 'px' : 'auto',

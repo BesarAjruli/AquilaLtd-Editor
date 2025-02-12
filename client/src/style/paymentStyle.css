@@ -1,0 +1,67 @@
+.paymentBody{
+    background-color: #1f1f1f;
+    color: #fff;
+    width: 100%;
+    height: 100vh;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    place-items: center;
+    justify-content: center;
+}
+.paymentBody div{
+    background-color: #333;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+    height: 250px;
+    width: 350px;
+    border-radius: 10px;
+    display: flex;
+    justify-content: center;
+    place-items: center;
+    color: #999;
+    flex-direction: column;
+    padding: 0 30px;
+}
+.paymentBody div:hover{
+    background-color: #464646;
+    scale: 110%;
+}
+.paymentBody div button {
+    margin: 10px;
+    height: auto;
+    background: transparent;
+    padding: 0;
+    border: none;
+    cursor: pointer;
+  }
+  
+  .paymentBody div button {
+    --border-right: 6px;
+    --text-stroke-color: rgba(255,255,255,0.5);
+    --animation-color: #37FF8B;
+    --fs-size: 1.7em;
+    letter-spacing: 3px;
+    text-decoration: none;
+    font-size: var(--fs-size);
+    font-family: "Arial";
+    position: relative;
+    text-transform: uppercase;
+    color: transparent;
+    -webkit-text-stroke: 1px var(--text-stroke-color);
+  }
+  .hover-text {
+    position: absolute;
+    box-sizing: border-box;
+    content: attr(data-text);
+    color: var(--animation-color);
+    width: 0%;
+    inset: 0;
+    border-right: var(--border-right) solid var(--animation-color);
+    overflow: hidden;
+    transition: 0.5s;
+    -webkit-text-stroke: 1px var(--animation-color);
+  }
+
+  .paymentBody div button:hover .hover-text {
+    width: 100%;
+    filter: drop-shadow(0 0 23px var(--animation-color))
+  }

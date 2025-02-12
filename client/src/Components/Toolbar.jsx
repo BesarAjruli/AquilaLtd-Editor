@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 const Toolbar = ({ 
     historyIndex, saveDesign, saveTempRef, templatesRef,
@@ -8,6 +9,7 @@ const Toolbar = ({
 
   const [pages, setPage] = useState([1])
   const mediaQuery = window.matchMedia('(max-width: 768px)');
+  const navigate = useNavigate()
 
     const undoFunction = () => {
         if (historyIndex > 0) {
@@ -25,6 +27,11 @@ const Toolbar = ({
 
       const addNewPage = () => {
         setPage((prevPages) => {
+          const currentPages = prevPages || 0; // Ensure prevPages is treated as a number
+          if (currentPages >= 3) {
+            navigate('/payment')
+            return currentPages; // Return currentPages without change if limit is reached
+          }
           const nextPage = parseInt(prevPages) + 1;
           setCurrentPage(nextPage);
           return nextPage;

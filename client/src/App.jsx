@@ -15,7 +15,7 @@ const Text = ({style, content}) => <span className='edit' style={style}>{content
 const Button = ({style, content}) => <button className='edit' style={style}>{content}</button>;
 const Input = ({style, content}) => <input className='edit' style={style} type="text" placeholder={content}/>;
 const ImageCmp = ({style, content}) => <img className='edit' style={style} src={content || "https://img.icons8.com/skeuomorphism/64/image.png"} alt="Picture" />;
-const Video = ({style}) => <img className='edit' style={style} src="https://img.icons8.com/skeuomorphism/64/video.png" alt="Video" />;
+const Video = ({style}) => <img className='edit' style={style} src="https://play-lh.googleusercontent.com/lVNP5YVLH630fs0oQunDStVjtZBmV3ZGyjvH1MOj6xINVBmxJyNszQx2_ky6_5GBLkH5=w526-h296-rw" alt="Video" />;
 const Audio = ({style}) => <img className='edit' style={style} src="https://png.pngtree.com/png-vector/20230408/ourmid/pngtree-sound-waves-equalizer-audio-radio-signal-music-recording-vector-png-image_6678910.png" alt="audio" />;
 const Gallery = ({style}) => <img className='edit' style={style} src="https://t3.ftcdn.net/jpg/04/19/92/88/360_F_419928833_w7HrdbjTCl1zGIBY1YljW6feoWx90ETm.jpg" alt="Gallery" />;
 const Section = ({style}) => <div className='edit' style={style}></div>;
@@ -87,6 +87,8 @@ export default function App() {
     ["", ""],
     ["", ""] 
   ]);
+  const [shouldRunEffect, setShouldRunEffect] = useState(false);
+
   const SNAP_THRESHOLD = 10;
   const GRID_SIZE = 50;
 
@@ -148,8 +150,11 @@ if(mediaQuery.matches){
         page: currentPage,
     };
     setCurrentElement(newElement);
+    setShouldRunEffect(true);
+};
 
-    if (!currentElement) return;
+  useEffect(() => {
+    if (!currentElement || !shouldRunEffect) return;
 
     const dialog = dialogRef.current;
     const type = currentElement.component.type.name;
@@ -177,6 +182,7 @@ if(mediaQuery.matches){
     // Helper function to set values in input fields
     const setValues = (values) => {
         Object.entries(values).forEach(([selector, value]) => {
+            console.log(selector, value)
             dialog.querySelector(selector).value = value;
         });
     };
@@ -221,6 +227,18 @@ if(mediaQuery.matches){
             dialog.querySelector('#hiddenContent').removeAttribute('disabled');
             dialog.querySelector('#content').setAttribute('disabled', 'true');
             break;
+        case "Video":
+          setValues({
+            '#width': 520,
+            '#height': 250,
+          })
+          break;
+        case "Calendar":
+          setValues({
+            '#width': 520,
+            '#height': 250,
+          })
+          break;
         default:
             setValues({ '#width': 100, '#height': 50 });
     }
@@ -231,7 +249,7 @@ if(mediaQuery.matches){
 
     // Show modal dialog
     dialog.showModal();
-};
+  }, [currentElement, shouldRunEffect])
 
 
   const handleDragStart = (id, e) => {
@@ -865,8 +883,6 @@ const handleMobileContextMenu = (id, e) => {
         <hr />
         <div className='audio' title='Audio' onClick={() => addElement(Audio)}><img src="https://img.icons8.com/skeuomorphism/64/circled-play.png" alt="audio" /></div>
         <hr />
-        <div className='gallery' title='Gallery' onClick={() => addElement(Gallery)}><img src="https://img.icons8.com/skeuomorphism/64/stack-of-photos.png" alt="gallery" /></div>
-        <hr />
         <div className='section' title='Section (Header,footer...)' onClick={() => addElement(Section)}></div>
         <hr />
         <div className='link' title='Link' onClick={() => addElement(Link)}>https://link.com</div>
@@ -893,6 +909,7 @@ const handleMobileContextMenu = (id, e) => {
 	          <path fill="currentColor" d="M5 13v-1h6V6h1v6h6v1h-6v6h-1v-6z" />
           </svg>
         </div>
+        <div className='gallery' title='Gallery' onClick={() => addElement(Gallery)}><img src="https://img.icons8.com/skeuomorphism/64/stack-of-photos.png" alt="gallery" /></div>
         <div title='Table' onClick={() => addElement(Table)}><img src="https://img.icons8.com/officel/60/table-1.png" alt="table" /></div>
         <div title='Calendar' onClick={() => addElement(Calendar)}><img src='https://img.icons8.com/color/60/calendar--v1.png'/></div>
 
