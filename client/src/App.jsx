@@ -182,7 +182,6 @@ if(mediaQuery.matches){
     // Helper function to set values in input fields
     const setValues = (values) => {
         Object.entries(values).forEach(([selector, value]) => {
-            console.log(selector, value)
             dialog.querySelector(selector).value = value;
         });
     };
@@ -240,7 +239,7 @@ if(mediaQuery.matches){
           })
           break;
         default:
-            setValues({ '#width': 100, '#height': 50 });
+          setValues({ '#width': 100, '#height': 50 });
     }
 
     // Hide duplication & layers container
@@ -249,6 +248,7 @@ if(mediaQuery.matches){
 
     // Show modal dialog
     dialog.showModal();
+    setShouldRunEffect(false);
   }, [currentElement, shouldRunEffect])
 
 
