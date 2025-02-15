@@ -199,7 +199,7 @@ app.delete('/api/remove-todo/:id', async (req, res) => {
   res.json(response)
   })
   //Update thumbnail
-  app.put('/api/update-todo/:id', async (req, res) => {
+app.put('/api/update-todo/:id', async (req, res) => {
     const id = req.params.id
     await prisma.toDo.update({
       where: { id: parseInt(id) },
@@ -209,7 +209,15 @@ app.delete('/api/remove-todo/:id', async (req, res) => {
     })
     const response = await prisma.template.findMany()
     res.json(response)
-  })
+})
+
+//Payment processing
+app.post('/api/payment', (req, res) => {
+  console.log('Headers:', req.headers);
+  console.log('Body:', req.body);
+
+  res.status(200).set('Content-Type', 'text/plain').send('SUCCESS');
+})
   
 
 //Passport
