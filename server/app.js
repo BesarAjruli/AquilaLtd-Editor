@@ -30,7 +30,7 @@ cloudinary.config({
 });
 
 app.use(cors({
-    origin: ['http://localhost:5173', 'https://aquila-editor.up.railway.app'],
+    origin: ['http://localhost:5173', 'https://aquila-editor.web.app'],
     methods: 'GET,POST,PUT,DELETE',
     allowedHeaders: 'Content-Type,Authorization',
     credentials: true,
