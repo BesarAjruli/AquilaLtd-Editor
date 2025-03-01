@@ -10,6 +10,7 @@ import { Icon } from '@iconify-icon/react';
 import Toolbar from './Components/Toolbar';
 import Loading from './Components/Loading';
 import ExtraInput from './Components/Dialogs/ExtraInput'
+import { Rnd } from "react-rnd";
 
 const Text = ({style, content}) => <span className='edit' style={style}>{content}</span>;
 const Button = ({style, content}) => <button className='edit' style={style}>{content}</button>;
@@ -903,7 +904,6 @@ const handleMobileContextMenu = (id, e) => {
       <div className='sideElementsBar right'>
         <div title='Pie Charts' onClick={() => addElement(Pie)}><img src="https://img.icons8.com/skeuomorphism/64/pie-chart.png" alt="pie chart" /></div>
         <div title='Charts' onClick={() => addElement(Charts)}><img src="https://img.icons8.com/skeuomorphism/64/bar-chart.png" alt="charts" /></div>
-        <div title='Menu' onClick={() => addElement(Menu)}><img src="https://img.icons8.com/material-rounded/64/menu--v1.png" alt="more menu" /></div>
         <div title='Icons' onClick={() => iconsDialog.current.showModal()}>
           <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24">
 	          <path fill="currentColor" d="M5 13v-1h6V6h1v6h6v1h-6v6h-1v-6z" />
