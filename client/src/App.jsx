@@ -90,13 +90,14 @@ export default function App() {
   ]);
   const [shouldRunEffect, setShouldRunEffect] = useState(false);
 
-  const SNAP_THRESHOLD = 10;
-  const GRID_SIZE = 50;
-
   const uniqueId = () => `element-${Date.now()}-${Math.random()}`;
   const backendUrl = import.meta.env.VITE_BACKEND_URL;
 
+  const SNAP_THRESHOLD = 10;
+  const GRID_SIZE = 50;
+
   const mediaQuery = window.matchMedia('(max-width: 768px)');
+
 
   useEffect(() => {
     async function getUser() {
@@ -142,6 +143,244 @@ if(mediaQuery.matches){
     setHistoryIndex(newHistory.length);
   };
 
+  const handleDragStart = (elId, e) => {
+    e.preventDefault()
+    e.stopPropagation()
+    const longClickThreshold = 500; // Set long click threshold to 500ms
+    let pressTimer;
+    let isLongClick = false;
+  
+    const startPress = () => {
+      pressTimer = setTimeout(() => {
+        isLongClick = true;
+        console.log('Long click detected');
+        changeStyle(elId, e); // Call changeStyle only on long click
+      }, longClickThreshold);
+    };
+  
+    const cancelPress = () => {
+      clearTimeout(pressTimer);
+      if (isLongClick) {
+        // If long click was detected, cancel it
+        isLongClick = false;
+      }
+    };
+  
+    // Start detecting the press on mouse down or touch start
+    e.preventDefault(); // Prevent default behavior to avoid conflicts with dragging
+    startPress();
+  
+    // Cancel long press if mouse or touch moves
+    const handleMove = (e) => {
+      cancelPress();
+    };
+  
+    // Listen for mouse/touch move and cancel long press
+    const handleEnd = () => {
+      cancelPress();
+      document.removeEventListener('mousemove', handleMove);
+      document.removeEventListener('mouseup', handleEnd);
+      document.removeEventListener('touchmove', handleMove);
+      document.removeEventListener('touchend', handleEnd);
+    };
+  
+    // Add move and end event listeners to detect dragging
+    document.addEventListener('mousemove', handleMove);
+    document.addEventListener('mouseup', handleEnd);
+    document.addEventListener('touchmove', handleMove);
+    document.addEventListener('touchend', handleEnd);
+  
+    // Clean up on drag end (mouse/touch)
+    const cleanup = () => {
+      cancelPress();
+      document.removeEventListener('mousemove', handleMove);
+      document.removeEventListener('mouseup', handleEnd);
+      document.removeEventListener('touchmove', handleMove);
+      document.removeEventListener('touchend', handleEnd);
+    };
+  
+    // Attach cleanup on drag end
+    e.target.addEventListener('dragend', cleanup);
+  };
+
+  const handleDragStop = (elId, e, data) => {
+    // Update the element's position
+    const updatedElements = elements.map((el) =>
+      el.id === elId ? { ...el, x: data.x, y: data.y } : el
+    );
+    
+    clearGuides();
+    setElements(updatedElements);
+    saveHistory(updatedElements); // Save the updated elements to history
+  };
+  
+  const handleResizeStop = (elId, e, direction, ref, delta, position) => {
+    // Update the element's size and position
+    const updatedElements = elements.map((el) =>
+      el.id === elId
+        ? {
+            ...el,
+            style: {
+              ...el.style,
+              width: ref.style.width,
+              height: ref.style.height,
+              x: position.x,
+              y: position.y,
+            },
+            component: React.cloneElement(el.component, {
+              style: {
+                ...el.style,
+                width: ref.style.width,
+                height: ref.style.height,
+              },
+              content: el.component.props.content,
+            }),
+            page: currentPage,
+            id: el.id,
+          }
+        : el
+    );
+  
+    setElements(updatedElements);
+    saveHistory(updatedElements); // Save the updated elements to history
+  };
+  
+  const snappingToGrid = (e, id) => {
+    e.preventDefault();
+  
+    const clientX = e.clientX || e.touches[0].clientX;
+    const clientY = e.clientY || e.touches[0].clientY;
+  
+    const elementIndex = elements.findIndex((el) => el.id === id);
+    if (elementIndex === -1) return;
+  
+    const crntElement = elements[elementIndex];
+    const element = e.target;
+    const elementContainer = element.parentElement;
+    const parent = elementContainer.parentElement;
+    const parentRect = parent.getBoundingClientRect();
+    const rect = element.getBoundingClientRect();
+  
+    let offsetX = clientX - rect.left;
+    let offsetY = clientY - rect.top;
+  
+    const parentCenterX = parentRect.width / 2;
+    const parentCenterY = parentRect.height / 2;
+  
+    let newX = clientX - offsetX;
+    let newY = clientY - offsetY;
+  
+    // Snapping to Grid
+    const snapX = Math.round(newX / GRID_SIZE) * GRID_SIZE;
+    const snapY = Math.round(newY / GRID_SIZE) * GRID_SIZE;
+  
+    if (Math.abs(newX - snapX) < SNAP_THRESHOLD) newX = snapX;
+    if (Math.abs(newY - snapY) < SNAP_THRESHOLD) newY = snapY;
+  
+    // Ensure element stays within parent boundaries
+    newX = Math.max(0, Math.min(newX, parentRect.width - rect.width));
+    newY = Math.max(0, Math.min(newY, parentRect.height - rect.height));
+  
+    // Alignment Guides
+    const guides = [];
+  
+    // Snap to other elements
+    elements.forEach((el) => {
+      if (el.id === crntElement.id) return; // Skip the current element
+  
+      const elRect = document.getElementById(el.id).getBoundingClientRect();
+  
+      // Snap to vertical edges
+      if (Math.abs(elRect.left - newX) < SNAP_THRESHOLD) {
+        newX = elRect.left;
+        guides.push({ type: 'vertical', position: elRect.left });
+      }
+      if (Math.abs(elRect.right - (newX + rect.width)) < SNAP_THRESHOLD) {
+        newX = elRect.right - rect.width;
+        guides.push({ type: 'vertical', position: elRect.right });
+      }
+  
+      // Snap to horizontal edges
+      if (Math.abs(elRect.top - newY) < SNAP_THRESHOLD) {
+        newY = elRect.top;
+        guides.push({ type: 'horizontal', position: elRect.top });
+      }
+      if (Math.abs(elRect.bottom - (newY + rect.height)) < SNAP_THRESHOLD) {
+        newY = elRect.bottom - rect.height;
+        guides.push({ type: 'horizontal', position: elRect.bottom });
+      }
+    });
+  
+    // Snap to center of the page
+    if (Math.abs(newX + rect.width / 2 - parentCenterX) < SNAP_THRESHOLD) {
+      newX = parentCenterX - rect.width / 2;
+      guides.push({ type: 'vertical', position: parentCenterX });
+    }
+    if (Math.abs(newY + rect.height / 2 - parentCenterY) < SNAP_THRESHOLD) {
+      newY = parentCenterY - rect.height / 2;
+      guides.push({ type: 'horizontal', position: parentCenterY });
+    }
+  
+    // Render guides
+    renderGuides(guides);
+  
+    // Update element position
+    const updatedElement = {
+      ...crntElement,
+      x: newX,
+      y: newY,
+    };
+  
+    const newElements = elements.map((el) => (el.id === crntElement.id ? updatedElement : el));
+    setElements(newElements);
+  };
+  
+  const renderGuides = (guides) => {
+    const guideContainer = document.getElementById('guide-container') || createGuideContainer();
+    guideContainer.innerHTML = '';
+  
+    guides.forEach((guide) => {
+      const line = document.createElement('div');
+      line.className = `guide ${guide.type}`;
+      line.style.position = 'absolute';
+      line.style.backgroundColor = 'rgba(0, 123, 255, 0.5)';
+      line.style.zIndex = '999';
+  
+      if (guide.type === 'vertical') {
+        line.style.left = `${guide.position}px`;
+        line.style.top = '0';
+        line.style.height = '100%';
+        line.style.width = '1px';
+      } else {
+        line.style.top = `${guide.position}px`;
+        line.style.left = '0';
+        line.style.width = '100%';
+        line.style.height = '1px';
+      }
+  
+      guideContainer.appendChild(line);
+    });
+  };
+  
+  const clearGuides = () => {
+    const guideContainer = document.getElementById('guide-container');
+    if (guideContainer) guideContainer.innerHTML = '';
+  };
+  
+  const createGuideContainer = () => {
+    const container = document.createElement('div');
+    container.id = 'guide-container';
+    container.style.position = 'absolute';
+    container.style.top = '0';
+    container.style.left = '0';
+    container.style.width = '100%';
+    container.style.height = '100%';
+    container.style.pointerEvents = 'none';
+    editorRef.current.appendChild(container);
+    return container;
+  };
+  
+
   const addElement = (Component) => {
     const id = uniqueId();
     const newElement = {
@@ -152,6 +391,7 @@ if(mediaQuery.matches){
     };
     setCurrentElement(newElement);
     setShouldRunEffect(true);
+    console.log(elements)
 };
 
   useEffect(() => {
@@ -252,196 +492,6 @@ if(mediaQuery.matches){
     setShouldRunEffect(false);
   }, [currentElement, shouldRunEffect])
 
-
-  const handleDragStart = (id, e) => {
-    e.preventDefault();
-    e.stopPropagation();
-
-    const longClickThreshold = 500;
-  let pressTimer;
-  let isLongClick = false;
-
-    const elementIndex = elements.findIndex((el) => el.id === id);
-    if (elementIndex === -1) return;
-
-    const crntElement = elements[elementIndex];
-
-    const element = e.target
-    const rect = element.getBoundingClientRect();
-
-    const startPress = () => {
-      pressTimer = setTimeout(() => {
-        isLongClick = true;
-        changeStyle(id, e)
-      }, longClickThreshold);
-    };
-  
-    const cancelPress = () => {
-      clearTimeout(pressTimer);
-    };
-
-    if(mediaQuery.matches){
-    document.body.style.overflow = 'hidden';
-    document.documentElement.style.overflow = 'hidden';
-  }
-    const preventScroll = (scrollEvent) => {
-      scrollEvent.preventDefault();
-    };
-
-    let offsetX = (e.clientX || e.touches[0].clientX) - rect.left;
-    let offsetY = (e.clientY || e.touches[0].clientY) - rect.top;
-    
-    element.classList.add('dragging')
-
-    startPress()
-  
-    const move = (moveEvent) => {
-      moveEvent.preventDefault()
-      cancelPress()
-      const clientX = moveEvent.clientX || moveEvent.touches[0].clientX;
-      const clientY = moveEvent.clientY || moveEvent.touches[0].clientY;
-  
-      const elementContainer = element.parentElement;
-      const parent = elementContainer.parentElement;
-      const parentRect = parent.getBoundingClientRect();
-
-      const parentCenterX = parentRect.width / 2;
-      const parentCenterY = parentRect.height / 2;
-  
-      let newX = clientX - offsetX;
-      let newY = clientY - offsetY;
-
-      // Snapping to Grid
-      const snapX = Math.round(newX / GRID_SIZE) * GRID_SIZE;
-      const snapY = Math.round(newY / GRID_SIZE) * GRID_SIZE;
-
-      if (Math.abs(newX - snapX) < SNAP_THRESHOLD) newX = snapX;
-      if (Math.abs(newY - snapY) < SNAP_THRESHOLD) newY = snapY;
-  
-      // Ensure element stays within parent boundaries
-      newX = Math.max(0, Math.min(newX, parentRect.width - rect.width));
-      newY = Math.max(0, Math.min(newY, parentRect.height - rect.height));
-
-      // Alignment Guides
-    const guides = [];
-    elements.forEach((el) => {
-      const elLeft = parseInt(el.style.left) || 0;
-      const elTop = parseInt(el.style.top) || 0;
-
-      if (Math.abs(elLeft - newX) < SNAP_THRESHOLD) {
-        newX = elLeft;
-        guides.push({ type: 'vertical', position: elLeft });
-      }
-      if (Math.abs(elTop - newY) < SNAP_THRESHOLD) {
-        newY = elTop;
-        guides.push({ type: 'horizontal', position: elTop });
-      }
-
-    });
-
-    // Algiment guides for middle of page
-    if (Math.abs(newX + rect.width / 2 - parentCenterX) < SNAP_THRESHOLD) {
-      newX = parentCenterX - rect.width / 2;
-      guides.push({ type: 'vertical', position: parentCenterX });
-    }
-    if (Math.abs(newY + rect.height / 2 - parentCenterY) < SNAP_THRESHOLD) {
-      newY = parentCenterY - rect.height / 2;
-      guides.push({ type: 'horizontal', position: parentCenterY });
-    }
-    
-
-    renderGuides(guides);
-  
-      element.style.left = `${newX}px`;
-      element.style.top = `${newY}px`;
-      const updatedStyle = {
-        ...crntElement.style,
-        left: `${newX}px`,
-        top: `${newY}px`,
-      };
-
-      const updatedElement = {
-        ...crntElement,
-        style: updatedStyle,
-        component: React.cloneElement(crntElement.component, { style: updatedStyle }),
-      };
-
-      const newElements =  elements.map((el) => el.id === crntElement.id ? updatedElement : el)
-
-      setElements(newElements);
-    };
-  
-    const endDrag = () => {
-      element.classList.remove('dragging');
-
-      document.body.style.overflow = '';
-      document.documentElement.style.overflow = '';
-
-      document.removeEventListener('mousemove', move);
-      document.removeEventListener('mouseup', endDrag);
-      document.removeEventListener('touchmove', move);
-      document.removeEventListener('touchend', endDrag);
-
-      document.removeEventListener('touchmove', preventScroll);
-
-      clearGuides();
-      saveHistory(elements);
-      cancelPress()
-    };
-  
-    document.addEventListener('mousemove', move);
-    document.addEventListener('mouseup', endDrag);
-    document.addEventListener('touchmove', move);
-    document.addEventListener('touchend', endDrag);
-
-    document.addEventListener('touchmove', preventScroll, { passive: false });
-  };
-
-  // Helper functions to render and clear guides
-const renderGuides = (guides) => {
-  const guideContainer = document.getElementById('guide-container') || createGuideContainer();
-
-  guideContainer.innerHTML = '';
-  guides.forEach((guide) => {
-    const line = document.createElement('div');
-    line.className = `guide ${guide.type}`;
-    line.style.position = 'absolute';
-    line.style.backgroundColor = 'rgba(0, 123, 255, 0.5)';
-    line.style.zIndex = '999';
-
-    if (guide.type === 'vertical') {
-      line.style.left = `${guide.position}px`;
-      line.style.top = '0';
-      line.style.height = '100%';
-      line.style.width = '1px';
-    } else {
-      line.style.top = `${guide.position}px`;
-      line.style.left = '0';
-      line.style.width = '100%';
-      line.style.height = '1px';
-    }
-
-    guideContainer.appendChild(line);
-  });
-};
-
-const clearGuides = () => {
-  const guideContainer = document.getElementById('guide-container');
-  if (guideContainer) guideContainer.innerHTML = '';
-};
-
-const createGuideContainer = () => {
-  const container = document.createElement('div');
-  container.id = 'guide-container';
-  container.style.position = 'absolute';
-  container.style.top = '0';
-  container.style.left = '0';
-  container.style.width = '100%';
-  container.style.height = '100%';
-  container.style.pointerEvents = 'none';
-  editorRef.current.appendChild(container);
-  return container;
-};
 
 const changeStyle = (id, e) => {
   e.preventDefault();
@@ -930,14 +980,25 @@ const handleMobileContextMenu = (id, e) => {
         >
          {elements.map((el) => (
           el.page === currentPage &&
-            (<div
+            (<Rnd
+              default={{
+                x: 0,
+                y: 0,
+                width: el.style.width,
+                height: el.style.height,
+              }}
+              bounds="parent"
+              onDragStart={(e) => handleDragStart(el.id, e)}
+              onDrag={(e) => snappingToGrid(e, el.id)}
+              onDragStop={(e, data) => handleDragStop(el.id, e, data)}
+              onResizeStop={(e, direction, ref, delta, position) =>
+                handleResizeStop(el.id, e, direction, ref, delta, position)
+              }
               key={el.id}
-              onMouseDown={(e) => handleDragStart(el.id, e)} 
-              onContextMenu={(e) => changeStyle(el.id, e)}
-              onTouchStart={(e) => handleDragStart(el.id, e)} 
             >
               {el.component}
-            </div>)
+            </Rnd>
+            )
           ))}
         </div>
       </div>
