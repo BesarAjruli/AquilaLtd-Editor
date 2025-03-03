@@ -32,7 +32,7 @@ const Approved = () => {
         const getThumbnails = async () => {
           setLoading(true)
           try {
-            const response = await fetch(`http://localhost:5000/api/to-do/`);
+            const response = await fetch(`${backendUrl}/api/to-do/`);
             const data = await response.json();
             const paths = data.map((element) => {
               if(!element.finished){

@@ -7,7 +7,7 @@ let imagesSet = 0
 
 const EditorDialog = forwardRef(({
     mediaQuery,duplicate,closeDialog, handleImageChange,
-    deleteElement, currentElement, chngStyle, extraEditor, elements,
+    currentElement, chngStyle, extraEditor, elements,
      imageSrc, currentPage, setImageSrc, setElements, saveHistory, setChangingStyle,
     setCurrentElement, iconsDialog, editorRef
     }, ref) => {
@@ -84,6 +84,13 @@ const EditorDialog = forwardRef(({
     }
   }  
 
+  const deleteElement = () => {
+    const newElements = elements.filter((el) => el.id !== chngStyle.id);
+    setElements(newElements);
+    saveHistory(newElements);
+    ref.current.close();
+  }
+
   const handleSubmit = (e) => {
     e.preventDefault()
     const formData = new FormData(e.target)
@@ -108,7 +115,6 @@ const EditorDialog = forwardRef(({
         
         if (currentElement && !currentElement.id.startsWith('editor')) {
           const compName = currentElement.component.type.name
-          console.log(compName)
           if( compName === 'ImageCmp'){
             if(imagesSet !== 3){
               imagesSet++

@@ -98,7 +98,6 @@ export default function App() {
 
   const mediaQuery = window.matchMedia('(max-width: 768px)');
 
-
   useEffect(() => {
     async function getUser() {
     try{
@@ -143,12 +142,22 @@ if(mediaQuery.matches){
     setHistoryIndex(newHistory.length);
   };
 
+  let offsetX, offsetY;
+
   const handleDragStart = (elId, e) => {
     e.preventDefault()
     e.stopPropagation()
+
+    const element = e.target
+    const rect = element.getBoundingClientRect();
+    offsetX = (e.clientX || e.touches[0].clientX) - rect.left;
+    offsetY = (e.clientY || e.touches[0].clientY) - rect.top;
+
     const longClickThreshold = 500; // Set long click threshold to 500ms
     let pressTimer;
     let isLongClick = false;
+
+    e.target.classList.add('dragging')
   
     const startPress = () => {
       pressTimer = setTimeout(() => {
@@ -209,7 +218,8 @@ if(mediaQuery.matches){
       el.id === elId ? { ...el, x: data.x, y: data.y } : el
     );
     
-    clearGuides();
+    e.target.classList.remove('dragging')
+
     setElements(updatedElements);
     saveHistory(updatedElements); // Save the updated elements to history
   };
@@ -245,141 +255,6 @@ if(mediaQuery.matches){
     saveHistory(updatedElements); // Save the updated elements to history
   };
   
-  const snappingToGrid = (e, id) => {
-    e.preventDefault();
-  
-    const clientX = e.clientX || e.touches[0].clientX;
-    const clientY = e.clientY || e.touches[0].clientY;
-  
-    const elementIndex = elements.findIndex((el) => el.id === id);
-    if (elementIndex === -1) return;
-  
-    const crntElement = elements[elementIndex];
-    const element = e.target;
-    const elementContainer = element.parentElement;
-    const parent = elementContainer.parentElement;
-    const parentRect = parent.getBoundingClientRect();
-    const rect = element.getBoundingClientRect();
-  
-    let offsetX = clientX - rect.left;
-    let offsetY = clientY - rect.top;
-  
-    const parentCenterX = parentRect.width / 2;
-    const parentCenterY = parentRect.height / 2;
-  
-    let newX = clientX - offsetX;
-    let newY = clientY - offsetY;
-  
-    // Snapping to Grid
-    const snapX = Math.round(newX / GRID_SIZE) * GRID_SIZE;
-    const snapY = Math.round(newY / GRID_SIZE) * GRID_SIZE;
-  
-    if (Math.abs(newX - snapX) < SNAP_THRESHOLD) newX = snapX;
-    if (Math.abs(newY - snapY) < SNAP_THRESHOLD) newY = snapY;
-  
-    // Ensure element stays within parent boundaries
-    newX = Math.max(0, Math.min(newX, parentRect.width - rect.width));
-    newY = Math.max(0, Math.min(newY, parentRect.height - rect.height));
-  
-    // Alignment Guides
-    const guides = [];
-  
-    // Snap to other elements
-    elements.forEach((el) => {
-      if (el.id === crntElement.id) return; // Skip the current element
-  
-      const elRect = document.getElementById(el.id).getBoundingClientRect();
-  
-      // Snap to vertical edges
-      if (Math.abs(elRect.left - newX) < SNAP_THRESHOLD) {
-        newX = elRect.left;
-        guides.push({ type: 'vertical', position: elRect.left });
-      }
-      if (Math.abs(elRect.right - (newX + rect.width)) < SNAP_THRESHOLD) {
-        newX = elRect.right - rect.width;
-        guides.push({ type: 'vertical', position: elRect.right });
-      }
-  
-      // Snap to horizontal edges
-      if (Math.abs(elRect.top - newY) < SNAP_THRESHOLD) {
-        newY = elRect.top;
-        guides.push({ type: 'horizontal', position: elRect.top });
-      }
-      if (Math.abs(elRect.bottom - (newY + rect.height)) < SNAP_THRESHOLD) {
-        newY = elRect.bottom - rect.height;
-        guides.push({ type: 'horizontal', position: elRect.bottom });
-      }
-    });
-  
-    // Snap to center of the page
-    if (Math.abs(newX + rect.width / 2 - parentCenterX) < SNAP_THRESHOLD) {
-      newX = parentCenterX - rect.width / 2;
-      guides.push({ type: 'vertical', position: parentCenterX });
-    }
-    if (Math.abs(newY + rect.height / 2 - parentCenterY) < SNAP_THRESHOLD) {
-      newY = parentCenterY - rect.height / 2;
-      guides.push({ type: 'horizontal', position: parentCenterY });
-    }
-  
-    // Render guides
-    renderGuides(guides);
-  
-    // Update element position
-    const updatedElement = {
-      ...crntElement,
-      x: newX,
-      y: newY,
-    };
-  
-    const newElements = elements.map((el) => (el.id === crntElement.id ? updatedElement : el));
-    setElements(newElements);
-  };
-  
-  const renderGuides = (guides) => {
-    const guideContainer = document.getElementById('guide-container') || createGuideContainer();
-    guideContainer.innerHTML = '';
-  
-    guides.forEach((guide) => {
-      const line = document.createElement('div');
-      line.className = `guide ${guide.type}`;
-      line.style.position = 'absolute';
-      line.style.backgroundColor = 'rgba(0, 123, 255, 0.5)';
-      line.style.zIndex = '999';
-  
-      if (guide.type === 'vertical') {
-        line.style.left = `${guide.position}px`;
-        line.style.top = '0';
-        line.style.height = '100%';
-        line.style.width = '1px';
-      } else {
-        line.style.top = `${guide.position}px`;
-        line.style.left = '0';
-        line.style.width = '100%';
-        line.style.height = '1px';
-      }
-  
-      guideContainer.appendChild(line);
-    });
-  };
-  
-  const clearGuides = () => {
-    const guideContainer = document.getElementById('guide-container');
-    if (guideContainer) guideContainer.innerHTML = '';
-  };
-  
-  const createGuideContainer = () => {
-    const container = document.createElement('div');
-    container.id = 'guide-container';
-    container.style.position = 'absolute';
-    container.style.top = '0';
-    container.style.left = '0';
-    container.style.width = '100%';
-    container.style.height = '100%';
-    container.style.pointerEvents = 'none';
-    editorRef.current.appendChild(container);
-    return container;
-  };
-  
 
   const addElement = (Component) => {
     const id = uniqueId();
@@ -391,7 +266,6 @@ if(mediaQuery.matches){
     };
     setCurrentElement(newElement);
     setShouldRunEffect(true);
-    console.log(elements)
 };
 
   useEffect(() => {
@@ -560,6 +434,7 @@ const changeStyle = (id, e) => {
 
   setChangingStyle({ changing: true, id });
 
+  console.log(isEditor)
   if (!isEditor) {
       if (isIcon) {
           dialog.querySelectorAll('#content, #width, #height').forEach(el => el.setAttribute('disabled', 'true'));
@@ -615,13 +490,6 @@ const changeStyle = (id, e) => {
     
     return hexColor;
 }
-
-  const deleteElement = () => {
-    const newElements = elements.filter((el) => el.id !== chngStyle.id);
-    setElements(newElements);
-    saveHistory(newElements);
-    dialogRef.current.close();
-  }
 
   const saveDesign = async (totalPages, template = false) => {
     setLoading(true)
@@ -989,11 +857,14 @@ const handleMobileContextMenu = (id, e) => {
               }}
               bounds="parent"
               onDragStart={(e) => handleDragStart(el.id, e)}
-              onDrag={(e) => snappingToGrid(e, el.id)}
               onDragStop={(e, data) => handleDragStop(el.id, e, data)}
+              onResize={(e, direction, ref, delta, position) =>
+                handleResizeStop(el.id, e, direction, ref, delta, position)
+              }
               onResizeStop={(e, direction, ref, delta, position) =>
                 handleResizeStop(el.id, e, direction, ref, delta, position)
               }
+              onContextMenu={(e) => changeStyle(el.id, e)}
               key={el.id}
             >
               {el.component}
@@ -1006,7 +877,7 @@ const handleMobileContextMenu = (id, e) => {
 
       <EditorDialog ref={dialogRef} mediaQuery={mediaQuery}
       duplicate={duplicate} closeDialog={closeDialog} handleImageChange={handleImageChange} 
-      deleteElement={deleteElement} currentElement={currentElement} chngStyle={chngStyle}
+      currentElement={currentElement} chngStyle={chngStyle}
       extraEditor={extraInptRef} elements={elements}
        imageSrc={imageSrc} currentPage={currentPage} setImageSrc={setImageSrc} setElements={setElements} saveHistory={saveHistory}
        setChangingStyle={setChangingStyle} setCurrentElement={setCurrentElement} iconsDialog={iconsDialog} editorRef={editorRef}/>
