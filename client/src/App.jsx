@@ -162,7 +162,6 @@ if(mediaQuery.matches){
     const startPress = () => {
       pressTimer = setTimeout(() => {
         isLongClick = true;
-        console.log('Long click detected');
         changeStyle(elId, e); // Call changeStyle only on long click
       }, longClickThreshold);
     };
@@ -268,7 +267,9 @@ if(mediaQuery.matches){
 };
 
   useEffect(() => {
+    console.log('running')
     if (!currentElement || !shouldRunEffect) return;
+    console.log('passed')
 
     const dialog = dialogRef.current;
     const type = currentElement.component.type.name;
@@ -433,7 +434,6 @@ const changeStyle = (id, e) => {
 
   setChangingStyle({ changing: true, id });
 
-  console.log(isEditor)
   if (!isEditor) {
       if (isIcon) {
           dialog.querySelectorAll('#content, #width, #height').forEach(el => el.setAttribute('disabled', 'true'));
