@@ -13,14 +13,20 @@ import ExtraInput from './Components/Dialogs/ExtraInput'
 import { Rnd } from "react-rnd";
 
 const Text = ({style, content}) => <span className='edit' style={style}>{content}</span>;
+Text.displayName = 'Text'
 const Button = ({style, content}) => <button className='edit' style={style}>{content}</button>;
+Button.displayName = 'Button'
 const Input = ({style, content}) => <input className='edit' style={style} type="text" placeholder={content}/>;
+Input.displayName = 'Input'
 const ImageCmp = ({style, content}) => <img className='edit' style={style} src={content || "https://img.icons8.com/skeuomorphism/64/image.png"} alt="Picture" />;
+ImageCmp.displayName = 'ImageCmp'
 const Video = ({style}) => <img className='edit' style={style} src="https://play-lh.googleusercontent.com/lVNP5YVLH630fs0oQunDStVjtZBmV3ZGyjvH1MOj6xINVBmxJyNszQx2_ky6_5GBLkH5=w526-h296-rw" alt="Video" />;
+Video.displayName = 'Video'
 const Audio = ({style}) => <img className='edit' style={style} src="https://png.pngtree.com/png-vector/20230408/ourmid/pngtree-sound-waves-equalizer-audio-radio-signal-music-recording-vector-png-image_6678910.png" alt="audio" />;
 const Gallery = ({style}) => <img className='edit' style={style} src="https://t3.ftcdn.net/jpg/04/19/92/88/360_F_419928833_w7HrdbjTCl1zGIBY1YljW6feoWx90ETm.jpg" alt="Gallery" />;
 const Section = ({style}) => <div className='edit' style={style}></div>;
 const Link = ({style, content}) => <a className='edit' style={style}>{content}</a>;
+Link.displayName = 'Link'
 const List = ({style, content}) => { 
   const listItems = JSON.parse(content)
   return (
@@ -33,10 +39,12 @@ const List = ({style, content}) => {
     </ul>
   </div>
 );}
+List.displayName = 'List'
 const Pie = ({style}) => <img className='edit' style={style} src='https://img.icons8.com/skeuomorphism/64/pie-chart.png'/>
 const Charts = ({style}) => <img className='edit' style={style} src='https://img.icons8.com/skeuomorphism/64/bar-chart.png'/>
 const Menu = ({style}) => <img className='edit' style={style} src='https://img.icons8.com/material-rounded/64/menu--v1.png'/>
 const Icons = ({style, content}) => <Icon className='edit' icon={`mdi-light:${content}`} style={style}/>
+Icons.displayName = 'Icons'
 const Table = ({style, content}) => {
   const tableItems = JSON.parse(content)
   return(
@@ -62,7 +70,9 @@ const Table = ({style, content}) => {
     </div>
   )
 }
+Table.displayName = 'Table'
 const Calendar = ({style}) => <img className='edit' style={style} src="https://www.figma.com/community/resource/e155ded4-5d35-4474-93ef-a8c53f619ca3/thumbnail" alt="calendar" />
+Calendar.displayName = 'Calendar'
 
 export default function App() {
   const [elements, setElements] = useState([]);
@@ -92,9 +102,6 @@ export default function App() {
 
   const uniqueId = () => `element-${Date.now()}-${Math.random()}`;
   const backendUrl = import.meta.env.VITE_BACKEND_URL;
-
-  const SNAP_THRESHOLD = 10;
-  const GRID_SIZE = 50;
 
   const mediaQuery = window.matchMedia('(max-width: 768px)');
 
@@ -142,17 +149,10 @@ if(mediaQuery.matches){
     setHistoryIndex(newHistory.length);
   };
 
-  let offsetX, offsetY;
-
   const handleDragStart = (elId, e) => {
     e.preventDefault()
     e.stopPropagation()
-
-    const element = e.target
-    const rect = element.getBoundingClientRect();
-    offsetX = (e.clientX || e.touches[0].clientX) - rect.left;
-    offsetY = (e.clientY || e.touches[0].clientY) - rect.top;
-
+    
     const longClickThreshold = 500; // Set long click threshold to 500ms
     let pressTimer;
     let isLongClick = false;
@@ -267,12 +267,12 @@ if(mediaQuery.matches){
 };
 
   useEffect(() => {
-    console.log('running')
     if (!currentElement || !shouldRunEffect) return;
-    console.log('passed')
+
+    console.log(currentElement)
 
     const dialog = dialogRef.current;
-    const type = currentElement.component.type.name;
+    const type = currentElement.component.type.displayName;
 
     // Store references to commonly used elements
     const content = dialog.querySelector('#content');
@@ -322,9 +322,6 @@ if(mediaQuery.matches){
             break;
         case 'Link':
             dialog.querySelector('#fontColor').value = '#0000EE';
-            break;
-        case 'Menu':
-            setValues({ '#width': 30, '#height': 30 });
             break;
         case 'Icons':
             setValues({ '#content': iconConent, '#hiddenContent': iconConent, '#fontSize': 50 });
