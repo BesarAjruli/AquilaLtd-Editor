@@ -254,7 +254,6 @@ if(mediaQuery.matches){
     setElements(updatedElements);
     saveHistory(updatedElements); // Save the updated elements to history
   };
-  
 
   const addElement = (Component) => {
     const id = uniqueId();
