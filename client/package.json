@@ -12,8 +12,10 @@
     "dev": "vite"
   },
   "dependencies": {
+    "@codemirror/language": "^6.10.8",
     "@mdi/js": "^7.4.47",
     "@mdi/react": "^1.6.1",
+    "@monaco-editor/react": "^4.7.0",
     "dotenv": "^16.4.7",
     "firebase": "^11.3.1",
     "html2canvas": "^1.4.1",

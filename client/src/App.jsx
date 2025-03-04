@@ -11,6 +11,7 @@ import Toolbar from './Components/Toolbar';
 import Loading from './Components/Loading';
 import ExtraInput from './Components/Dialogs/ExtraInput'
 import { Rnd } from "react-rnd";
+import CodeEditor from './Components/Dialogs/codeEditor';
 
 const Text = ({style, content}) => <span className='edit' style={style}>{content}</span>;
 Text.displayName = 'Text'
@@ -99,6 +100,7 @@ export default function App() {
     ["", ""] 
   ]);
   const [shouldRunEffect, setShouldRunEffect] = useState(false);
+  const injectCssRef = useRef(null)
 
   const uniqueId = () => `element-${Date.now()}-${Math.random()}`;
   const backendUrl = import.meta.env.VITE_BACKEND_URL;
@@ -269,8 +271,6 @@ if(mediaQuery.matches){
   useEffect(() => {
     if (!currentElement || !shouldRunEffect) return;
 
-    console.log(currentElement)
-
     const dialog = dialogRef.current;
     const type = currentElement.component.type.displayName;
 
@@ -289,8 +289,9 @@ if(mediaQuery.matches){
 
     // Toggle content visibility based on element type
     const isImage = type === 'ImageCmp';
-    content.style.display = isImage ? 'none' : 'block';
-    contentLabel.style.display = isImage ? 'none' : 'block';
+    content.style.display = 'block';
+    contentLabel.style.display = 'block';
+    contentLabel.textContent = isImage ? 'URL' : 'Content'
     imageContent.style.display = isImage ? 'block' : 'none';
     imgContLabel.style.display = isImage ? 'block' : 'none';
 
@@ -387,8 +388,7 @@ const changeStyle = (id, e) => {
 
   // Handle image-specific content toggling
   if (isImage) {
-      dialog.querySelector('#content').style.display = 'none';
-      dialog.querySelector('label[for="content"]').style.display = 'none';
+      dialog.querySelector('label[for="content"]').textContent = 'URL';
       dialog.querySelector('label[for="imageContent"]').style.display = 'block';
       dialog.querySelector('#imageContent').style.display = 'block';
       setImageSrc(target.src);
@@ -398,6 +398,7 @@ const changeStyle = (id, e) => {
       dialog.querySelector('#content').style.display = 'block';
       dialog.querySelector('label[for="content"]').style.display = 'block';
       dialog.querySelector('#content').value = isInput ? target.placeholder : target.textContent;
+      dialog.querySelector('#content').textContent = 'Content';
   }
   
   // Handle list and table elements
@@ -860,8 +861,10 @@ const handleMobileContextMenu = (id, e) => {
               onResizeStop={(e, direction, ref, delta, position) =>
                 handleResizeStop(el.id, e, direction, ref, delta, position)
               }
+              dragGrid={[10, 10]}
               onContextMenu={(e) => changeStyle(el.id, e)}
               key={el.id}
+              id={el.id}
             >
               {el.component}
             </Rnd>
@@ -874,17 +877,15 @@ const handleMobileContextMenu = (id, e) => {
       <EditorDialog ref={dialogRef} mediaQuery={mediaQuery}
       duplicate={duplicate} closeDialog={closeDialog} handleImageChange={handleImageChange} 
       currentElement={currentElement} chngStyle={chngStyle}
-      extraEditor={extraInptRef} elements={elements}
+      extraEditor={extraInptRef} elements={elements} injectCssRef={injectCssRef}
        imageSrc={imageSrc} currentPage={currentPage} setImageSrc={setImageSrc} setElements={setElements} saveHistory={saveHistory}
        setChangingStyle={setChangingStyle} setCurrentElement={setCurrentElement} iconsDialog={iconsDialog} editorRef={editorRef}/>
-
       <SaveTemplateDialog ref={saveTempRef} saveTemplate={(elements, e) => saveTemplate(elements, e)} elements={elements}/>
-
       <IconsSelector ref={iconsDialog} addElement={() => addElement(Icons)} 
         sendIconName={(value) => setIconName(value)}/>
-
       <ExtraInput ref={extraInptRef} currentElement={currentElement} listItems={listItems} setListItems={setListItems} dialogRef={dialogRef}
       setTableData={setTableData} tableItems={tableItems}/>
+      <CodeEditor ref={injectCssRef} currentElement={currentElement} dialogRef={dialogRef}/>
     </>
   );
 }
