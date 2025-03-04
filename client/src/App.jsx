@@ -101,6 +101,7 @@ export default function App() {
   ]);
   const [shouldRunEffect, setShouldRunEffect] = useState(false);
   const injectCssRef = useRef(null)
+  const [alignmentLines, setAlignmentLines] = useState([]);
 
   const uniqueId = () => `element-${Date.now()}-${Math.random()}`;
   const backendUrl = import.meta.env.VITE_BACKEND_URL;
@@ -213,6 +214,54 @@ if(mediaQuery.matches){
     e.target.addEventListener('dragend', cleanup);
   };
 
+  const hanldeDrag = (e, d, id) => {
+    if(e.target.className !== 'edit dragging') return
+
+    //const draggingElm = elements.find(e => e.id === id);
+
+    setElements(prevElements => {
+      const updatedElements = prevElements.map(el => {
+        if (el.id === id) {
+          return { ...el, x: d.x, y: d.y };
+        }
+        return el;
+      });
+  
+      const draggingElm = updatedElements.find(e => e.id === id);
+      if (!draggingElm) return prevElements;
+
+      let newLines = [];
+  
+      updatedElements.forEach(el => {
+        if (el.id === draggingElm.id) return;
+
+        const elCenterX = el.x + parseFloat(el.style.width) / 2;
+        const elCenterY = el.y + parseFloat(el.style.height) / 2;
+
+        const editorCenterX = editorRef.current.style.width / 2
+        const editorCenterY = editorRef.current.style.height / 2
+
+        if (Math.abs(elCenterX - editorCenterX) < 5) { // 5px tolerance
+          newLines.push({ x: editorCenterX, y: 0, height: '100%', type: 'vertical' });
+        }
+    
+        if (Math.abs(elCenterY - editorCenterY) < 5) {
+          newLines.push({ x: 0, y: editorCenterY, width: '100%', type: 'horizontal' });
+        }
+
+        if (el.x === draggingElm.x) {
+          newLines.push({ x: elCenterX, y: el.y, width: el.width, type: 'vertical' });
+        }
+        if (el.y === draggingElm.y) {
+          newLines.push({ x: el.x, y: elCenterY, height: el.height, type: 'horizontal' });
+        }
+      });
+  
+      setAlignmentLines(newLines.length > 0 ? newLines : []);
+            return updatedElements;
+    });
+  }
+
   const handleDragStop = (elId, e, data) => {
     // Update the element's position
     const updatedElements = elements.map((el) =>
@@ -221,6 +270,7 @@ if(mediaQuery.matches){
     
     e.target.classList.remove('dragging')
 
+    setAlignmentLines([])
     setElements(updatedElements);
     saveHistory(updatedElements); // Save the updated elements to history
   };
@@ -263,6 +313,8 @@ if(mediaQuery.matches){
         component: <Component key={id} style={{}} content='' />,
         style: {},
         page: currentPage,
+        x: 0,
+        y: 0
     };
     setCurrentElement(newElement);
     setShouldRunEffect(true);
@@ -843,6 +895,19 @@ const handleMobileContextMenu = (id, e) => {
         onContextMenu={(e) => changeStyle(editorRef.current.id, e)}
         onTouchStart={(e) => handleMobileContextMenu(editorRef.current.id, e)}
         >
+          {alignmentLines.map((line, index) => (
+  <div
+    key={index}
+    style={{
+      position: "absolute",
+      background: 'rgba(0, 123, 255, 0.5)',
+      zIndex: 1000,
+      ...(line.type === "vertical"
+        ? { left: line.x,  width: "2px", height: "100%" }
+        : { top: line.y, width: "100%", height: "2px" }),
+    }}
+  />
+))}
          {elements.map((el) => (
           el.page === currentPage &&
             (<Rnd
@@ -854,6 +919,7 @@ const handleMobileContextMenu = (id, e) => {
               }}
               bounds="parent"
               onDragStart={(e) => handleDragStart(el.id, e)}
+              onDrag={(e, d) => hanldeDrag(e, d, el.id)}
               onDragStop={(e, data) => handleDragStop(el.id, e, data)}
               onResize={(e, direction, ref, delta, position) =>
                 handleResizeStop(el.id, e, direction, ref, delta, position)
