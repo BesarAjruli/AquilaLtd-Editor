@@ -233,21 +233,22 @@ if(mediaQuery.matches){
       let newLines = [];
   
       updatedElements.forEach(el => {
-        if (el.id === draggingElm.id) return;
-
         const elCenterX = el.x + parseFloat(el.style.width) / 2;
         const elCenterY = el.y + parseFloat(el.style.height) / 2;
 
-        const editorCenterX = editorRef.current.style.width / 2
-        const editorCenterY = editorRef.current.style.height / 2
+        const editorRect = editorRef.current.getBoundingClientRect();
+        const editorCenterX = editorRect.width / 2;
+        const editorCenterY = editorRect.height / 2;
 
-        if (Math.abs(elCenterX - editorCenterX) < 5) { // 5px tolerance
+        if (Math.abs(elCenterX - editorCenterX) < 15) { // 5px tolerance
           newLines.push({ x: editorCenterX, y: 0, height: '100%', type: 'vertical' });
         }
     
-        if (Math.abs(elCenterY - editorCenterY) < 5) {
+        if (Math.abs(elCenterY - editorCenterY) < 15) {
           newLines.push({ x: 0, y: editorCenterY, width: '100%', type: 'horizontal' });
         }
+
+        if (el.id === draggingElm.id) return;
 
         if (el.x === draggingElm.x) {
           newLines.push({ x: elCenterX, y: el.y, width: el.width, type: 'vertical' });
