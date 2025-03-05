@@ -904,8 +904,8 @@ const handleMobileContextMenu = (id, e) => {
       background: 'rgba(0, 123, 255, 0.5)',
       zIndex: 1000,
       ...(line.type === "vertical"
-        ? { left: line.x,  width: "2px", height: "100%" }
-        : { top: line.y, width: "100%", height: "2px" }),
+        ? { left: line.x,  width: "1.5px", height: "100%" }
+        : { top: line.y, width: "100%", height: "1.5px" }),
     }}
   />
 ))}
