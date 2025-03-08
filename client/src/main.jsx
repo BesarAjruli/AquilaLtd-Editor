@@ -7,6 +7,7 @@ import LogIn from './Components/clientSignUp/login.jsx'
 import Approved from './Components/approve.jsx';
 import ToDo from './Components/todo.jsx';
 import Payment from './Components/payment.jsx';
+import FoldersToDo from './Components/toDo-folders.jsx'
 
 const router = createBrowserRouter([
   {
@@ -27,6 +28,10 @@ const router = createBrowserRouter([
   }, 
   {
     path: '/to-do',
+    element: <FoldersToDo/>
+  },
+  {
+    path: '/to-do/:id',
     element: <ToDo/>
   },
   {

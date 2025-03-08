@@ -558,6 +558,48 @@ input {
   padding: 15px;
   margin: 30px 0;
 }
+.file-item {
+  display: flex;
+  align-items: center;
+  padding: 10px;
+  background-color: #f1f3f4;
+  border-radius: 8px;
+  width: 220px;
+  cursor: pointer;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  transition: all 0.2s;
+}
+.file-item:hover {
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+}
+.folder-icon {
+  width: 35px;
+  height: 35px;
+  background-color: #ccc;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-radius: 50%;
+  margin-right: 10px;
+  padding: 5px;
+}
+.folder-icon svg{
+  fill: #f9f9f9;
+}
+
+.file-details {
+  display: flex;
+  flex-direction: column;
+}
+
+.file-name {
+  font-size: 16px;
+  font-weight: bold;
+  width: 20ch;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: #363636;
+}
 
 @media (max-width: 768px) {
   .tabs {

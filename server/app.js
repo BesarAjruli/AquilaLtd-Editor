@@ -211,13 +211,26 @@ app.put('/api/update-todo/:id', async (req, res) => {
     res.json(response)
 })
 
-//Payment processing
+//folders
+app.get('/api/to-do-folders', async (req, res) => {
+  const todos = await prisma.toDo.findMany({
+    where: {
+      finished: false,
+    },
+    include: {
+      author: true,
+    },
+  });
+  res.json(todos)
+})
+
+/*//Payment processing
 app.post('/api/payment', (req, res) => {
   console.log('Headers:', req.headers);
   console.log('Body:', req.body);
 
   res.status(200).set('Content-Type', 'text/plain').send('SUCCESS');
-})
+})*/
   
 
 //Passport

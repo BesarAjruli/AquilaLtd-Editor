@@ -1,13 +1,30 @@
 import { useState, useEffect } from "react"
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import Loading from '../Components/Loading';
+
 
 const backendUrl = import.meta.env.VITE_BACKEND_URL;
 
-const ToDo = () => {
+const FoldersToDo = () => {
     const [thumbnails, setThumbnails] = useState([])
     const navigate = useNavigate()
     const [loading, setLoading] = useState(true)
+
+    const Folders = ({ user }) => (
+        <Link to={`/to-do/${user}`}>
+            <div className="file-item">
+              <div className="folder-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                  <title>folder</title>
+                  <path d="M10,4H4C2.89,4 2,4.89 2,6V18A2,2 0 0,0 4,20H20A2,2 0 0,0 22,18V8C22,6.89 21.1,6 20,6H12L10,4Z" />
+                </svg>
+              </div>
+              <div className="file-details">
+                <div className="file-name">{user}</div>
+              </div>
+            </div>
+        </Link>
+      );
 
     useEffect(() => {
         async function getUser() {
@@ -31,13 +48,14 @@ const ToDo = () => {
         const getThumbnails = async () => {
           setLoading(true)
           try {
-            const response = await fetch(`${backendUrl}/api/to-do/`);
+            const response = await fetch(`${backendUrl}/api/to-do-folders`);
             const data = await response.json();
+            console.log(data)
             const paths = data.map((element) => {
               if(!element.finished){
+                console.log(element)
                 return {
-                    thumbnail: element.path,
-                    id: element.id
+                    user: element.authorId,
                 };
               }
             });  
@@ -106,6 +124,8 @@ const ToDo = () => {
             console.error("Error deleting:", error);
         }
       }
+
+      console.log(thumbnails)
     return (
         <>
               {loading && <Loading/>}
@@ -114,9 +134,7 @@ const ToDo = () => {
         thumbnails.map((thumbnail, index) => (
           thumbnail &&
             <div className="containerVerification" key={index}>
-                <div className="imageContVer">
-                    <img key={thumbnail.id} src={thumbnail.thumbnail} alt={`Thumbnail ${thumbnail.id}`} onClick={() => onThumbnailClick(index)} />
-                </div><br />
+                <Folders key={thumbnail.authorId} user={thumbnail.authorId} />
                 <div className="aproveButtonsCont">
                     <button className="disapprove" onClick={() => disapprove(thumbnail.id)}>Remove</button>
                     <button className="approve" onClick={() => done(thumbnail.id)}>Finished</button>
@@ -131,4 +149,4 @@ const ToDo = () => {
     )
 }
 
-export default ToDo
+export default FoldersToDo

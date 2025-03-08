@@ -28,6 +28,7 @@ model User {
   pages Int @default(3)
   imagesLimit Int @default(3)
   bundle Int @default(0)
+  todos     ToDo[] 
 
   @@unique([username, id], name: "usernameId")
 }
@@ -38,4 +39,6 @@ model ToDo {
   authorId Int
   finished Boolean
   publicId String
+
+  author    User   @relation(fields: [authorId], references: [id])
 }
