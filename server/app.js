@@ -230,18 +230,24 @@ app.get('/api/to-do-folders', async (req, res) => {
 
 app.get("/api/logout", (req, res, next) => {
   req.logout((err) => {
-    if (err) {
-      return next(err);
-    }
-    req.session.destroy((err) => { // Destroy session completely
-      if (err) {
-        return next(err);
-      }
-      res.clearCookie("connect.sid"); // Remove session cookie
-      res.json('/');
+    if (err) return next(err);
+
+    req.session.destroy((err) => { // Destroy session in DB
+      if (err) return next(err);
+
+      res.clearCookie("connect.sid", { 
+        path: "/", 
+        domain: ".koyeb.app", 
+        httpOnly: true, 
+        secure: true, 
+        sameSite: 'None' 
+      });
+
+      res.json({ message: "Logged out" });
     });
   });
 });
+
 
 /*//Payment processing
 app.post('/api/payment', (req, res) => {
