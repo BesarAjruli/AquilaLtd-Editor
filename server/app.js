@@ -229,29 +229,21 @@ app.get('/api/to-do-folders', async (req, res) => {
 })
 
 app.get("/api/logout", (req, res, next) => {
-  if (!req.session) return res.json({ message: "No active session" });
-
-  const sessionID = req.sessionID; // Get current session ID
-
   req.logout((err) => {
     if (err) return next(err);
 
-    req.session.destroy(async (err) => { // Try normal destroy first
+    req.session.destroy((err) => { // Destroy session in DB
       if (err) return next(err);
-
-      // Manually remove from PostgreSQL if still there
-      const db = require("./db"); // Make sure this is your actual DB connection
-      await db.query("DELETE FROM user_session WHERE sid = $1", [sessionID]);
 
       res.clearCookie("connect.sid", { 
         path: "/", 
         domain: ".koyeb.app", 
         httpOnly: true, 
         secure: true, 
-        sameSite: "None"
+        sameSite: 'None' 
       });
 
-      res.json({ message: "Logged out and session removed" });
+      res.json({ message: "Logged out" });
     });
   });
 });

@@ -57,7 +57,10 @@ const Toolbar = ({
       const logUser = async () => {
         if(userId){
           try{
-            const response = await fetch(`${backendUrl}/api/logout`);
+            const response = await fetch(`${backendUrl}/api/logout`, {
+              method: "GET",
+              credentials: "include", // 🔥 Allows sending session cookies
+            });
             if (!response.ok) {
               console.error('Network response was not ok', response.statusText);
               return;
