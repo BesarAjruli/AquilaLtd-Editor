@@ -185,8 +185,13 @@ app.post('/api/to-do', upload.single('image'), async (req, res) => {
       res.status(500).json({ error: 'Failed to save template' });
     }
 })
-app.get('/api/to-do', async (req, res) => {
-  const data = await prisma.toDo.findMany()  
+app.get('/api/to-do/:id', async (req, res) => {
+  const id = req.params.id
+  const data = await prisma.toDo.findMany({
+    where: {
+      authorId: id
+    }
+  })  
   res.json(data)
 })
 app.delete('/api/remove-todo/:id', async (req, res) => {
@@ -214,15 +219,24 @@ app.put('/api/update-todo/:id', async (req, res) => {
 //folders
 app.get('/api/to-do-folders', async (req, res) => {
   const todos = await prisma.toDo.findMany({
-    where: {
-      finished: false,
-    },
-    include: {
-      author: true,
-    },
+    where: { finished: false },
+    include: { author: true },
   });
-  res.json(todos)
+
+  const uniqueUserIds = [...new Set(todos.map(todo => todo.username))];
+
+  res.json(uniqueUserIds);
 })
+
+app.get("/api/logout", (req, res, next) => {
+  req.logout((err) => {
+    if (err) {
+      return next(err);
+    }
+    res.redirect("/");
+  });
+});
+
 
 /*//Payment processing
 app.post('/api/payment', (req, res) => {

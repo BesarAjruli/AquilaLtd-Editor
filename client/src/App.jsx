@@ -838,7 +838,7 @@ const handleMobileContextMenu = (id, e) => {
        saveTempRef={saveTempRef} templatesRef={templatesRef}
        currentPage={currentPage} setCurrentPage={setCurrentPage}
        history={history} setHistoryIndex={setHistoryIndex} 
-       setElements={setElements} editorRef={editorRef}/>
+       setElements={setElements} editorRef={editorRef} userId={userId}/>
       <div className='sideElementsBar left'>
         <div className='text' title='Text' onClick={() => addElement(Text)}>Text</div>
         <hr />

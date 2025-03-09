@@ -4,12 +4,14 @@ import { useNavigate } from "react-router-dom";
 const Toolbar = ({ 
     historyIndex, saveDesign, saveTempRef, templatesRef,
     currentPage,setCurrentPage, history, setHistoryIndex, 
-    setElements, editorRef
+    setElements, editorRef, userId
  }) => {
-
+  
   const [pages, setPage] = useState([1])
   const mediaQuery = window.matchMedia('(max-width: 768px)');
   const navigate = useNavigate()
+
+  const backendUrl = import.meta.env.VITE_BACKEND_URL;
 
     const undoFunction = () => {
         if (historyIndex > 0) {
@@ -52,6 +54,21 @@ const Toolbar = ({
         }
       }
 
+      const logUser = async () => {
+        if(userId){
+          try{
+            const response = await fetch(`${backendUrl}/api/logout`);
+            if (!response.ok) {
+              console.error('Network response was not ok', response.statusText);
+              return;
+            }
+          } catch(error){
+            console.error(error)
+          }
+        }else {
+          navigate('/login')
+        }
+      }
   return (
     <>
       <div className="toolBar">
@@ -77,8 +94,17 @@ const Toolbar = ({
               <path d="M21,7L9,19L3.5,13.5L4.91,12.09L9,16.17L19.59,5.59L21,7Z" />
             </svg>
           </button>
+          <button onClick={logUser}>
+              {!userId ?
+               (<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                <title>login</title>
+                <path d="M12,4A4,4 0 0,1 16,8A4,4 0 0,1 12,12A4,4 0 0,1 8,8A4,4 0 0,1 12,4M12,14C16.42,14 20,15.79 20,18V20H4V18C4,15.79 7.58,14 12,14Z" /></svg>) :
+              (<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                <title>logout</title>
+                <path d="M17 7L15.59 8.41L18.17 11H8V13H18.17L15.59 15.58L17 17L22 12M4 5H12V3H4C2.9 3 2 3.9 2 5V19C2 20.1 2.9 21 4 21H12V19H4V5Z" /></svg>)}
+          </button>
         </div>
-        {!mediaQuery.matches && <div className="container">
+              {!mediaQuery.matches && <div className="container">
           <div className="tabs">
             <input type="radio" id="radio-1" name="tabs" defaultChecked="" onChange={changeResponsivnes} />
             <label className="tab" htmlFor="radio-1">
