@@ -62,6 +62,8 @@ const Toolbar = ({
               console.error('Network response was not ok', response.statusText);
               return;
             }
+            const data = await response.json();
+            navigate(data)
           } catch(error){
             console.error(error)
           }
