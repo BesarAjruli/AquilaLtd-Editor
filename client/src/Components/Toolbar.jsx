@@ -63,7 +63,7 @@ const Toolbar = ({
               return;
             }
             const data = await response.json();
-            navigate(data)
+            location.reload()
           } catch(error){
             console.error(error)
           }

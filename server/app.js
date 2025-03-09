@@ -233,10 +233,15 @@ app.get("/api/logout", (req, res, next) => {
     if (err) {
       return next(err);
     }
-    res.json('/')
+    req.session.destroy((err) => { // Destroy session completely
+      if (err) {
+        return next(err);
+      }
+      res.clearCookie("connect.sid"); // Remove session cookie
+      res.json('/');
+    });
   });
 });
-
 
 /*//Payment processing
 app.post('/api/payment', (req, res) => {

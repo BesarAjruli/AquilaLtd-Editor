@@ -119,6 +119,7 @@ export default function App() {
       }
         setLoading(false)
         const data = await response.json();
+        console.log(data)
         setUserId(data.user.id)
     } catch(error){
       setLoading(false)
