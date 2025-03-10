@@ -59,7 +59,7 @@ const Toolbar = ({
           try{
             const response = await fetch(`${backendUrl}/api/logout`, {
               method: "GET",
-              credentials: "include", // 🔥 Allows sending session cookies
+              credentials: "include",
             });
             if (!response.ok) {
               console.error('Network response was not ok', response.statusText);

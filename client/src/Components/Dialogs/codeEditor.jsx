@@ -49,6 +49,7 @@ ${prevStyle}
         const [key, value] = property.split(':').map(str => str.trim());
         
         if (key && value) {
+          console.log(document.getElementById(elmId))
             document.getElementById(elmId).children[0].style[key] = value;
         }
       });

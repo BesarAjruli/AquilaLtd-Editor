@@ -844,15 +844,11 @@ const handleMobileContextMenu = (id, e) => {
         <div className='text' title='Text' onClick={() => addElement(Text)}>Text</div>
         <hr />
         <div className='button' title='Button' onClick={() => addElement(Button)}><button>Button</button></div>
-        <hr />
+        <hr/>
         <div className='input' title='Input' onClick={() => addElement(Input)}><span>|</span></div>
-        <hr />
         <div className='image' title='Image' onClick={() => addElement(ImageCmp)}><img src="https://img.icons8.com/skeuomorphism/64/image.png" alt="image" /></div>
-        <hr />
         <div className='video' title='Video' onClick={() => addElement(Video)}><img src="https://img.icons8.com/skeuomorphism/64/video.png" alt="video" /></div>
-        <hr />
         <div className='audio' title='Audio' onClick={() => addElement(Audio)}><img src="https://img.icons8.com/skeuomorphism/64/circled-play.png" alt="audio" /></div>
-        <hr />
         <div className='section' title='Section (Header,footer...)' onClick={() => addElement(Section)}></div>
         <hr />
         <div className='link' title='Link' onClick={() => addElement(Link)}>https://link.com</div>
@@ -881,6 +877,7 @@ const handleMobileContextMenu = (id, e) => {
         <div className='gallery' title='Gallery' onClick={() => addElement(Gallery)}><img src="https://img.icons8.com/skeuomorphism/64/stack-of-photos.png" alt="gallery" /></div>
         <div title='Table' onClick={() => addElement(Table)}><img src="https://img.icons8.com/officel/60/table-1.png" alt="table" /></div>
         <div title='Calendar' onClick={() => addElement(Calendar)}><img src='https://img.icons8.com/color/60/calendar--v1.png'/></div>
+        <div title='Gif' onClick={() => addElement(ImageCmp)}><img src='https://img.icons8.com/color/60/gif.png'/></div>        
 
         <div className='dots rightDots'>
             <div></div>

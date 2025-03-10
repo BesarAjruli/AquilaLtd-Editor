@@ -65,3 +65,15 @@
     width: 100%;
     filter: drop-shadow(0 0 23px var(--animation-color))
   }
+
+  @media (max-width: 768px) {
+    .paymentBody{
+      grid-template-columns: 1fr;
+      gap: 30px;
+      height: auto;
+      padding: 30px;
+    }
+    .paymentBody div{
+      width: 80%;
+    }
+  }
