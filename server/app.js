@@ -2,7 +2,6 @@ const express = require('express')
 const cors = require('cors')
 const path = require('node:path')
 const multer = require('multer')
-const fs = require('fs')
 const { PrismaClient } = require("@prisma/client");
 const bcrypt = require('bcryptjs')
 const passport = require('passport')
@@ -15,6 +14,7 @@ const cookieParser = require('cookie-parser');
 const db = new Pool({
   connectionString: process.env.DATABASE_URL + '?sslmode=require'
 })
+const paypal = require('./routers/paypal')
 
 const upload = multer({dest: 'uploads/'})
 
@@ -248,15 +248,34 @@ app.get("/api/logout", (req, res, next) => {
   });
 });
 
+app.use((req, res, next) => {
+  res.setHeader("Content-Security-Policy", 
+    "script-src 'self' https://www.paypal.com https://www.paypalobjects.com 'unsafe-inline'; " +
+    "frame-src https://www.paypal.com;"
+  );
+  next();
+});
+//payment
+app.post('/pay/:productId', async(req,res) => {
+  const productId = req.params.productId
+  try{
+    const url = await paypal.createOrder(productId)
+    
+    res.json({ approvalUrl: url });
+    }catch(error){
+    res.status(500).json({ error: error.message || 'An unknown error occurred' });
+  }
+})
 
-/*//Payment processing
-app.post('/api/payment', (req, res) => {
-  console.log('Headers:', req.headers);
-  console.log('Body:', req.body);
-
-  res.status(200).set('Content-Type', 'text/plain').send('SUCCESS');
-})*/
-  
+app.get('/complete-order', async (req, res) => {
+  try{
+    await paypal.capturePayments(req.query.token)
+    console.log('completed')
+    res.json({bundleId: '001'})
+  }catch(err){
+    res.status(500).json({ error: err.message || 'An unknown error occurred' });
+  }
+})
 
 //Passport
 passport.use(

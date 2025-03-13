@@ -1,35 +1,17 @@
-import { useEffect } from 'react'
 import '../style/paymentStyle.css'
 
 const Payment = () => {
-    useEffect(() => {
-        if (window.TwoCoInlineCart) return; // Prevent duplicate script loading
 
-        const script = document.createElement('script');
-        script.src = 'https://secure.2checkout.com/checkout/client/twoCoInlineCart.js';
-        script.async = true;
-
-        script.onload = () => {
-            if (window.TwoCoInlineCart) {
-                window.TwoCoInlineCart.setup.setConfig('app', { merchant: '255406192514', iframeLoad: 'checkout' });
-                window.TwoCoInlineCart.setup.setConfig('cart', { host: 'https://secure.2checkout.com', customization: 'inline-one-step' });
-                window.TwoCoInlineCart.register();
-            }
-        };
-
-        document.body.appendChild(script);
-
-        return () => {
-            document.querySelectorAll("script[src*='twoCoInlineCart.js']").forEach(script => script.remove());
-        };
-    }, []);
-
-    const handlePayment = (productCode) => {
-        if (window.TwoCoInlineCart) {
-            window.TwoCoInlineCart.products.add({ code: productCode, quantity: 1 });
-            window.TwoCoInlineCart.cart.checkout();
+    const handlePayment = async (productCode) => {
+        const response = await fetch(`http://localhost:5000/pay/${productCode}`, {
+            method:'POST',
+        })
+        const data = await response.json()
+        
+        if (data.approvalUrl) {
+            window.location.href = data.approvalUrl; // Redirect user to PayPal for approval
         } else {
-            console.error("2Checkout Inline Cart not loaded");
+            console.error('Error getting PayPal approval URL:', data.error);
         }
     };
 
@@ -43,7 +25,7 @@ const Payment = () => {
                         <li>+3 Images</li>
                         <li>Unlock table & calendar</li>
                     </ul>
-                    <button data-text="Awesome" onClick={() => handlePayment('1')}>
+                    <button data-text="Awesome" onClick={() => handlePayment('001')}>
                         <span className="actual-text">&nbsp;$3.99&nbsp;</span>
                         <span aria-hidden="true" className="hover-text">&nbsp;$3.99&nbsp;</span>
                     </button>
@@ -55,7 +37,7 @@ const Payment = () => {
                         <li>+5 Images</li>
                         <li>Unlock table, calendar, charts & gallery</li>
                     </ul>
-                    <button data-text="Awesome" onClick={() => handlePayment('2')}>
+                    <button data-text="Awesome" onClick={() => handlePayment('002')}>
                         <span className="actual-text">&nbsp;$4.99&nbsp;</span>
                         <span aria-hidden="true" className="hover-text">&nbsp;$4.99&nbsp;</span>
                     </button>
@@ -67,7 +49,7 @@ const Payment = () => {
                         <li>Unlimited Images</li>
                         <li>Everything Unlocked</li>
                     </ul>
-                    <button data-text="Awesome" onClick={() => handlePayment('3')}>
+                    <button data-text="Awesome" onClick={() => handlePayment('003')}>
                         <span className="actual-text">&nbsp;$7.99&nbsp;</span>
                         <span aria-hidden="true" className="hover-text">&nbsp;$7.99&nbsp;</span>
                     </button>
@@ -79,7 +61,7 @@ const Payment = () => {
                         <li>Unlimited Images</li>
                         <li>Everything Unlocked</li>
                     </ul>
-                    <button data-text="Awesome" onClick={() => handlePayment('4')}>
+                    <button data-text="Awesome" onClick={() => handlePayment('004')}>
                         <span className="actual-text">&nbsp;$74.99&nbsp;</span>
                         <span aria-hidden="true" className="hover-text">&nbsp;$74.99&nbsp;</span>
                     </button>

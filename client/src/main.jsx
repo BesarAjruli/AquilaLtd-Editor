@@ -8,6 +8,7 @@ import Approved from './Components/approve.jsx';
 import ToDo from './Components/todo.jsx';
 import Payment from './Components/payment.jsx';
 import FoldersToDo from './Components/toDo-folders.jsx'
+import CheckPayment from './Components/checkPayment.jsx'
 
 const router = createBrowserRouter([
   {
@@ -37,6 +38,10 @@ const router = createBrowserRouter([
   {
     path: '/payment',
     element: <Payment/>
+  },
+  {
+    path: '/complete-order',
+    element: <CheckPayment/>
   }
 ])
 
