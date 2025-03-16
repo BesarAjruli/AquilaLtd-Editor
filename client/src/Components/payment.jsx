@@ -1,8 +1,12 @@
+import { useState } from 'react';
 import '../style/paymentStyle.css'
+import Loading from './Loading';
 
 const Payment = () => {
+  const [loading, setLoading] = useState(false)
 
     const handlePayment = async (productCode) => {
+        setLoading(true)
         const response = await fetch(`http://localhost:5000/pay/${productCode}`, {
             method:'POST',
         })
@@ -10,6 +14,7 @@ const Payment = () => {
         
         if (data.approvalUrl) {
             window.location.href = data.approvalUrl; // Redirect user to PayPal for approval
+            setLoading(false)
         } else {
             console.error('Error getting PayPal approval URL:', data.error);
         }
@@ -17,6 +22,7 @@ const Payment = () => {
 
    return(
         <>
+      {loading && <Loading/>}
             <div className="paymentBody">
                 <div>
                     <h2>-Basic Bundle-</h2>

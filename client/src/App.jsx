@@ -1,7 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import './style/style.css';
 import html2canvas from 'html2canvas'
-import { useNavigate } from "react-router-dom";
 import SaveTemplateDialog from './Components/Dialogs/saveTemplate'
 import EditorDialog from './Components/Dialogs/editComponents';
 import SelectTemplate from './Components/Dialogs/selectTemplate';
@@ -77,6 +76,7 @@ Calendar.displayName = 'Calendar'
 
 export default function App() {
   const [elements, setElements] = useState([]);
+  const elementsRef = useRef(elements);
   const dialogRef = useRef(null)
   const [currentElement, setCurrentElement] = useState(null)
   const [chngStyle, setChangingStyle] = useState(false)
@@ -90,7 +90,6 @@ export default function App() {
   const iconsDialog = useRef(null)
   const [iconConent, setIconName] = useState(null)
   const [userId, setUserId] = useState(null)
-  const navigate = useNavigate()
   const [loading, setLoading] = useState(true)
   const extraInptRef = useRef(null)
   const [listItems, setListItems] = useState(["Item1", "Item2"]);
@@ -102,6 +101,9 @@ export default function App() {
   const [shouldRunEffect, setShouldRunEffect] = useState(false);
   const injectCssRef = useRef(null)
   const [alignmentLines, setAlignmentLines] = useState([]);
+  const [limitations, setLimitations] = useState({})
+  const [loadedElms, setLoaded] = useState(false)
+  const toolbarRef = useRef()
 
   const uniqueId = () => `element-${Date.now()}-${Math.random()}`;
   const backendUrl = import.meta.env.VITE_BACKEND_URL;
@@ -119,8 +121,11 @@ export default function App() {
       }
         setLoading(false)
         const data = await response.json();
-        console.log(data)
         setUserId(data.user.id)
+        setLimitations({
+          pages: data.user.pages,
+          images: data.user.imagesLimit
+        })
     } catch(error){
       setLoading(false)
       console.error(error)
@@ -631,11 +636,14 @@ const changeStyle = (id, e) => {
   const serializeTemplate = (elements, editorStyle) => {
     return {
       editorStyle,
-      elements: elements.map(({ id, style, component }) => ({
+      elements: elements.map(({ id, style, component, page, x, y }) => ({
       id,
       style,
+      page,
       type: component.type.name,
       content: component.props.content,
+      x,
+      y
     }))
   }
   };
@@ -677,14 +685,14 @@ const changeStyle = (id, e) => {
       setLoading(false)
     })
   } else{
-    navigate('/signup')
+    location.href = '/signup'
   }
   };
 
   const deserializeTemplate = (serializedData) => {
     const { editorStyle, elements } = JSON.parse(serializedData); 
-  
-    const deserializedElements = elements.map(({ id, style, type, content }) => {
+    
+    const deserializedElements = elements.map(({ id, style, type, content, page, x, y }) => {
       let Component;
   
       // Dynamically select the component based on the type
@@ -741,6 +749,9 @@ const changeStyle = (id, e) => {
         component: (
           <Component key={id} style={style} content={content} />
         ),
+        page,
+        x, 
+        y
       };
     });
   
@@ -748,18 +759,24 @@ const changeStyle = (id, e) => {
   };
   
   const loadTemplate = async (templateNr) => {
-    templatesRef.current.close();
     setLoading(true)
+    const saved = localStorage.getItem('saved')
+
     let serialized = '';
-    await fetch(`${backendUrl}/api/saveTemplate`)
-      .then((response) => response.json())
-      .then((data) => {
-        serialized = JSON.parse(data[templateNr].template);
-        setLoading(false)
-      });
+    if(saved){
+      serialized = saved
+    } else{
+    templatesRef.current.close();
+
+      await fetch(`${backendUrl}/api/saveTemplate`)
+        .then((response) => response.json())
+        .then((data) => {
+          serialized = JSON.parse(data[templateNr].template);
+          setLoading(false)
+        });
+      }
   
     const { editorStyle, deserializedElements } = deserializeTemplate(serialized);
-  
     const newElements = deserializedElements.map((element) => {
       const updatedElement = {
         ...element,
@@ -768,7 +785,9 @@ const changeStyle = (id, e) => {
           style: element.style,
           content: element.component.props.content,
         }),
-        page: currentPage,
+        page: saved ? element.page : currentPage,
+        x: element.x,
+        y: element.y
       };
       return updatedElement;
     });
@@ -780,9 +799,11 @@ const changeStyle = (id, e) => {
     });
   
       Object.keys(editorStyle).forEach(key => {
-       editorRef.current.style[key] = editorStyle[key];
+        if (editorRef.current) {
+          editorRef.current.style[key] = editorStyle[key];
+      }
       });
-  
+
   };
   
   const getStyleAsObject = (element) => {
@@ -831,15 +852,61 @@ const handleMobileContextMenu = (id, e) => {
 
   startPress();
 }
-  return (
+
+useEffect(() => {
+  if (!elements || elements.length === 0) return; // Prevent running for null/empty elements
+
+  const highestPage = Math.max(...elements.map((el) => el.page));
+
+  if(highestPage > 1){
+    for(let i = highestPage; i > 1; i --){
+      toolbarRef.current.addNewPage()
+    }
+  }
+}, [loadedElms]);
+
+useEffect(() => {
+  elementsRef.current = elements;
+}, [elements]);
+
+  const handleBeforeUnload = () => {
+    if (!loadedElms){
+      const serialized = serializeTemplate(elementsRef.current, editorStyle);
+      localStorage.setItem("saved", JSON.stringify(serialized));
+    }
+  };
+
+useEffect(() => {
+  const loaded = () => {
+    if(localStorage.getItem('saved')){
+      loadTemplate()
+      localStorage.removeItem('saved')
+      setLoaded(true)
+    }
+  }
+
+  window.addEventListener('popstate', loaded);
+  loaded()
+  // Attach the event listener
+  window.addEventListener('beforeunload', handleBeforeUnload);
+
+  // Clean up the event listener when the component unmounts
+  return () => {
+    window.removeEventListener('beforeunload', handleBeforeUnload);
+    window.removeEventListener('popstate', loaded);
+  };
+},[])
+
+
+return (
     <>
       {loading && <Loading/>}
-      <Toolbar 
+      <Toolbar ref={toolbarRef}
        historyIndex={historyIndex} saveDesign={saveDesign}
        saveTempRef={saveTempRef} templatesRef={templatesRef}
        currentPage={currentPage} setCurrentPage={setCurrentPage}
        history={history} setHistoryIndex={setHistoryIndex} 
-       setElements={setElements} editorRef={editorRef} userId={userId}/>
+       setElements={setElements} editorRef={editorRef} userId={userId} limitations={limitations.pages}/>
       <div className='sideElementsBar left'>
         <div className='text' title='Text' onClick={() => addElement(Text)}>Text</div>
         <hr />
@@ -911,8 +978,8 @@ const handleMobileContextMenu = (id, e) => {
           el.page === currentPage &&
             (<Rnd
               default={{
-                x: 0,
-                y: 0,
+                x: el.x || 0,
+                y: el.y || 0,
                 width: el.style.width,
                 height: el.style.height,
               }}
@@ -944,7 +1011,7 @@ const handleMobileContextMenu = (id, e) => {
       currentElement={currentElement} chngStyle={chngStyle}
       extraEditor={extraInptRef} elements={elements} injectCssRef={injectCssRef}
        imageSrc={imageSrc} currentPage={currentPage} setImageSrc={setImageSrc} setElements={setElements} saveHistory={saveHistory}
-       setChangingStyle={setChangingStyle} setCurrentElement={setCurrentElement} iconsDialog={iconsDialog} editorRef={editorRef}/>
+       setChangingStyle={setChangingStyle} setCurrentElement={setCurrentElement} iconsDialog={iconsDialog} editorRef={editorRef} limitations={limitations.images}/>
       <SaveTemplateDialog ref={saveTempRef} saveTemplate={(elements, e) => saveTemplate(elements, e)} elements={elements}/>
       <IconsSelector ref={iconsDialog} addElement={() => addElement(Icons)} 
         sendIconName={(value) => setIconName(value)}/>

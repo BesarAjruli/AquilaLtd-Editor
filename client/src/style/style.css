@@ -169,9 +169,9 @@ max-width: 120px;
 /* Header */
 .dialog-header {
   display: flex;
-  justify-content: space-between;
   align-items: center;
   margin-bottom: 20px;
+  justify-content: center;
 }
 
 .dialog-header h3 {
@@ -184,6 +184,7 @@ max-width: 120px;
   font-size: 1.2rem;
   color: #888;
   transition: color 0.2s;
+  margin-left: 15%;
 }
 
 .close-icon:hover {
@@ -303,6 +304,12 @@ input[name='height']{
 }
 .pages div svg {
   fill: #333;
+}
+.deleteHistory{
+  fill: #333;
+  width: 30px;
+  margin-left: 30px;
+  cursor: pointer;
 }
 
 .templateDialog {
@@ -729,5 +736,10 @@ input {
   }
   .iconSelectorDialog .close-icon {
     margin-left: 10%;
+  }
+}
+@media (min-width: 1440px) {
+  #root{
+    zoom: 125%;
   }
 }

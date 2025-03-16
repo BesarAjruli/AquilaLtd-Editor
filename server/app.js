@@ -269,12 +269,26 @@ app.post('/pay/:productId', async(req,res) => {
 
 app.get('/complete-order', async (req, res) => {
   try{
-    await paypal.capturePayments(req.query.token)
-    console.log('completed')
-    res.json({bundleId: '001'})
+    const response = await paypal.capturePayments(req.query.token)
+    res.json({bundleId: response.firstItemSku})
   }catch(err){
     res.status(500).json({ error: err.message || 'An unknown error occurred' });
   }
+})
+
+app.put('/update-bundle/:bundleId', async(req, res) => {
+  if(!req.user) return
+  const bundleId = req.params.bundleId
+  await prisma.user.update({
+    where:{
+      id: req.user.id
+    },
+    data:{
+      bundle: bundleId,
+      pages: bundleId === '001' ? user.req.pages + 3 : bundleId === '002' ? user.req.pages + 8 : 9999,
+      imagesLimit: bundleId === '001' ? user.req.imagesLimit + 3 : bundleId === '002' ? user.req.imagesLimit + 5 : 9999,
+    }
+  })
 })
 
 //Passport

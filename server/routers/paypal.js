@@ -45,7 +45,8 @@ exports.createOrder = async (productId) => {
                     unit_amount: {
                         currency_code: 'USD',
                         value: value
-                    }
+                    },
+                    sku: productId,
                 }],
                 amount: {
                     currency_code: 'USD',
@@ -84,7 +85,26 @@ exports.capturePayments = async (orderId) => {
             }
         });
 
-        return response.data;  // Return the response data
+        // Fetch full order details to get the items
+        const orderDetailsResponse = await axios({
+            url: `${process.env.PAYPAL_BASE_URL}/v2/checkout/orders/${orderId}`,
+            method: 'get',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${accessToken}`
+            }
+        });
+
+        const orderDetails = orderDetailsResponse.data;
+        const purchaseUnit = orderDetails.purchase_units?.[0];
+        const items = purchaseUnit?.items || [];
+
+        const firstItemSku = items.length > 0 ? items[0].sku : null;
+
+        return {
+            captureResponse: response.data,  // The original response data
+            firstItemSku: firstItemSku       // SKU of the first item, if it exists
+        };
     } catch (error) {
         // Catch any errors and log them
         console.error('Error during payment capture:', error.response ? error.response.data : error.message);
