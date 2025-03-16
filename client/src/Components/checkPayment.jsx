@@ -2,13 +2,16 @@ import { useState, useEffect } from "react"
 
 const CheckPayment = () => {
     const [bundeId, setBundleId] = useState(null)
+    const backendUrl = import.meta.env.VITE_BACKEND_URL;
+
 
     useEffect(() => {
         const urlParams = new URLSearchParams(window.location.search);
         const token = urlParams.get('token')
         const getResponse = async() => {
-            const response = await fetch(`http://localhost:5000/complete-order?token=${token}`)
+            const response = await fetch(`${backendUrl}/complete-order?token=${token}`)
             const data = await response.json()
+            console.log(data)
 
             setBundleId(data.bundleId)
         }
@@ -17,10 +20,20 @@ const CheckPayment = () => {
     }, [])
 
     useEffect(() => {
-        const response = fetch(`http://localhost:5000/update-bundle/${bundeId}`, {
+        if (!bundeId) return
+        const getResponse = async () => {
+        const response = await fetch(`${backendUrl}/update-bundle/${bundeId}`, {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' }
         })
+
+        const data = await response.json()
+        console.log(data)
+        if(data.success){
+            location.href = '/'
+        }}
+
+        getResponse()
     }, [bundeId])
 }
 

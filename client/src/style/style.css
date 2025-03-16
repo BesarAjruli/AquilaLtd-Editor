@@ -20,7 +20,7 @@ html {
   padding: 30px;
   border-radius: 15px;
   position: fixed;
-  top: 10px;
+  top: 70px;
   z-index: 90;
 }
 .left {
@@ -634,12 +634,12 @@ input {
     top: 10%;
   }
   .left {
-    left: -37%;
+    left: -38%;
     right: auto;
   }
   .right {
     width: 20%;
-    right: -27%;
+    right: -28%;
     left: auto;
   }
   .right *{

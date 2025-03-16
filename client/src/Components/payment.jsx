@@ -4,10 +4,12 @@ import Loading from './Loading';
 
 const Payment = () => {
   const [loading, setLoading] = useState(false)
+  const backendUrl = import.meta.env.VITE_BACKEND_URL;
+
 
     const handlePayment = async (productCode) => {
         setLoading(true)
-        const response = await fetch(`http://localhost:5000/pay/${productCode}`, {
+        const response = await fetch(`${backendUrl}/pay/${productCode}`, {
             method:'POST',
         })
         const data = await response.json()

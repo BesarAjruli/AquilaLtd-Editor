@@ -277,8 +277,13 @@ app.get('/complete-order', async (req, res) => {
 })
 
 app.put('/update-bundle/:bundleId', async(req, res) => {
-  if(!req.user) return
+  if (!req.user) {
+    return res.status(401).json({ success: false, message: "Unauthorized" });
+  }
+  
   const bundleId = req.params.bundleId
+
+  try{
   await prisma.user.update({
     where:{
       id: req.user.id
@@ -289,6 +294,11 @@ app.put('/update-bundle/:bundleId', async(req, res) => {
       imagesLimit: bundleId === '001' ? user.req.imagesLimit + 3 : bundleId === '002' ? user.req.imagesLimit + 5 : 9999,
     }
   })
+
+  res.json({success: true})
+} catch(err){
+  console.log(err)
+}
 })
 
 //Passport
