@@ -289,9 +289,9 @@ app.put('/update-bundle/:bundleId', async(req, res) => {
       id: req.user.id
     },
     data:{
-      bundle: bundleId,
-      pages: bundleId === '001' ? user.req.pages + 3 : bundleId === '002' ? user.req.pages + 8 : 9999,
-      imagesLimit: bundleId === '001' ? user.req.imagesLimit + 3 : bundleId === '002' ? user.req.imagesLimit + 5 : 9999,
+      bundle: parseInt(bundleId),
+      pages: bundleId === '001' ? req.user.pages + 3 : bundleId === '002' ? req.user.pages + 8 : 9999,
+      imagesLimit: bundleId === '001' ? req.user.imagesLimit + 3 : bundleId === '002' ? req.user.imagesLimit + 5 : 9999,
     }
   })
 

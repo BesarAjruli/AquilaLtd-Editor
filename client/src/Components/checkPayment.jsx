@@ -22,8 +22,10 @@ const CheckPayment = () => {
     useEffect(() => {
         if (!bundeId) return
         const getResponse = async () => {
+
         const response = await fetch(`${backendUrl}/update-bundle/${bundeId}`, {
             method: 'PUT',
+            credentials: 'include', 
             headers: { 'Content-Type': 'application/json' }
         })
 
