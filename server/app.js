@@ -88,6 +88,7 @@ app.post('/api/saveTemplate', upload.single('image'), async (req, res) => {
         authorId: parseInt(req.body.userId),
         premium: false,
         verified: false,
+        name: req.body.name
       }
     });
 

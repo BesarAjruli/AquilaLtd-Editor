@@ -9,6 +9,8 @@ const SaveTemplateDialog = forwardRef(({saveTemplate, elements}, ref) => {
             e.preventDefault()
             saveTemplate(elements, e)
             }}>
+          <label htmlFor="name">Name</label>
+          <input type="text" name="name" id="name" placeholder="Your templates name" />
           <label htmlFor="category">Category</label>
           <select name='category' id='category'>
             <option value='login'>Login</option>
