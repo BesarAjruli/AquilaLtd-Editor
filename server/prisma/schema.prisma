@@ -17,28 +17,34 @@ model Template {
   premium     Boolean
   publicId    String
   verified    Boolean
+  name        String?
   author      User    @relation(fields: [authorId], references: [id])
 }
 
 model User {
-  id        Int        @id @default(autoincrement())
-  password  String
-  username  String     @unique
-  templates Template[]
-  pages Int @default(3)
-  imagesLimit Int @default(3)
-  bundle Int @default(0)
-  todos     ToDo[] 
+  id          Int        @id @default(autoincrement())
+  password    String
+  username    String     @unique
+  bundle      Int        @default(0)
+  imagesLimit Int        @default(3)
+  pages       Int        @default(3)
+  templates   Template[]
+  todos       ToDo[]
 
   @@unique([username, id], name: "usernameId")
 }
 
 model ToDo {
-  id Int @id @default(autoincrement())
-  path String
+  id       Int     @id @default(autoincrement())
+  path     String
   authorId Int
   finished Boolean
   publicId String
+  author   User    @relation(fields: [authorId], references: [id])
+}
 
-  author    User   @relation(fields: [authorId], references: [id])
+model user_session {
+  sid    String   @id @db.VarChar
+  sess   Json     @db.Json
+  expire DateTime @db.Timestamp(6)
 }

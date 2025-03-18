@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react"
+import Loading from "./Loading";
 
 const CheckPayment = () => {
     const [bundeId, setBundleId] = useState(null)
@@ -37,6 +38,12 @@ const CheckPayment = () => {
 
         getResponse()
     }, [bundeId])
+
+    return(
+    <>
+        <Loading/>
+    </>
+    )
 }
 
 export default CheckPayment

@@ -1,8 +1,8 @@
 import '../../style/unlockStyle.css'
 import { forwardRef } from 'react'
-import limitsImg from '../../images/limits.png';
+import limitsImg from '../../images/limitReachedGlowing.png';
 
-const Unlock = forwardRef(({}, ref) => {
+const Unlock = forwardRef(({userId}, ref) => {
 
     const closeDialog = () => {
         ref.current.close()
@@ -15,7 +15,7 @@ const Unlock = forwardRef(({}, ref) => {
                     <i onClick={closeDialog} className="close-icon" title='close'>✖</i>
                 </header>
                 <div><img src={limitsImg} alt="limits" /></div>
-                <button data-text="Awesome" onClick={() => location.href = ('/payment')}>
+                <button data-text="Awesome" onClick={() => userId ? location.href = ('/payment'): location.href = '/login'}>
                         <span className="actual-text">&nbsp;Purchase&nbsp;</span>
                         <span aria-hidden="true" className="hover-text">&nbsp;Purchase&nbsp;</span>
                     </button>

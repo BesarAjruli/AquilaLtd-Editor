@@ -14,6 +14,7 @@ async function generateAccessToken() {
     return response.data.access_token
 }
 exports.createOrder = async (productId) => {
+    try {
     const accessToken = await generateAccessToken()
     let value
 
@@ -70,6 +71,10 @@ exports.createOrder = async (productId) => {
     })
 
     return response.data.links.find(link => link.rel === 'approve').href
+    } catch (error){
+        console.error("PayPal createOrder Error:", error.response ? error.response.data : error.message);
+        throw error;
+    }
 }
 
 exports.capturePayments = async (orderId) => {

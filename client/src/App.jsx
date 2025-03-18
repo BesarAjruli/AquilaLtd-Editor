@@ -11,6 +11,7 @@ import Loading from './Components/Loading';
 import ExtraInput from './Components/Dialogs/ExtraInput'
 import { Rnd } from "react-rnd";
 import CodeEditor from './Components/Dialogs/codeEditor';
+import Unlock from './Components/Dialogs/unlockMore.jsx'
 
 const Text = ({style, content}) => <span className='edit' style={style}>{content}</span>;
 Text.displayName = 'Text'
@@ -24,6 +25,7 @@ const Video = ({style}) => <img className='edit' style={style} src="https://play
 Video.displayName = 'Video'
 const Audio = ({style}) => <img className='edit' style={style} src="https://png.pngtree.com/png-vector/20230408/ourmid/pngtree-sound-waves-equalizer-audio-radio-signal-music-recording-vector-png-image_6678910.png" alt="audio" />;
 const Gallery = ({style}) => <img className='edit' style={style} src="https://t3.ftcdn.net/jpg/04/19/92/88/360_F_419928833_w7HrdbjTCl1zGIBY1YljW6feoWx90ETm.jpg" alt="Gallery" />;
+Gallery.displayName = 'Gallery'
 const Section = ({style}) => <div className='edit' style={style}></div>;
 const Link = ({style, content}) => <a className='edit' style={style}>{content}</a>;
 Link.displayName = 'Link'
@@ -41,7 +43,9 @@ const List = ({style, content}) => {
 );}
 List.displayName = 'List'
 const Pie = ({style}) => <img className='edit' style={style} src='https://img.icons8.com/skeuomorphism/64/pie-chart.png'/>
+Pie.displayName = 'Charts'
 const Charts = ({style}) => <img className='edit' style={style} src='https://img.icons8.com/skeuomorphism/64/bar-chart.png'/>
+Charts.displayName = 'Charts'
 const Menu = ({style}) => <img className='edit' style={style} src='https://img.icons8.com/material-rounded/64/menu--v1.png'/>
 const Icons = ({style, content}) => <Icon className='edit' icon={`mdi-light:${content}`} style={style}/>
 Icons.displayName = 'Icons'
@@ -104,6 +108,8 @@ export default function App() {
   const [limitations, setLimitations] = useState({})
   const [loadedElms, setLoaded] = useState(false)
   const toolbarRef = useRef()
+  const unlockRef = useRef(null)
+  const [usersBundle, setUsersBundle] = useState(0)
 
   const uniqueId = () => `element-${Date.now()}-${Math.random()}`;
   const backendUrl = import.meta.env.VITE_BACKEND_URL;
@@ -126,6 +132,7 @@ export default function App() {
           pages: data.user.pages,
           images: data.user.imagesLimit
         })
+        setUsersBundle(data.user.bundle || 0)
     } catch(error){
       setLoading(false)
       console.error(error)
@@ -361,6 +368,7 @@ if(mediaQuery.matches){
         });
     };
 
+    console.log(type)
     // Apply settings based on component type
     switch (type) {
         case 'Button':
@@ -394,6 +402,10 @@ if(mediaQuery.matches){
             dialog.querySelector('#content').setAttribute('disabled', 'true');
             break;
         case 'Table':
+          if(usersBundle === 0) {
+            unlockRef.current.showModal()
+            return
+          }
             setValues({ '#content': JSON.stringify(tableItems), '#hiddenContent': JSON.stringify(tableItems) });
             dialog.querySelector('#hiddenContent').removeAttribute('disabled');
             dialog.querySelector('#content').setAttribute('disabled', 'true');
@@ -405,10 +417,26 @@ if(mediaQuery.matches){
           })
           break;
         case "Calendar":
+          if(usersBundle === 0) {
+            unlockRef.current.showModal()
+            return
+          }
           setValues({
             '#width': 520,
             '#height': 250,
           })
+          break;
+        case 'Gallery':
+          if(usersBundle <= 1) {
+            unlockRef.current.showModal()
+            return
+          }
+          break;
+        case 'Charts':
+          if(usersBundle === 0) {
+            unlockRef.current.showModal()
+            return
+          }
           break;
         default:
           setValues({ '#width': 100, '#height': 50 });
@@ -1011,13 +1039,15 @@ return (
       currentElement={currentElement} chngStyle={chngStyle}
       extraEditor={extraInptRef} elements={elements} injectCssRef={injectCssRef}
        imageSrc={imageSrc} currentPage={currentPage} setImageSrc={setImageSrc} setElements={setElements} saveHistory={saveHistory}
-       setChangingStyle={setChangingStyle} setCurrentElement={setCurrentElement} iconsDialog={iconsDialog} editorRef={editorRef} limitations={limitations.images}/>
+       setChangingStyle={setChangingStyle} setCurrentElement={setCurrentElement} iconsDialog={iconsDialog} editorRef={editorRef} 
+       limitations={limitations.images} unlockDialog={unlockRef}/>
       <SaveTemplateDialog ref={saveTempRef} saveTemplate={(elements, e) => saveTemplate(elements, e)} elements={elements}/>
       <IconsSelector ref={iconsDialog} addElement={() => addElement(Icons)} 
         sendIconName={(value) => setIconName(value)}/>
       <ExtraInput ref={extraInptRef} currentElement={currentElement} listItems={listItems} setListItems={setListItems} dialogRef={dialogRef}
       setTableData={setTableData} tableItems={tableItems}/>
       <CodeEditor ref={injectCssRef} currentElement={currentElement} dialogRef={dialogRef}/>
+      <Unlock ref={unlockRef} userId={userId}/>
     </>
   );
 }

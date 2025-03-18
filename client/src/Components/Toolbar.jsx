@@ -87,7 +87,7 @@ const Toolbar = forwardRef(({
       }
   return (
     <>
-    <Unlock ref={unlockRef}/>
+    <Unlock ref={unlockRef} userId={userId}/>
       <div className="toolBar">
         <div className="history">
           <button onClick={undoFunction} disabled={historyIndex === 0}>

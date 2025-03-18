@@ -1,7 +1,6 @@
 import React, { forwardRef, useState } from "react"
 import Icon from '@mdi/react';
 import { mdiContentCopy } from '@mdi/js';
-import { useNavigate } from "react-router-dom";
 
 let imagesSet = 0
 
@@ -9,11 +8,10 @@ const EditorDialog = forwardRef(({
     mediaQuery,duplicate,closeDialog, handleImageChange,
     currentElement, chngStyle, extraEditor, elements, injectCssRef,
      imageSrc, currentPage, setImageSrc, setElements, saveHistory, setChangingStyle,
-    setCurrentElement, iconsDialog, editorRef, limitations
+    setCurrentElement, iconsDialog, editorRef, limitations, unlockDialog
     }, ref) => {
 
       const [layer, setLayer]= useState(null)
-      const navigate = useNavigate()
 
       let clicksW = 0, clicksH = 0, clicksT = 0
 
@@ -120,17 +118,9 @@ const EditorDialog = forwardRef(({
               imagesSet++
             } else{
               closeDialog()
-              navigate('/payment')
+              unlockDialog.current.showModal()
               return
             }
-          } else if(compName === 'Table' || compName === 'Calendar'){
-            closeDialog()
-            navigate('/payment')
-            return
-          } else if(compName === 'Pie' || compName === 'Charts' || compName === 'Gallery'){
-            closeDialog()
-            navigate('/payment')
-            return
           }
           const updatedElement = {
             ...currentElement,
