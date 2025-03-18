@@ -44,17 +44,17 @@ exports.createOrder = async (productId) => {
                     description: 'Basic Bundle',
                     quantity: 1,
                     unit_amount: {
-                        currency_code: 'USD',
+                        currency_code: 'EUR',
                         value: value
                     },
                     sku: productId,
                 }],
                 amount: {
-                    currency_code: 'USD',
+                    currency_code: 'EUR',
                     value: value,
                     breakdown: {
                         item_total: {
-                            currency_code: 'USD',
+                            currency_code: 'EUR',
                             value: value
                         }
                     }
