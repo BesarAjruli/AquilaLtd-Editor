@@ -5,7 +5,7 @@ import Editor from '@monaco-editor/react'
     const editorRef = useRef(null);
     const [defaultStyle, setDefaultStyle] = useState(null); 
     const [id, setId] = useState(null);
-    let elmId
+    const [elmId, setElmID] = useState('')
     const [prevStyle, setPrevStyle] = useState(null)
 
     function camelToKebab(str) {
@@ -16,7 +16,7 @@ import Editor from '@monaco-editor/react'
     useEffect(() => {
         if (currentElement?.id) {
             setId((currentElement.id).replace(/\./g, '\\2e'));
-            elmId = currentElement.id
+            setElmID(currentElement.id)
             setPrevStyle(JSON.stringify(currentElement.style)
             .replace(/[{}\"]/g, '')
             .replace(/,/g, ';\n')
@@ -49,7 +49,6 @@ ${prevStyle}
         const [key, value] = property.split(':').map(str => str.trim());
         
         if (key && value) {
-          console.log(document.getElementById(elmId))
             document.getElementById(elmId).children[0].style[key] = value;
         }
       });

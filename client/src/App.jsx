@@ -12,6 +12,7 @@ import ExtraInput from './Components/Dialogs/ExtraInput'
 import { Rnd } from "react-rnd";
 import CodeEditor from './Components/Dialogs/codeEditor';
 import Unlock from './Components/Dialogs/unlockMore.jsx'
+import url2htmlIcon from './images/u2c.jpeg'
 
 const Text = ({style, content}) => <span className='edit' style={style}>{content}</span>;
 Text.displayName = 'Text'
@@ -110,6 +111,7 @@ export default function App() {
   const toolbarRef = useRef()
   const unlockRef = useRef(null)
   const [usersBundle, setUsersBundle] = useState(0)
+  const urlRef = useRef(null)
 
   const uniqueId = () => `element-${Date.now()}-${Math.random()}`;
   const backendUrl = import.meta.env.VITE_BACKEND_URL;
@@ -368,7 +370,6 @@ if(mediaQuery.matches){
         });
     };
 
-    console.log(type)
     // Apply settings based on component type
     switch (type) {
         case 'Button':
@@ -465,7 +466,7 @@ const changeStyle = (id, e) => {
   const hasTable = target.children[0]?.tagName === 'TABLE';
   const isIcon = target.tagName === 'ICONIFY-ICON';
   const isEditor = id.startsWith('editor');
-  
+
   // Disable/enable appropriate fields
   dialog.querySelector('#hiddenContent').setAttribute('disabled', 'true');
   dialog.querySelector('#width').removeAttribute('disabled');
@@ -504,7 +505,7 @@ const changeStyle = (id, e) => {
 
   // Set style properties
   const setStyleValue = (selector, value) => {
-      dialog.querySelector(selector).value = parseInt(value) || '';
+      dialog.querySelector(selector).value = parseInt(value) === 0 ? 0 : parseInt(value) || '';
   };
   
   setStyleValue('#width', target.style.width);
@@ -535,16 +536,19 @@ const changeStyle = (id, e) => {
       dialog.querySelector('.layersCOntainer').style.display = 'flex';
       
       if (elementToUpdate) {
-          setCurrentElement({ id, component: elementToUpdate.component, style: elementToUpdate.style });
+          setCurrentElement({ id, component: elementToUpdate.component, style: elementToUpdate.style, x: getXY(id).x, y: getXY(id).y  });
       }
   } else {
       // Disable fields for editor elements
       dialog.querySelectorAll('#content, #width, #borderWidth, #borderRadius, #fontSize, #imageContent, .deleteButton, #opacity, #borderColor, .maxWidth ').forEach(el => el.setAttribute('disabled', 'true'));
-      setCurrentElement({ id, component: editorRef.current, style: editorRef.current.style });
+      setCurrentElement({ id, component: editorRef.current, style: editorRef.current.style});
   }
 
   dialog.showModal();
 };
+
+const getXY = (id) => elements.find((e) => e.id === id);
+
 
   const closeDialog = () => {
     dialogRef.current.querySelector('form').reset()
@@ -556,21 +560,26 @@ const changeStyle = (id, e) => {
     if(!rgb || rgb === 'transparent'){
       return
     }
-    var match = rgb.match(/\d+/g);
+    var match = rgb.match(/(\d*\.?\d+)/g);
 
     // Ensure that we have three RGB values
-    if (match.length !== 3) {
+    if (!match || (match.length !== 3 && match.length !== 4)) {
         console.error("Invalid RGB color format");
         return null;
     }
 
     // Convert RGB values to hexadecimal format
     function hex(x) {
-        return ("0" + parseInt(x).toString(16)).slice(-2);
+      return ("0" + Math.min(255, Math.max(0, parseInt(x))).toString(16)).slice(-2);
     }
 
     // Construct the hexadecimal color string
     var hexColor = "#" + hex(match[0]) + hex(match[1]) + hex(match[2]);
+
+    if (match.length === 4) {
+        const alpha = Math.round(parseFloat(match[3]) * 255);
+        hexColor += hex(alpha);
+    }
     
     return hexColor;
 }
@@ -808,6 +817,7 @@ const changeStyle = (id, e) => {
     const newElements = deserializedElements.map((element) => {
       const updatedElement = {
         ...element,
+        id: uniqueId(),
         style: element.style,
         component: React.cloneElement(element.component, {
           style: element.style,
@@ -846,9 +856,11 @@ const duplicate = () => {
   const updatedElement = {
     ...currentElement,
     style: currentElement.style,
-    component: React.cloneElement(currentElement.component, { style: currentElement.syle, content:  currentElement.component.props.content }),
+    component: React.cloneElement(currentElement.component, { style: currentElement.style, content:  currentElement.component.props.content }),
     page: currentPage,
-    id: uniqueId()
+    id: uniqueId(),
+    x: currentElement.x + 20,
+    y: currentElement.y + 20
   };
   const newElements =  [...elements, updatedElement];
   setElements(newElements);
@@ -925,6 +937,145 @@ useEffect(() => {
   };
 },[])
 
+const handleUrlSubmit = async (e) => {
+  e.preventDefault()
+  urlRef.current.close()
+
+  setLoading(true)
+        const formData = new FormData(e.target)
+        const data = Object.fromEntries(formData.entries())
+
+        try{
+           const resposne = await fetch(`http://localhost:5000/api/url2html`, {
+            method: 'POST',
+            headers: {"Content-Type": "application/json"},
+            body: JSON.stringify(data),
+           })
+           const results = await resposne.json()
+           setLoading(false)
+
+           if (!results.success) {
+            throw new Error('Fetch failed');
+            
+          }
+
+           if(results.success){
+            const parsedElements = parseElements(results.code);
+            console.log(parsedElements)
+            setElements(parsedElements);
+           }
+        }catch(err){
+          setLoading(false)
+            console.log(err)
+        }
+}
+
+const parseElements = (htmlString) => {
+  const tempDiv = document.createElement("div");
+  tempDiv.innerHTML = htmlString
+
+  const voidElements = new Set([
+    'area', 'base', 'br', 'col', 'embed', 'hr', 
+    'img', 'input', 'link', 'meta', 'param', 
+    'source', 'track', 'wbr'
+  ]);
+
+  return Array.from(tempDiv.children).map((element) => {
+    document.body.appendChild(element); // Temporarily add to DOM for measurements
+    const x = parseFloat(element.style.x)
+    const y = parseFloat(element.style.y)
+    const tagName = String(element.tagName).toLowerCase()
+    const srcImg = element.src
+
+    // Convert CSS text into a React-friendly object
+    const style = Object.fromEntries(
+      element.style.cssText
+        .split(";")
+        .map((rule) => rule.trim().split(":").map((part) => part.trim()))
+        .filter(([key, value]) => key && value)
+        .map(([key, value]) => [toCamelCase(key), value])
+    );
+
+    // Create a React component dynamically
+    let component;
+    if (voidElements.has(tagName)) {
+      const props = {
+        style: {
+          ...style,
+          // Special handling for images
+          ...(tagName === 'img' && {
+            maxWidth: '100%',       // Ensure responsiveness
+            height: 'auto',        // Maintain aspect ratio
+            // Only set explicit width/height if they exist in the original styles
+            ...(style.width && { width: style.width }),
+            ...(style.height && { height: style.height }),
+            // Preserve object-fit if it was specified
+            objectFit: style.objectFit || 'contain'
+          })
+        },
+        className: 'edit',
+        key: element.id
+      };
+    
+      // Handle special attributes for specific elements
+      if (tagName === 'img' && srcImg) {
+        props.src = srcImg;
+        props.alt = element.alt || ''; // Always include alt text for accessibility
+      } else if (tagName === 'input') {
+        props.type = element.type || 'text';
+        props.value = element.value || '';
+      }
+    
+      component = React.createElement(tagName, props);
+    } else {
+      const children = element.textContent.trim() 
+    ? element.textContent 
+    : parseNestedElements(element.innerHTML);
+  
+  component = React.createElement(
+    tagName,
+    { 
+      style: {
+        ...style,
+        // Preserve responsive behavior for non-void elements
+        ...(!style.width && { maxWidth: '100%' }),
+        ...(!style.height && { height: 'auto' })
+      },
+      className: 'edit',
+      key: element.id,
+      dangerouslySetInnerHTML: children === element.textContent 
+        ? undefined 
+        : { __html: children }
+    },
+    children === element.textContent ? children : undefined
+  );
+}
+
+function parseNestedElements(html) {
+  const tempDiv = document.createElement('div');
+  tempDiv.innerHTML = html;
+  return Array.from(tempDiv.children)
+    .map(child => child.outerHTML)
+    .join('');
+}
+    
+
+    document.body.removeChild(element); // Cleanup after getting position
+
+    return {
+      id: uniqueId(),
+      style,
+      component,
+      page: currentPage,
+      x,
+      y,
+    };
+  });
+};
+
+// ✅ Function to convert CSS property names to camelCase
+const toCamelCase = (str) =>
+  str.replace(/-([a-z])/g, (_, letter) => letter.toUpperCase());
 
 return (
     <>
@@ -973,6 +1124,7 @@ return (
         <div title='Table' onClick={() => addElement(Table)}><img src="https://img.icons8.com/officel/60/table-1.png" alt="table" /></div>
         <div title='Calendar' onClick={() => addElement(Calendar)}><img src='https://img.icons8.com/color/60/calendar--v1.png'/></div>
         <div title='Gif' onClick={() => addElement(ImageCmp)}><img src='https://img.icons8.com/color/60/gif.png'/></div>        
+        <img src={url2htmlIcon} className='url2htmIcon' onClick={() => urlRef.current.showModal()}/>
 
         <div className='dots rightDots'>
             <div></div>
@@ -1011,6 +1163,7 @@ return (
                 width: el.style.width,
                 height: el.style.height,
               }}
+              style={{zIndex: el.style.zIndex}}
               bounds="parent"
               onDragStart={(e) => handleDragStart(el.id, e)}
               onDrag={(e, d) => hanldeDrag(e, d, el.id)}
@@ -1032,6 +1185,14 @@ return (
           ))}
         </div>
       </div>
+      <dialog ref={urlRef} className='custom-dialog'>
+        <i onClick={() => urlRef.current.close()} className="close-icon urlClose" title='close'>✖</i>
+        <form action="post" onSubmit={handleUrlSubmit}>
+          <label htmlFor="url">URL   </label>
+          <input type='url' name="url" id="url" placeholder='https://example.com' /><br /><br />
+          <button type='submit' className='submit-button'>Submit</button>
+        </form>
+      </dialog>
       <SelectTemplate ref={templatesRef} loadTemplate={(e) => loadTemplate(e)}/>
 
       <EditorDialog ref={dialogRef} mediaQuery={mediaQuery}

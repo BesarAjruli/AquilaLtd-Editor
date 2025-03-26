@@ -100,13 +100,11 @@ const EditorDialog = forwardRef(({
         color: data.fontColor,
         backgroundColor: parseInt(data.transparent) === 0 ? data.bgColor : 'transparent',
         fontSize: data.fontSize + 'px',
-        borderWidth: data.borderWidth + 'px',
+        borderWidth: data.borderWidth + 'px' || 0,
         borderRadius: data.borderRadius + 'px',
         borderColor: data.borderColor,
         borderStyle: 'solid',
         position: currentElement.id.startsWith('editor') ? 'relative' : 'absolute',
-        left: currentElement.id.startsWith('editor') && chngStyle.changing === true ? 0 : currentElement.style.left || 0,
-        top: currentElement.id.startsWith('editor') ? 0 : currentElement.style.top || 0,
         zIndex: chngStyle.changing ? layer ?? currentElement.style.zIndex : elements.length ,
         opacity: parseInt(data.opacity) / 100,
         }
@@ -127,12 +125,16 @@ const EditorDialog = forwardRef(({
             style: formattedStyle,
             component: React.cloneElement(currentElement.component, { style: formattedStyle, content: imageSrc ? imageSrc : data.content }),
             page: currentPage,
+            x: currentElement.x,
+            y: currentElement.y
           };
           const newElements = chngStyle.changing
           ? elements.map((el) =>
               el.id === currentElement.id ? updatedElement : el
             )
           : [...elements, updatedElement];
+          document.getElementById(currentElement.id).style.width = formattedStyle.width
+          document.getElementById(currentElement.id).style.height = formattedStyle.height
   
         setImageSrc(null)
         setElements(newElements);

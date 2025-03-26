@@ -15,6 +15,7 @@ const db = new Pool({
   connectionString: process.env.DATABASE_URL + '?sslmode=require'
 })
 const paypal = require('./routers/paypal')
+const urlToHtml = require('./routers/urlToHtml')
 
 const upload = multer({dest: 'uploads/'})
 
@@ -300,6 +301,13 @@ app.put('/update-bundle/:bundleId', async(req, res) => {
 } catch(err){
   console.log(err)
 }
+})
+
+//urlToHTML
+app.post('/api/url2html', async (req, res) => {
+  const url = req.body.url
+  const code = await urlToHtml.url2html(url)
+  res.json({success: true, code: code});
 })
 
 //Passport
