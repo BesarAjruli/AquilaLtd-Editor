@@ -93,7 +93,6 @@ const EditorDialog = forwardRef(({
     e.preventDefault()
     const formData = new FormData(e.target)
     const data = Object.fromEntries(formData.entries())
-
     const formattedStyle = {
         width: parseInt(data.autoW ) === 0 ? data.width + 'px' : 'auto',
         height: parseInt(data.autoH) === 0 ? data.height + 'px' : 'auto',
@@ -133,8 +132,11 @@ const EditorDialog = forwardRef(({
               el.id === currentElement.id ? updatedElement : el
             )
           : [...elements, updatedElement];
-          document.getElementById(currentElement.id).style.width = formattedStyle.width
-          document.getElementById(currentElement.id).style.height = formattedStyle.height
+
+          if(chngStyle.changing){
+            document.getElementById(currentElement.id).style.width = formattedStyle.width
+            document.getElementById(currentElement.id).style.height = formattedStyle.height
+          }
   
         setImageSrc(null)
         setElements(newElements);

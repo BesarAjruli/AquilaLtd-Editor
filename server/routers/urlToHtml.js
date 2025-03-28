@@ -26,7 +26,7 @@ exports.url2html = async (baseUrl) => {
             const domOrderIndex = allElements.indexOf(el);
 
             const ignoredValues = new Set([
-                "normal", "unset", "initial", "inherit", "currentcolor", '0s'
+                "normal", "unset", "initial", "inherit", "currentcolor", '0s', 'none'
             ]);
 
             const ignoredPrefixes = ["-webkit-", "-moz-", "-ms-", "-o-"];
@@ -118,8 +118,8 @@ exports.url2html = async (baseUrl) => {
                   })
                   .filter(style => style),
                   'position: relative;',
-                `x: ${rect.top}px;`,
-                `y: ${rect.left}px;`,
+                `x: ${rect.top + window.scrollX};`,
+                `y: ${rect.left + window.scrollY};`,
                 `z-index: ${domOrderIndex};`,
             ]
 
@@ -144,7 +144,7 @@ exports.url2html = async (baseUrl) => {
             Array.from(el.children)
             .filter(child => {
                 const tagName = child.tagName.toLowerCase();
-                const skipTags = ['script', 'style', 'meta', 'link', 'noscript', 'svg'];
+                const skipTags = ['script', 'style', 'meta', 'link', 'noscript', 'svg', 'head'];
                 
                 // Skip invisible elements
                 const style = window.getComputedStyle(child);

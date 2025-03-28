@@ -568,6 +568,10 @@ const getXY = (id) => elements.find((e) => e.id === id);
         return null;
     }
 
+    if(rgb === 'rgba(0, 0, 0, 0)'){
+      return 'transparent'
+    }
+
     // Convert RGB values to hexadecimal format
     function hex(x) {
       return ("0" + Math.min(255, Math.max(0, parseInt(x))).toString(16)).slice(-2);
