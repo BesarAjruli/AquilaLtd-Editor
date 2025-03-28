@@ -2,9 +2,12 @@ const puppeteer = require("puppeteer");
 
 exports.url2html = async (baseUrl) => {
     try{
-    const browser = await puppeteer.launch({
-        headless: true,
-    });
+        const browser = await puppeteer.launch({
+            headless: "new",
+            executablePath: "/usr/bin/chromium", // Use system-installed Chromium
+            args: ["--no-sandbox", "--disable-setuid-sandbox"],
+        });
+        
     const page = await browser.newPage();
 
     await page.goto(baseUrl, { waitUntil: "networkidle0" });
