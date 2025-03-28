@@ -4,7 +4,6 @@ exports.url2html = async (baseUrl) => {
     try{
     const browser = await puppeteer.launch();
     const page = await browser.newPage();
-    console.log('checking')
 
     await page.goto(baseUrl, { waitUntil: "networkidle0" });
 

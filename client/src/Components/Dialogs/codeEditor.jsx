@@ -17,11 +17,11 @@ import Editor from '@monaco-editor/react'
         if (currentElement?.id) {
             setId((currentElement.id).replace(/\./g, '\\2e'));
             setElmID(currentElement.id)
-            setPrevStyle(JSON.stringify(currentElement.style)
-            .replace(/[{}\"]/g, '')
-            .replace(/,/g, ';\n')
-            .replace(/:/g, ': ')
-            .replace(/\b[a-zA-Z]+\b/g, camelToKebab))
+            setPrevStyle(
+              Object.entries(currentElement.style)
+                  .map(([key, value]) => `${camelToKebab(key)}: ${value}`)
+                  .join(';\n')
+          );
          }
     }, [currentElement]);
 
