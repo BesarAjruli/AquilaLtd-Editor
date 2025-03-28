@@ -1061,8 +1061,6 @@ function parseNestedTable(html) {
   return rows;
 }
 
-
-// ✅ Function to convert CSS property names to camelCase
 const toCamelCase = (str) =>
   str.replace(/-([a-z])/g, (_, letter) => letter.toUpperCase());
 
