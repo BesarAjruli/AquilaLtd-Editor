@@ -3,11 +3,11 @@
   "version": "1.0.0",
   "description": "",
   "main": "app.js",
- "scripts": {
-  "postinstall": "npx puppeteer browsers install chrome && ./install-deps.sh",
-  "start": "node app.js",
-  "test": "echo \"Error: no test specified\" && exit 1"
-},
+  "scripts": {
+    "start": "node app.js",
+    "postinstall": "npx puppeteer browsers install chrome && ./install-deps.sh",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
   "author": "Besar Ajruli",
   "license": "ISC",
   "dependencies": {
