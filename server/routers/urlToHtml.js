@@ -3,14 +3,7 @@ const puppeteer = require("puppeteer");
 exports.url2html = async (baseUrl) => {
     try{
     const browser = await puppeteer.launch({
-        headless: 'new',
-        executablePath: require('puppeteer').executablePath(),
-        args: [
-            '--no-sandbox',
-            '--disable-setuid-sandbox',
-            '--disable-dev-shm-usage',
-            '--single-process'
-          ]
+        headless: true,
     });
     const page = await browser.newPage();
 
