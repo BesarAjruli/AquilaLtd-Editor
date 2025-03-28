@@ -1,20 +1,9 @@
-# Use the official Node.js image
-FROM node:18-slim
+FROM ghcr.io/puppeteer/puppeteer:24.4.0
 
-# Set the working directory in the container
-WORKDIR /app
+WORKDIR /usr/src/app
 
-# Copy package.json and package-lock.json first
-COPY package.json package-lock.json ./
+COPY package*.json ./
 
-# Install Node.js dependencies
-RUN npm install --omit=dev
-
-# Copy the rest of the application files
+RUN npm ci
 COPY . .
-
-# Expose the application port
-EXPOSE 3000
-
-# Start the application
-CMD ["npm", "start"]
+CMD ["node", "app.js"]
