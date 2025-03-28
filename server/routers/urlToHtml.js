@@ -2,10 +2,7 @@ const puppeteer = require("puppeteer");
 
 exports.url2html = async (baseUrl) => {
     try{
-    const browser = await puppeteer.launch({
-        executablePath: '/app/.cache/puppeteer/chrome/linux-134.0.6998.35/chrome-linux64/chrome',
-        args: ['--no-sandbox', '--disable-setuid-sandbox']
-    });
+    const browser = await puppeteer.launch();
     const page = await browser.newPage();
 
     await page.goto(baseUrl, { waitUntil: "networkidle0" });
