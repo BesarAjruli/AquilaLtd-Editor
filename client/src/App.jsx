@@ -976,21 +976,32 @@ const handleUrlSubmit = async (e) => {
 
 const parseElements = (htmlString) => {
   const tempDiv = document.createElement("div");
-  tempDiv.innerHTML = htmlString
+  tempDiv.innerHTML = htmlString;
 
-  const voidElements = new Set([
-    'area', 'base', 'br', 'col', 'embed', 'hr', 
-    'img', 'input', 'link', 'meta', 'param', 
-    'source', 'track', 'wbr'
-  ]);
+  // Define the mapping between HTML elements and React components
+  const componentMapping = {
+    'text': Text,
+    'button': Button,
+    'input': Input,
+    'img': ImageCmp,
+    'video': Video,
+    'audio': Audio,
+    'section': Section,
+    'div': Section,
+    'a': Link,
+    'li': Text,
+    'table': Table,
+  };
 
   return Array.from(tempDiv.children).map((element) => {
     document.body.appendChild(element); // Temporarily add to DOM for measurements
-    const x = parseFloat(element.style.x)
-    const y = parseFloat(element.style.y)
-    const tagName = String(element.tagName).toLowerCase()
-    const srcImg = element.src
 
+    const tagName = String(element.tagName).toLowerCase();
+    const component = componentMapping[tagName] || Text; // Default to Text component if not found
+    const x = parseFloat(element.style.x);
+    const y = parseFloat(element.style.y);
+    const content = element.textContent.trim() || element.innerHTML || element.src;
+    
     // Convert CSS text into a React-friendly object
     const style = Object.fromEntries(
       element.style.cssText
@@ -1000,82 +1011,61 @@ const parseElements = (htmlString) => {
         .map(([key, value]) => [toCamelCase(key), value])
     );
 
-    // Create a React component dynamically
-    let component;
-    if (voidElements.has(tagName)) {
-      const props = {
-        style: {
-          ...style,
-          // Special handling for images
-          ...(tagName === 'img' && {
-            maxWidth: '100%',       // Ensure responsiveness
-            height: 'auto',        // Maintain aspect ratio
-            // Only set explicit width/height if they exist in the original styles
-            ...(style.width && { width: style.width }),
-            ...(style.height && { height: style.height }),
-            // Preserve object-fit if it was specified
-            objectFit: style.objectFit || 'contain'
-          })
-        },
-        className: 'edit',
-        key: element.id
-      };
-    
-      // Handle special attributes for specific elements
-      if (tagName === 'img' && srcImg) {
-        props.src = srcImg;
-        props.alt = element.alt || ''; // Always include alt text for accessibility
-      } else if (tagName === 'input') {
-        props.type = element.type || 'text';
-        props.value = element.value || '';
-      }
-    
-      component = React.createElement(tagName, props);
-    } else {
-      const children = element.textContent.trim() 
-    ? element.textContent 
-    : parseNestedElements(element.innerHTML);
-  
-  component = React.createElement(
-    tagName,
-    { 
+    // Prepare the props for the component
+    let componentProps = {
       style: {
         ...style,
-        // Preserve responsive behavior for non-void elements
+        // Preserve responsive behavior
         ...(!style.width && { maxWidth: '100%' }),
-        ...(!style.height && { height: 'auto' })
+        ...(!style.height && { height: 'auto' }),
       },
-      className: 'edit',
       key: element.id,
-      dangerouslySetInnerHTML: children === element.textContent 
-        ? undefined 
-        : { __html: children }
-    },
-    children === element.textContent ? children : undefined
-  );
-}
+      content,
+    };
 
-function parseNestedElements(html) {
-  const tempDiv = document.createElement('div');
-  tempDiv.innerHTML = html;
-  return Array.from(tempDiv.children)
-    .map(child => child.outerHTML)
-    .join('');
-}
-    
+    // Handle special elements with unique attributes
+    if (tagName === 'input') {
+      componentProps.type = element.type || 'text';
+      componentProps.placeholder = content || '';
+    } else if (tagName === 'img') {
+      componentProps.src = element.src || "https://img.icons8.com/skeuomorphism/64/image.png";
+      componentProps.alt = element.alt || '';
+    } else if (tagName === 'table') {
+      componentProps.content = JSON.stringify(parseNestedTable(element.innerHTML));
+    }
+
+    // Dynamically create the React component
+    const createdComponent = React.createElement(component, componentProps);
 
     document.body.removeChild(element); // Cleanup after getting position
 
     return {
       id: uniqueId(),
+      component: createdComponent,
       style,
-      component,
       page: currentPage,
       x,
       y,
     };
   });
 };
+
+function parseNestedList(html) {
+  const tempDiv = document.createElement('div');
+  tempDiv.innerHTML = html;
+  return Array.from(tempDiv.querySelectorAll('li')).map(li => li.textContent.trim());
+}
+
+function parseNestedTable(html) {
+  const tempDiv = document.createElement('div');
+  tempDiv.innerHTML = html;
+  const rows = Array.from(tempDiv.querySelectorAll('tr')).map(row => {
+    const cells = Array.from(row.querySelectorAll('td')).map(cell => cell.textContent.trim());
+    return cells;
+  });
+  return rows;
+}
+
 
 // ✅ Function to convert CSS property names to camelCase
 const toCamelCase = (str) =>

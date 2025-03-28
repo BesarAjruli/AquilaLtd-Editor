@@ -4,6 +4,7 @@ exports.url2html = async (baseUrl) => {
     try{
     const browser = await puppeteer.launch();
     const page = await browser.newPage();
+    console.log('checking')
 
     await page.goto(baseUrl, { waitUntil: "networkidle0" });
 
@@ -19,8 +20,7 @@ exports.url2html = async (baseUrl) => {
             const computedStyle = window.getComputedStyle(el);
             const rect = el.getBoundingClientRect();
 
-            if (rect.width === 0 && rect.height === 0) return;
-            if (computedStyle.display === 'none') return;
+            if (rect.width === 0 && rect.height === 0 || computedStyle.display === 'none' || computedStyle.visibility === 'hidden' || computedStyle.opacity === '0') return;
 
             const allElements = Array.from(document.querySelectorAll('*:not(script, style, meta, link)'));
             const domOrderIndex = allElements.indexOf(el);
