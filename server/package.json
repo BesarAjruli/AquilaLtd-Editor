@@ -4,8 +4,8 @@
   "description": "",
   "main": "app.js",
   "scripts": {
-    "start": "PUPPETEER_CACHE_DIR=/app/.cache/puppeteer node server.js",
-    "postinstall": "npx puppeteer@latest install",
+    "start": "node app.js",
+    "postinstall": "npx puppeteer browsers install chrome && ./install-deps.sh",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "Besar Ajruli",
