@@ -28,6 +28,7 @@ const Audio = ({style}) => <img className='edit' style={style} src="https://png.
 const Gallery = ({style}) => <img className='edit' style={style} src="https://t3.ftcdn.net/jpg/04/19/92/88/360_F_419928833_w7HrdbjTCl1zGIBY1YljW6feoWx90ETm.jpg" alt="Gallery" />;
 Gallery.displayName = 'Gallery'
 const Section = ({style}) => <div className='edit' style={style}></div>;
+Section.displayName = 'Section'
 const Link = ({style, content}) => <a className='edit' style={style}>{content}</a>;
 Link.displayName = 'Link'
 const List = ({style, content}) => { 

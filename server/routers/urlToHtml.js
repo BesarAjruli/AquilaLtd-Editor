@@ -15,6 +15,24 @@ exports.url2html = async (baseUrl) => {
         });
     });
 
+    const pageHeight = await page.evaluate(() => {
+        return Math.max(
+            document.body.scrollHeight,
+            document.documentElement.scrollHeight,
+            document.body.offsetHeight,
+            document.documentElement.offsetHeight,
+            document.body.clientHeight,
+            document.documentElement.clientHeight
+        );
+    });
+    
+
+    await page.setViewport({
+        width: 1280,
+        height: pageHeight,
+        deviceScaleFactor: 2
+    });
+
     const elementsHTML = await page.evaluate(() => {
         function inlineCustomStyles(el) {
             const computedStyle = window.getComputedStyle(el);
@@ -118,8 +136,8 @@ exports.url2html = async (baseUrl) => {
                   })
                   .filter(style => style),
                   'position: relative;',
-                `x: ${rect.top + window.scrollX};`,
-                `y: ${rect.left + window.scrollY};`,
+                `x: ${rect.left};`,
+                `y: ${rect.top};`,
                 `z-index: ${domOrderIndex};`,
             ]
 
