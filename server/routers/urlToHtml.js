@@ -1,9 +1,14 @@
 const puppeteer = require("puppeteer");
-
+console.log({
+    executablePath: puppeteer.executablePath(),
+    cachePath: puppeteer.executablePath('chrome').split('/').slice(0, -3).join('/')
+  });
 exports.url2html = async (baseUrl) => {
     try{
     const browser = await puppeteer.launch({
-        headless: true,
+        headless: 'new',
+  executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || 
+    require('puppeteer').executablePath(),
         args: [
             '--no-sandbox',
             '--disable-setuid-sandbox',
