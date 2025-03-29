@@ -6,7 +6,9 @@ ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true \
 WORKDIR /usr/server/app
 
 COPY package*.json ./
-RUN npm ci
+COPY prisma ./prisma
+
+RUN npm ci && npx prisma generate
 COPY . .
 CMD ["node", "app.js"]
 
