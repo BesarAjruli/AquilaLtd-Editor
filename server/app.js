@@ -134,6 +134,7 @@ app.post('/api/login', passport.authenticate('local'), (req, res) => {
   })
 
   app.get('/api', (req, res) => {
+    console.log(req.session)
     res.json({ user: req.user || "No user found" });
   });
 
