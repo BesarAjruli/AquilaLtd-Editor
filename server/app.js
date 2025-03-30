@@ -8,12 +8,9 @@ const passport = require('passport')
 const session = require('express-session')
 const { body, validationResult } = require('express-validator');
 const LocalStrategy = require('passport-local').Strategy
-const {Pool} = require('pg')
 const cloudinary = require('cloudinary').v2
 const cookieParser = require('cookie-parser');
-const db = new Pool({
-  connectionString: process.env.DATABASE_URL + '?sslmode=require'
-})
+
 const paypal = require('./routers/paypal')
 const urlToHtml = require('./routers/urlToHtml')
 
@@ -40,7 +37,7 @@ app.use(cors({
 app.use(cookieParser())
 app.use(session({
   store: new (require('connect-pg-simple')(session))({
-    pool: db,
+    prisma: new PrismaClient(),
     tableName: 'user_session',
     createTableIfMissing: true
   }),
