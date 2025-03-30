@@ -36,7 +36,7 @@ app.use(cors({
 }));
 app.use(cookieParser())
 app.use(session({
-  store: new (require('connect-pg-simple')(session))({
+  store: new (require('@prisma/session-store')(session))({
     prisma: new PrismaClient(),
     tableName: 'user_session',
     createTableIfMissing: true
