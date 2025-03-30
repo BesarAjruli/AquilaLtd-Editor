@@ -122,7 +122,7 @@ export default function App() {
   useEffect(() => {
     async function getUser() {
     try{
-      const response = await fetch(`http://localhost:5000/api`,{method: 'GET', credentials: 'include'});
+      const response = await fetch(`${backendUrl}/api`,{method: 'GET', credentials: 'include'});
       if (!response.ok) {
         console.error('Network response was not ok', response.statusText);
         setLoading(false)
