@@ -50,8 +50,9 @@ app.use(session({
   cookie: {
     maxAge: 30 * 24 * 60 * 60 * 1000, //30 days
     httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
+    secure: true,//process.env.NODE_ENV === 'production',
     sameSite: 'None',
+    domain: '.onrender.com'
   }
 }))
 app.use(passport.initialize())
@@ -132,14 +133,8 @@ app.post('/api/sign-up',[
 app.post('/api/login', passport.authenticate('local'), (req, res) => {
   res.json({success: true, redirect: `/`});
   })
-  
-  app.use((req, res, next) => {
-    console.log('Session at middleware:', req.session);
-    next();
-  });
-  
+
   app.get('/api', (req, res) => {
-    console.log(req.session)
     res.json({ user: req.user || "No user found" });
   });
 
