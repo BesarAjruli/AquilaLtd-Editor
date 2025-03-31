@@ -3,9 +3,9 @@ const puppeteer = require("puppeteer");
 exports.url2html = async (baseUrl) => {
     try{
         const browser = await puppeteer.launch({
+            timeout: 0,
             headless: "new",
-            args: ["--no-sandbox", "--disable-setuid-sandbox", '--disable-dev-shm-usage', '--single-process',],
-            timeout: 0
+            args: ["--no-sandbox", "--disable-setuid-sandbox", '--disable-dev-shm-usage'],
         });
 
     const page = await browser.newPage();
