@@ -23,6 +23,7 @@ return(
               <option value="signup">SignUp</option>
               <option value="homepage">Home Page</option>
               <option value="productpage">Product Page</option>
+              <option value="others">Others</option>
             </select>
           </div>
           <div>

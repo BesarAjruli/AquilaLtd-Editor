@@ -82,7 +82,11 @@ exports.url2html = async (baseUrl) => {
                 "stop-opacity", "lighting-color",
                 //others
                 "backface-visibility", "background-attachment", "mask-clip", "mask-composite", "mask-mode", "mask-origin",
-                "mask-position", "mask-repeat", "mask-type", "object-fit", "right",
+                "mask-position", "mask-repeat", "mask-type", "object-fit", "right", "text-box-edge", "scroll-padding-inlin",
+                "scroll-padding-block", "scroll-margin-inline", "scroll-margin-block", "animation-composition",
+                "animation-iteration-count"
+                ,"animation-play-state",
+                "animation-timeline",
                 "object-position", "hyphens", "image-orientation",
 "interpolate-size", "list-style-position", "list-style-type",
 "empty-cells", "field-sizing", "color-interpolation",
