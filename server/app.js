@@ -17,7 +17,7 @@ const db = new Pool({
 const paypal = require('./routers/paypal')
 const urlToHtml = require('./routers/urlToHtml')
 
-const upload = multer({dest: 'uploads/'})
+const upload = multer({dest: '/tmp'})
 
 require("dotenv").config();
 
@@ -78,7 +78,7 @@ app.post('/api/saveTemplate', upload.single('image'), async (req, res) => {
       public_id: `${Date.now()}-${req.file.originalname}`,
     });
 
-    const newTemplate = await prisma.template.create({
+    await prisma.template.create({
       data: {
         template: JSON.stringify(req.body.template),
         path: result.secure_url,
