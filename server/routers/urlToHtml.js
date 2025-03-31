@@ -10,7 +10,7 @@ exports.url2html = async (baseUrl) => {
 
     const page = await browser.newPage();
 
-    await page.goto(baseUrl, { waitUntil: "networkidle0" });
+    await page.goto(baseUrl, { waitUntil: "networkidle0", timeout: 0 });
 
     await page.evaluate(() => {
         document.querySelectorAll('img, link, script, a').forEach(el => {
