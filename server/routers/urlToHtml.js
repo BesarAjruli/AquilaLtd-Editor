@@ -37,7 +37,46 @@ exports.url2html = async (baseUrl) => {
         deviceScaleFactor: 2
     });
 
-    const elementsHTML = await page.evaluate(() => {
+    const elementsHTML = await page.evaluate(async () => {
+         // Function to wait for all animations to complete
+    async function waitForAnimations() {
+        return new Promise(resolve => {
+            const animations = document.getAnimations();
+            if (animations.length === 0) {
+                resolve();
+            } else {
+                Promise.all(animations.map(animation => animation.finished)).then(resolve);
+            }
+        });
+    }
+
+    // Function to wait for all transitions to complete
+    async function waitForTransitions() {
+        return new Promise(resolve => {
+            const animatedElements = Array.from(document.querySelectorAll('*'))
+                .filter(el => getComputedStyle(el).transitionDuration !== '0s');
+
+            if (animatedElements.length === 0) {
+                resolve();
+                return;
+            }
+
+            let completed = 0;
+            animatedElements.forEach(el => {
+                el.addEventListener('transitionend', () => {
+                    completed++;
+                    if (completed === animatedElements.length) {
+                        resolve();
+                    }
+                }, { once: true });
+            });
+        });
+    }
+
+    // Ensure the page has finished rendering animations and transitions
+    await waitForAnimations();
+    await waitForTransitions();
+
         function inlineCustomStyles(el) {
             const computedStyle = window.getComputedStyle(el);
             const rect = el.getBoundingClientRect();

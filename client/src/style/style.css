@@ -21,7 +21,7 @@ html {
   border-radius: 15px;
   position: fixed;
   top: 70px;
-  z-index: 90;
+  z-index: 9999;
 }
 .left {
   left: -12.5%;
