@@ -16,6 +16,7 @@ const db = new Pool({
 })
 const paypal = require('./routers/paypal')
 const urlToHtml = require('./routers/urlToHtml')
+const generate = require('./routers/generate')
 
 const upload = multer({dest: '/tmp'})
 
@@ -307,6 +308,13 @@ app.post('/api/url2html', async (req, res) => {
   const url = req.body.url
   const code = await urlToHtml.url2html(url)
   res.json({success: true, code: code});
+})
+
+//generate designs
+app.post('/api/generate', async (req, res) => {
+  const prompt = req.body.prompt
+const generatedCode = await generate.generate(prompt)
+res.json({generatedCode: generatedCode})
 })
 
 //Passport

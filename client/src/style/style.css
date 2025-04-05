@@ -20,7 +20,7 @@ html {
   padding: 30px;
   border-radius: 15px;
   position: fixed;
-  top: 70px;
+  top: 50px;
   z-index: 9999;
 }
 .left {
@@ -119,6 +119,7 @@ max-width: 120px;
   -webkit-user-select: none;
   -ms-user-select: none;
   user-select: none;
+  all: initial; 
 }
 .toolBar {
   height: 70px;
@@ -209,7 +210,8 @@ max-width: 120px;
 .dialog-form input[type="text"],
 .dialog-form input[type="number"],
 .dialog-form input[type="file"],
-.dialog-form input[type="color"] {
+.dialog-form input[type="color"],
+.dialog-form textarea {
   padding: 3px 3px;
   border: 1px solid #ccc;
   border-radius: 4px;
@@ -633,6 +635,14 @@ input {
   text-align: end;
   display: block;
   margin-bottom: 10px;
+}
+.generateIcon{
+  margin-top: 10px;
+  padding: 10px;
+}
+.generateIcon img{
+  width: 40px;
+  height: auto;
 }
 
 @media (max-width: 768px) {

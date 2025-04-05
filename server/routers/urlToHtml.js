@@ -209,7 +209,7 @@ exports.url2html = async (baseUrl) => {
             Array.from(el.children)
             .filter(child => {
                 const tagName = child.tagName.toLowerCase();
-                const skipTags = ['script', 'style', 'meta', 'link', 'noscript', 'svg', 'head'];
+                const skipTags = ['script', 'style', 'meta', 'link', 'noscript', 'svg', 'head', 'option'];
                 
                 // Skip invisible elements
                 const style = window.getComputedStyle(child);

@@ -154,6 +154,7 @@ const EditorDialog = forwardRef(({
     e.target.reset()
     closeDialog()
     iconsDialog.current.close()
+    console.log(currentElement)
   }
 
     return (
@@ -189,11 +190,13 @@ const EditorDialog = forwardRef(({
   </header>
   <form onSubmit={handleSubmit} className="dialog-form">
     <label htmlFor="content">Content:</label>
-    <input type="text" name="content" id="content" />
+    {currentElement?.component?.type?.displayName === 'Video' || currentElement?.component?.type?.displayName === 'ImageCmp'?
+    <input type="text" name="content" id="content" /> :
+    <textarea name="content" id="content" cols={40} rows={5}></textarea>}
     <input type="hidden" name="content" id="hiddenContent"/>
     
     <label htmlFor="imageContent">Select Image:</label>
-    <input type="file" name="imageContent" id="imageContent" accept="image/*" onChange={handleImageChange}/>
+    <input type="file" name="imageContent" id="imageContent" accept={currentElement?.component?.type?.displayName === 'Video' ? 'video/mp4,video/*' : 'image/*'} onChange={handleImageChange}/>
     
     <label htmlFor="width">Width:</label>
     <div>

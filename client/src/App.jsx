@@ -13,6 +13,7 @@ import { Rnd } from "react-rnd";
 import CodeEditor from './Components/Dialogs/codeEditor';
 import Unlock from './Components/Dialogs/unlockMore.jsx'
 import url2htmlIcon from './images/u2c.jpeg'
+import PromptDialog from './Components/Dialogs/promptDialog.jsx'
 
 const Text = ({style, content}) => <span className='edit' style={style}>{content}</span>;
 Text.displayName = 'Text'
@@ -22,7 +23,10 @@ const Input = ({style, content}) => <input className='edit' style={style} type="
 Input.displayName = 'Input'
 const ImageCmp = ({style, content}) => <img className='edit' style={style} src={content || "https://img.icons8.com/skeuomorphism/64/image.png"} alt="Picture" />;
 ImageCmp.displayName = 'ImageCmp'
-const Video = ({style}) => <img className='edit' style={style} src="https://play-lh.googleusercontent.com/lVNP5YVLH630fs0oQunDStVjtZBmV3ZGyjvH1MOj6xINVBmxJyNszQx2_ky6_5GBLkH5=w526-h296-rw" alt="Video" />;
+const Video = ({style, content}) => {return(
+    <video style={style} controls='false'>
+      <source src={content} />
+    </video>)}
 Video.displayName = 'Video'
 const Audio = ({style}) => <img className='edit' style={style} src="https://png.pngtree.com/png-vector/20230408/ourmid/pngtree-sound-waves-equalizer-audio-radio-signal-music-recording-vector-png-image_6678910.png" alt="audio" />;
 const Gallery = ({style}) => <img className='edit' style={style} src="https://t3.ftcdn.net/jpg/04/19/92/88/360_F_419928833_w7HrdbjTCl1zGIBY1YljW6feoWx90ETm.jpg" alt="Gallery" />;
@@ -113,6 +117,7 @@ export default function App() {
   const unlockRef = useRef(null)
   const [usersBundle, setUsersBundle] = useState(0)
   const urlRef = useRef(null)
+  const promptDialogRef = useRef(null)
 
   const uniqueId = () => `element-${Date.now()}-${Math.random()}`;
   const backendUrl = import.meta.env.VITE_BACKEND_URL;
@@ -335,6 +340,7 @@ if(mediaQuery.matches){
     };
     setCurrentElement(newElement);
     setShouldRunEffect(true);
+    setChangingStyle(false)
 };
 
   useEffect(() => {
@@ -357,7 +363,7 @@ if(mediaQuery.matches){
     dialog.querySelector('.advSettings').style.display = 'none';
 
     // Toggle content visibility based on element type
-    const isImage = type === 'ImageCmp';
+    const isImage = type === 'ImageCmp' || type === 'Video';
     content.style.display = 'block';
     contentLabel.style.display = 'block';
     contentLabel.textContent = isImage ? 'URL' : 'Content'
@@ -428,12 +434,6 @@ if(mediaQuery.matches){
             '#height': 250,
           })
           break;
-        case 'Gallery':
-          if(usersBundle <= 1) {
-            unlockRef.current.showModal()
-            return
-          }
-          break;
         case 'Charts':
           if(usersBundle === 0) {
             unlockRef.current.showModal()
@@ -461,7 +461,7 @@ const changeStyle = (id, e) => {
   const dialog = dialogRef.current;
   const extraInputs = extraInptRef.current;
   const target = e.target;
-  const isImage = target.tagName === 'IMG';
+  const isImage = target.tagName === 'IMG' || target.tagName === 'VIDEO';
   const isInput = target.tagName === 'INPUT';
   const hasUL = target.children[0]?.tagName === 'UL';
   const hasTable = target.children[0]?.tagName === 'TABLE';
@@ -487,7 +487,7 @@ const changeStyle = (id, e) => {
       dialog.querySelector('#content').style.display = 'block';
       dialog.querySelector('label[for="content"]').style.display = 'block';
       dialog.querySelector('#content').value = isInput ? target.placeholder : target.textContent;
-      dialog.querySelector('#content').textContent = 'Content';
+      dialog.querySelector('label[for="content"]').textContent = 'Content';
   }
   
   // Handle list and table elements
@@ -992,6 +992,8 @@ const parseElements = (htmlString) => {
     'a': Link,
     'li': Text,
     'table': Table,
+    'footer': Section,
+    'header': Section
   };
 
   return Array.from(tempDiv.children).map((element) => {
@@ -1064,6 +1066,33 @@ function parseNestedTable(html) {
 const toCamelCase = (str) =>
   str.replace(/-([a-z])/g, (_, letter) => letter.toUpperCase());
 
+const handleGeneratePrompt = async(e) => {
+  e.preventDefault()
+  urlRef.current.close()
+  promptDialogRef.current.close()
+
+  setLoading(true)
+        const formData = new FormData(e.target)
+        const data = Object.fromEntries(formData.entries())
+
+        try{
+           const resposne = await fetch(`http://localhost:5000/api/generate`, {
+            method: 'POST',
+            headers: {"Content-Type": "application/json"},
+            body: JSON.stringify(data),
+           })
+           const results = await resposne.json()
+           setLoading(false)
+
+           
+            const parsedElements = parseElements(results.generatedCode);
+            console.log(parsedElements)
+            setElements(parsedElements);
+        }catch(err){
+          setLoading(false)
+            console.error(err)
+        } 
+}
 return (
     <>
       {loading && <Loading/>}
@@ -1080,6 +1109,7 @@ return (
         <hr/>
         <div className='input' title='Input' onClick={() => addElement(Input)}><span>|</span></div>
         <div className='image' title='Image' onClick={() => addElement(ImageCmp)}><img src="https://img.icons8.com/skeuomorphism/64/image.png" alt="image" /></div>
+        <div className='gallery' title='Gallery' onClick={() => addElement(Gallery)}><img src="https://img.icons8.com/skeuomorphism/64/stack-of-photos.png" alt="gallery" /></div>
         <div className='video' title='Video' onClick={() => addElement(Video)}><img src="https://img.icons8.com/skeuomorphism/64/video.png" alt="video" /></div>
         <div className='audio' title='Audio' onClick={() => addElement(Audio)}><img src="https://img.icons8.com/skeuomorphism/64/circled-play.png" alt="audio" /></div>
         <div className='section' title='Section (Header,footer...)' onClick={() => addElement(Section)}></div>
@@ -1107,11 +1137,11 @@ return (
 	          <path fill="currentColor" d="M5 13v-1h6V6h1v6h6v1h-6v6h-1v-6z" />
           </svg>
         </div>
-        <div className='gallery' title='Gallery' onClick={() => addElement(Gallery)}><img src="https://img.icons8.com/skeuomorphism/64/stack-of-photos.png" alt="gallery" /></div>
         <div title='Table' onClick={() => addElement(Table)}><img src="https://img.icons8.com/officel/60/table-1.png" alt="table" /></div>
         <div title='Calendar' onClick={() => addElement(Calendar)}><img src='https://img.icons8.com/color/60/calendar--v1.png'/></div>
         <div title='Gif' onClick={() => addElement(ImageCmp)}><img src='https://img.icons8.com/color/60/gif.png'/></div>        
-        <img src={url2htmlIcon} className='url2htmIcon' onClick={() => urlRef.current.showModal()}/>
+        <img title='U2C' src={url2htmlIcon} className='url2htmIcon' onClick={() => urlRef.current.showModal()}/>
+        <div className='generateIcon'><img title='AI' onClick={() => promptDialogRef.current.showModal()} src="https://img.icons8.com/ios-filled/50/sparkling--v1.png" alt="AI" /></div>
 
         <div className='dots rightDots'>
             <div></div>
@@ -1181,7 +1211,6 @@ return (
         </form>
       </dialog>
       <SelectTemplate ref={templatesRef} loadTemplate={(e) => loadTemplate(e)}/>
-
       <EditorDialog ref={dialogRef} mediaQuery={mediaQuery}
       duplicate={duplicate} closeDialog={closeDialog} handleImageChange={handleImageChange} 
       currentElement={currentElement} chngStyle={chngStyle}
@@ -1196,6 +1225,7 @@ return (
       setTableData={setTableData} tableItems={tableItems}/>
       <CodeEditor ref={injectCssRef} currentElement={currentElement} dialogRef={dialogRef}/>
       <Unlock ref={unlockRef} userId={userId}/>
+      <PromptDialog ref={promptDialogRef} handleGeneratePrompt={handleGeneratePrompt}/>
     </>
   );
 }
