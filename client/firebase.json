@@ -1,6 +1,6 @@
 {
   "hosting": {
-    "site": "aquila-editor",
+    "site": "aploseditor",
     "public": "dist",
     "ignore": [
       "firebase.json",
