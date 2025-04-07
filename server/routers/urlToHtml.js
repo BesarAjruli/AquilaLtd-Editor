@@ -62,14 +62,21 @@ exports.url2html = async (baseUrl) => {
             }
 
             let completed = 0;
+            let resolved = false;
+
             animatedElements.forEach(el => {
                 el.addEventListener('transitionend', () => {
                     completed++;
                     if (completed === animatedElements.length) {
+                        resolved = true
                         resolve();
                     }
                 }, { once: true });
             });
+
+            setTimeout(() => {
+                if (!resolved) resolve(); // fallback
+              }, 1000);
         });
     }
 
@@ -242,5 +249,6 @@ exports.url2html = async (baseUrl) => {
     return elementsHTML.join("\n");
 }catch(error){
     console.log(error)
+    return
 }
 };

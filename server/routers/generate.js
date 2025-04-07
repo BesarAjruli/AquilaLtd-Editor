@@ -51,7 +51,6 @@ exports.generate = async (prompt) => {
         }
 
         const messageContent = response.choices[0].message.content;
-        console.log(messageContent)
         return getStyledElementsHTML(messageContent);
     } catch (error) {
         console.error("Error generating HTML:", error);

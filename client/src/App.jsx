@@ -732,7 +732,8 @@ const getXY = (id) => elements.find((e) => e.id === id);
   };
 
   const deserializeTemplate = (serializedData) => {
-    const { editorStyle, elements } = JSON.parse(serializedData); 
+    const { editorStyle, elements } = JSON.parse(serializedData);
+    console.log(elements) 
     
     const deserializedElements = elements.map(({ id, style, type, content, page, x, y }) => {
       let Component;
@@ -814,7 +815,7 @@ const getXY = (id) => elements.find((e) => e.id === id);
           setLoading(false)
         });
       }
-  
+
     const { editorStyle, deserializedElements } = deserializeTemplate(serialized);
     const newElements = deserializedElements.map((element) => {
       if (!element) return null
@@ -841,6 +842,7 @@ const getXY = (id) => elements.find((e) => e.id === id);
   
       Object.keys(editorStyle).forEach(key => {
         if (editorRef.current) {
+          if(editorRef.current.style['height'] > editorStyle['height']) return
           editorRef.current.style[key] = editorStyle[key];
       }
       });
@@ -949,7 +951,7 @@ const handleUrlSubmit = async (e) => {
         const data = Object.fromEntries(formData.entries())
 
         try{
-           const resposne = await fetch(`${backendUrl}/api/url2html`, {
+           const resposne = await fetch(`http://localhost:5000/api/url2html`, {
             method: 'POST',
             headers: {"Content-Type": "application/json"},
             body: JSON.stringify(data),
@@ -1042,6 +1044,8 @@ const parseElements = (htmlString) => {
       key: element.id,
       content,
     };
+
+    console.log(elements.type)
 
     // Handle special elements with unique attributes
     if (tagName === 'input') {
