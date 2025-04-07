@@ -9,7 +9,7 @@ const PromptDialog = forwardRef(({handleGeneratePrompt}, ref) => {
                 </header>
                 <form className="dialog-form" style={{display:'block'}} onSubmit={(e) => handleGeneratePrompt(e)}>
                     <label htmlFor="prompt">Prompt</label> <br /><br />
-                    <textarea name="prompt" id="prompt" rows='10' cols='40' onResize={false} placeholder="P.s: A modern portfolio website with a hero section, about me, projects, and contact info."></textarea><br /><br />
+                    <textarea name="prompt" id="prompt" rows='10' cols='40' placeholder="P.s: A modern portfolio website with a hero section, about me, projects, and contact info."></textarea><br /><br />
                     <button className="submit-button" style={{float:'right'}}>Submit</button>
                 </form>
             </dialog>

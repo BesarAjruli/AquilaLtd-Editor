@@ -7,6 +7,20 @@ import Loading from '../Components/Loading';
 const Thumbnails = ({onThumbnailClick, category, deviceType}) => {
   const [thumbnails, setThumbnails] = useState([]);
   const [loading, setLoading] = useState(true)
+  const [Categories, setCategories] = useState()
+  useEffect( () => {
+    const getCategories = async () =>  {
+    try{
+    const req = await fetch(`${backendUrl}/api/Categories`)
+    const res = await req.json()
+
+    setCategories(res)
+  } catch(err){
+    console.error(err)
+  }
+}
+  getCategories()
+  },[])
 
   useEffect(() => {
     const getThumbnails = async () => {
@@ -15,20 +29,25 @@ const Thumbnails = ({onThumbnailClick, category, deviceType}) => {
         const data = await response.json();
         
         const paths = data.map((element) => {
-          switch(category){
-            case 'all':
-              if(element.device_type === deviceType && element.verified === true) return element;
-            case 'login':
-            case 'signup':
-            case 'homepage':
-            case 'productpage':
-              if (element.category === category && element.device_type === deviceType && element.verified === true) {
-                return element;
-              }
-            return undefined; // Explicitly return undefined if condition isn't met
-            default:
-              return undefined;
+          const normalizedCategory = category?.toLowerCase().replace(/\s+/g, '') || '';
+
+          // Handle the 'all' case first
+          if (normalizedCategory === 'all') {
+            if (element.device_type === deviceType && element.verified === true) {
+              return element;
+            }
           }
+        
+          // Check if the category exists in Categories and matches the element
+          if (Categories && Categories.some((cat) => cat.name.toLowerCase().replace(/\s+/g, '') === normalizedCategory)) {
+            if (element.category?.toLowerCase().replace(/\s+/g, '') === normalizedCategory &&
+                element.device_type === deviceType && 
+                element.verified === true) {
+              return element;
+            }
+          }
+        
+          return undefined;
         });
         setThumbnails(paths);
         setLoading(false)

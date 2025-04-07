@@ -84,6 +84,7 @@ const Toolbar = forwardRef(({
         setElements([])
         setCurrentPage(1)
         setPage(1)
+        editorRef.current.style['height'] = 520 + 'px'
       }
   return (
     <>

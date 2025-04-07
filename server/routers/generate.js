@@ -19,18 +19,27 @@ exports.generate = async (prompt) => {
                     3. A header with navigation menu (include 4-5 example links)
                     4. A hero section with a heading, brief text, and call-to-action button
                     5. A main content section with at least 3 distinct components (features, testimonials, etc.)
-                    6. High-quality placeholder images using services like placeholder.com or unsplash
+                    6. High-quality images and videos sourced from free content platforms like:
+                    - Unsplash (https://unsplash.com)
+                    - Pexels (https://www.pexels.com)
+                    - Pixabay (https://pixabay.com)
+                    - Freepik (https://www.freepik.com)
+                    - Videvo (https://www.videvo.net)
+                    - Coverr (https://coverr.co)
+                    - Life of Vids (https://www.lifeofvids.com)
                     7. A footer with contact information and social links
 
                     Use:
                     - A cohesive color palette (provide 3-4 main colors)
                     - Modern typography (Google Fonts)
                     - Proper spacing and visual hierarchy
+                    - Optimized image/video URLs from the above sources that are free to use without attribution (though attribution is preferred when possible)
+                    - Responsive media (images that scale properly, videos that use HTML5 video tag)
 
                     User Request:
                     ${prompt}
 
-                    Ensure it contains base elements like headers, footers, images and buttons if relevant.
+                    Ensure it contains base elements like headers, footers, images, videos and buttons if relevant.
                     Only return pure HTML with inline CSS. Do not include explanations or additional text.`
                 }]
             })
@@ -42,6 +51,7 @@ exports.generate = async (prompt) => {
         }
 
         const messageContent = response.choices[0].message.content;
+        console.log(messageContent)
         return getStyledElementsHTML(messageContent);
     } catch (error) {
         console.error("Error generating HTML:", error);
@@ -219,7 +229,7 @@ async function getStyledElementsHTML(htmlContent) {
         Array.from(el.children)
             .filter(child => {
                 const tagName = child.tagName.toLowerCase();
-                return !['script', 'style', 'meta', 'link', 'noscript', 'svg', 'head', 'option'].includes(tagName);
+                return !['script', 'style', 'meta', 'link', 'noscript', 'svg', 'head', 'option', 'title'].includes(tagName);
             })
             .forEach((child, index) => {
                 elements = elements.concat(extractElements(child));

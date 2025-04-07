@@ -317,6 +317,17 @@ const generatedCode = await generate.generate(prompt)
 res.json({generatedCode: generatedCode})
 })
 
+//categories
+app.get('/api/Categories', async (req, res) => {
+  try {
+    const { rows } = await db.query('SELECT * FROM "Categories";');
+    res.json(rows);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
 //Passport
 passport.use(
   new LocalStrategy(async (username, password, done) => {

@@ -1,9 +1,25 @@
-import { forwardRef, useState } from "react"
+import { forwardRef,useEffect, useState } from "react"
 import Thumbnails from '../../Templates/templatesThumbnail'
 
 const SelectTemplate = forwardRef(({loadTemplate}, ref) => {
+  const backendUrl = import.meta.env.VITE_BACKEND_URL;
+
     const [templateCategory, setTemplateCat] = useState('all')
     const [tempDeviceType, setTempDeviceType] = useState('pc')
+      const [Categories, setCategories] = useState()
+      useEffect( () => {
+        const getCategories = async () =>  {
+        try{
+        const req = await fetch(`${backendUrl}/api/Categories`)
+        const res = await req.json()
+    
+        setCategories(res)
+      } catch(err){
+        console.error(err)
+      }
+    }
+      getCategories()
+      },[])
 
 return(
     <>
@@ -19,11 +35,7 @@ return(
             }}
             >
               <option value="all">All</option>
-              <option value='login'>Login</option>
-              <option value="signup">SignUp</option>
-              <option value="homepage">Home Page</option>
-              <option value="productpage">Product Page</option>
-              <option value="others">Others</option>
+              {Categories && Categories.map((cat) => <option key={cat.id} value={cat.name?.toLowerCase().replace(/\s+/g, '')}>{cat.name}</option>)}
             </select>
           </div>
           <div>

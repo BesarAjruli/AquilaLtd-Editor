@@ -1,6 +1,24 @@
-import { forwardRef } from "react"
+import { forwardRef, useEffect, useState } from "react"
 
 const SaveTemplateDialog = forwardRef(({saveTemplate, elements}, ref) => {
+  const backendUrl = import.meta.env.VITE_BACKEND_URL;
+
+  const [Categories, setCategories] = useState()
+  useEffect( () => {
+    const getCategories = async () =>  {
+    try{
+    const req = await fetch(`${backendUrl}/api/Categories`)
+    const res = await req.json()
+
+    setCategories(res)
+  } catch(err){
+    console.error(err)
+  }
+}
+  getCategories()
+  },[])
+
+
     return (
         <>
         <dialog className='saveTemp' ref={ref}>
@@ -13,11 +31,7 @@ const SaveTemplateDialog = forwardRef(({saveTemplate, elements}, ref) => {
           <input type="text" name="name" id="name" placeholder="Your templates name" />
           <label htmlFor="category">Category</label>
           <select name='category' id='category'>
-            <option value='login'>Login</option>
-            <option value="signup">SignUp</option>
-            <option value="homepage">Home Page</option>
-            <option value="productpage">Product Page</option>
-            <option value="others">Others</option>
+            {Categories && Categories.map((cat) => <option key={cat.id} value={cat.name?.toLowerCase().replace(/\s+/g, '')}>{cat.name}</option>)}
           </select>
           <label htmlFor="deviceType">Device Type</label>
           <select name="deviceType" id="deviceType">

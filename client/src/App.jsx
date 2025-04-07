@@ -775,14 +775,11 @@ const getXY = (id) => elements.find((e) => e.id === id);
         case 'Charts':
           Component = Charts;
           break;
-        case 'Menu':
-          Component = Menu;
-          break;
           case 'Icons':
             Component = Icons;
             break;
         default:
-          throw new Error(`Unknown component type: ${type}`);
+          return
       }
   
       return {
@@ -820,6 +817,7 @@ const getXY = (id) => elements.find((e) => e.id === id);
   
     const { editorStyle, deserializedElements } = deserializeTemplate(serialized);
     const newElements = deserializedElements.map((element) => {
+      if (!element) return null
       const updatedElement = {
         ...element,
         id: uniqueId(),
@@ -833,13 +831,13 @@ const getXY = (id) => elements.find((e) => e.id === id);
         y: element.y
       };
       return updatedElement;
-    });
+    }).filter(element => element !== null);
   
     setElements((prevElements) => {
       const allElements = [...prevElements, ...newElements];
       saveHistory(allElements);
       return allElements;
-    });
+    })
   
       Object.keys(editorStyle).forEach(key => {
         if (editorRef.current) {
@@ -978,6 +976,25 @@ const handleUrlSubmit = async (e) => {
 const parseElements = (htmlString) => {
   const tempDiv = document.createElement("div");
   tempDiv.innerHTML = htmlString;
+
+  const measurementContainer = document.createElement("div");
+  measurementContainer.style.position = 'absolute';
+  measurementContainer.style.visibility = 'hidden';
+  measurementContainer.style.height = 'auto';
+  measurementContainer.style.width = '100%';
+
+  const clonedElements = Array.from(tempDiv.children).map(el => el.cloneNode(true));
+  clonedElements.forEach(el => measurementContainer.appendChild(el));
+
+  document.body.appendChild(measurementContainer);
+
+  const pageHeight = measurementContainer.getBoundingClientRect().height
+  
+  console.log(parseInt(editorRef.current.style['height']) < pageHeight)
+  if(parseInt(editorRef.current.style['height']) < pageHeight){
+    editorRef.current.style['height'] = pageHeight + 'px'
+  }
+  document.body.removeChild(measurementContainer);
 
   // Define the mapping between HTML elements and React components
   const componentMapping = {
