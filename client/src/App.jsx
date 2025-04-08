@@ -123,6 +123,7 @@ export default function App() {
   const backendUrl = import.meta.env.VITE_BACKEND_URL;
 
   const mediaQuery = window.matchMedia('(max-width: 768px)');
+  const [selectedElements, setSelectedElements] = useState([]);
 
   useEffect(() => {
     async function getUser() {
@@ -181,7 +182,16 @@ if(mediaQuery.matches){
     let pressTimer;
     let isLongClick = false;
 
+    if(selectedElements.length > 0){
+      selectedElements.forEach(sel => {
+        const element = document.getElementById(sel.id).children[0];
+        if (element) {
+          element.classList.add('dragging')
+        }
+      });
+    } else{
     e.target.classList.add('dragging')
+  }
   
     const startPress = () => {
       pressTimer = setTimeout(() => {
@@ -237,16 +247,48 @@ if(mediaQuery.matches){
 
   const hanldeDrag = (e, d, id) => {
     if(e.target.className !== 'edit dragging') return
-
-    //const draggingElm = elements.find(e => e.id === id);
-
     setElements(prevElements => {
-      const updatedElements = prevElements.map(el => {
-        if (el.id === id) {
-          return { ...el, x: d.x, y: d.y };
-        }
-        return el;
-      });
+      const originalElement = prevElements.find(el => el.id === id);
+        if (!originalElement) return prevElements;
+
+        const editorRect = editorRef.current.getBoundingClientRect();
+        const editorWidth = editorRect.width;
+        const editorHeight = editorRect.height;
+    
+        const deltaX = d.x - originalElement.x;
+        const deltaY = d.y - originalElement.y;
+    
+        const updatedElements = prevElements.map(el => {
+          let newX = el.x;
+          let newY = el.y;
+          
+          if (selectedElements.length > 0 && selectedElements.some(item => item.id === el.id)) {
+            newX = el.x + deltaX;
+            newY = el.y + deltaY;
+          } 
+          else if (el.id === id) {
+            newX = d.x;
+            newY = d.y;
+          } 
+          else {
+            return el;
+          }
+    
+          // Boundary checks
+          const elementWidth = parseFloat(el.style.width);
+          const elementHeight = parseFloat(el.style.height);
+          
+          // Left boundary
+          if (newX < 0) newX = 0;
+          // Right boundary
+          if (newX + elementWidth > editorWidth) newX = editorWidth - elementWidth;
+          // Top boundary
+          if (newY < 0) newY = 0;
+          // Bottom boundary
+          if (newY + elementHeight > editorHeight) newY = editorHeight - elementHeight;
+    
+          return { ...el, x: newX, y: newY };
+        });
   
       const draggingElm = updatedElements.find(e => e.id === id);
       if (!draggingElm) return prevElements;
@@ -1180,6 +1222,10 @@ return (
                 width: el.style.width,
                 height: el.style.height,
               }}
+              position={{
+                x: el.x || 0,
+                y: el.y || 0
+              }}
               style={{zIndex: el.style.zIndex}}
               bounds="parent"
               onDragStart={(e) => handleDragStart(el.id, e)}
@@ -1198,6 +1244,31 @@ return (
                   changeStyle(editorRef.current.id, e)
                 } else{
                 changeStyle(el.id, e)}
+              }}
+              onClick={(e) => {
+                e.preventDefault()
+                if(e.shiftKey){
+                  if(!e.target.className.includes('edit')) return
+                const isSelected = selectedElements.some(item => item.id === el.id);
+                if (!isSelected) {
+                  const prevBorder = `${e.target.style.borderWidth} ${e.target.style.borderStyle} ${e.target.style.borderColor}`
+
+                  setSelectedElements(prev => [...prev, {id: el.id,border: prevBorder }]);
+                  e.target.style.border = '1px dotted blue'
+                } else{
+                  const prevBorder = selectedElements.find(item => item.id === el.id)?.border;
+                  e.target.style.border = prevBorder || '';
+
+                  setSelectedElements(prev => prev.filter(item => item.id !== el.id));
+                }} else {
+                  selectedElements.forEach(sel => {
+                    const element = document.getElementById(sel.id).children[0];
+                    if (element) {
+                      element.style.border = sel.border || '';
+                    }
+                  });
+                  setSelectedElements([])
+                }
               }}
               key={el.id}
               id={el.id}

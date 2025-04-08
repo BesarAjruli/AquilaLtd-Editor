@@ -91,7 +91,6 @@ const EditorDialog = forwardRef(({
   }
 
   const handleSubmit = (e) => {
-    console.log('submited')
     e.preventDefault()
     const formData = new FormData(e.target)
     const data = Object.fromEntries(formData.entries())
