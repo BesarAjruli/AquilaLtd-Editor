@@ -228,7 +228,7 @@ async function getStyledElementsHTML(htmlContent) {
         Array.from(el.children)
             .filter(child => {
                 const tagName = child.tagName.toLowerCase();
-                return !['script', 'style', 'meta', 'link', 'noscript', 'svg', 'head', 'option', 'title'].includes(tagName);
+                return !['script', 'style', 'meta', 'link', 'noscript', 'svg', 'head', 'option', 'title', 'html'].includes(tagName);
             })
             .forEach((child, index) => {
                 elements = elements.concat(extractElements(child));

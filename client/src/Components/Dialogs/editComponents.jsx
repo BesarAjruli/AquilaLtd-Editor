@@ -1,4 +1,4 @@
-import React, { forwardRef, useState } from "react"
+import React, { forwardRef, useState, useRef } from "react"
 import Icon from '@mdi/react';
 import { mdiContentCopy } from '@mdi/js';
 
@@ -12,6 +12,7 @@ const EditorDialog = forwardRef(({
     }, ref) => {
 
       const [layer, setLayer]= useState(null)
+      const imageRef = useRef(null)
 
       let clicksW = 0, clicksH = 0, clicksT = 0
 
@@ -111,6 +112,7 @@ const EditorDialog = forwardRef(({
         if (currentElement && !currentElement.id.startsWith('editor')) {
           const compName = currentElement.component.type.name
           if( compName === 'ImageCmp'){
+            if(data.content !== '') imageRef.current = data.content
             if(imagesSet !== (limitations || 3)){
               imagesSet++
             } else{
@@ -122,7 +124,7 @@ const EditorDialog = forwardRef(({
           const updatedElement = {
             ...currentElement,
             style: formattedStyle,
-            component: React.cloneElement(currentElement.component, { style: formattedStyle, content: imageSrc ? imageSrc : data.content }),
+            component: React.cloneElement(currentElement.component, { style: formattedStyle, content: imageRef.current? imageRef.current : imageSrc ? imageSrc : data.content }),
             page: currentPage,
             x: currentElement.x,
             y: currentElement.y
@@ -138,23 +140,23 @@ const EditorDialog = forwardRef(({
             document.getElementById(currentElement.id).style.height = formattedStyle.height
           }
   
-        setImageSrc(null)
         setElements(newElements);
         saveHistory(newElements);
         setChangingStyle(false);
         setCurrentElement(null);
+        imageRef.current = null
         } else if(currentElement){
           Object.keys(formattedStyle).forEach(key => {
             editorRef.current.style[key] = formattedStyle[key];
         });
         setChangingStyle(false);
         setCurrentElement(null);
+        setImageSrc(null)
         setLayer(null)
         }
     e.target.reset()
     closeDialog()
     iconsDialog.current.close()
-    console.log(currentElement)
   }
 
     return (
