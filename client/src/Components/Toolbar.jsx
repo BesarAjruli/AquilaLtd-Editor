@@ -80,11 +80,29 @@ const Toolbar = forwardRef(({
         }
       }
 
+      let editorStyle = {
+        width: '1280px',
+        height: '520px',
+        borderWidth: '0',
+        borderColor: '#000',
+        borderRadius: '10px',
+        marginBottom: '30px',
+        position: 'relative',
+        overflow: 'hidden',
+        color: '#000',
+        boxShadow: '0 4px 12px rgba(0, 0, 0, 0.5)',
+        backgroundColor: '#fff'
+    }
+
       const restartAll = () => {
         setElements([])
         setCurrentPage(1)
         setPage(1)
-        editorRef.current.style['height'] = 520 + 'px'
+        Object.keys(editorStyle).forEach(key => {
+          if (editorRef.current) {
+            editorRef.current.style[key] = editorStyle[key];
+        }
+        });
       }
   return (
     <>

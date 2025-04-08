@@ -91,6 +91,7 @@ const EditorDialog = forwardRef(({
   }
 
   const handleSubmit = (e) => {
+    console.log('submited')
     e.preventDefault()
     const formData = new FormData(e.target)
     const data = Object.fromEntries(formData.entries())
@@ -190,7 +191,12 @@ const EditorDialog = forwardRef(({
     
     <i onClick={closeDialog} className="close-icon" title='close'>✖</i>
   </header>
-  <form onSubmit={handleSubmit} className="dialog-form">
+  <form onSubmit={handleSubmit} className="dialog-form" onKeyDown={(e) => {
+  if(e.shiftKey && e.key === 'Delete') {
+    e.preventDefault()
+    deleteElement()
+  }
+}}>
     <label htmlFor="content">Content:</label>
     {currentElement?.component?.type?.displayName === 'Video' || currentElement?.component?.type?.displayName === 'ImageCmp'?
     <input type="text" name="content" id="content" /> :
@@ -203,15 +209,15 @@ const EditorDialog = forwardRef(({
     <label htmlFor="width">Width:</label>
     <div>
       <input type="number" id="width" name="width" min={1} defaultValue={100} max={mediaQuery.matches ? 300: 1280} required/>
-      <button className="maxWidth" onClick={(e) => setAuto(e, 'width')}>Auto</button>
-      <button className='maxWidth' onClick={setWidthMax}>Max</button>
+      <button type="button" className="maxWidth" onClick={(e) => setAuto(e, 'width')}>Auto</button>
+      <button type="button" className='maxWidth' onClick={setWidthMax}>Max</button>
       <input type="hidden" name="autoW" id="autoW" defaultValue={0}/>
     </div>
     
     <label htmlFor="height">Height:</label>
     <div>
       <input type="number" name="height" id="height" min={1} defaultValue={100} required/>
-      <button className="maxWidth" onClick={(e) => setAuto(e, 'height')}>Auto</button>
+      <button type="button" className="maxWidth" onClick={(e) => setAuto(e, 'height')}>Auto</button>
       <input type="hidden" name="autoH" id="autoH" defaultValue={0}/>
     </div>
     
@@ -224,7 +230,7 @@ const EditorDialog = forwardRef(({
     <label htmlFor="bgColor">Background Color:</label>
     <div>
       <input type="color" name="bgColor" id="bgColor" defaultValue="#ffffff"/>
-      <button className="maxWidth" onClick={(e) => setTransparent(e)}>Transparent</button>
+      <button type="button" className="maxWidth" onClick={(e) => setTransparent(e)}>Transparent</button>
       <input type="hidden" name="transparent" id="transparent"  defaultValue={0}/>
     </div>
     

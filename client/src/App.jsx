@@ -460,7 +460,7 @@ const changeStyle = (id, e) => {
 
   const dialog = dialogRef.current;
   const extraInputs = extraInptRef.current;
-  const target = e.target;
+  const target = e.shiftKey? editorRef.current : e.target;
   const isImage = target.tagName === 'IMG' || target.tagName === 'VIDEO';
   const isInput = target.tagName === 'INPUT';
   const hasUL = target.children[0]?.tagName === 'UL';
@@ -488,6 +488,7 @@ const changeStyle = (id, e) => {
       dialog.querySelector('label[for="content"]').style.display = 'block';
       dialog.querySelector('#content').value = isInput ? target.placeholder : target.textContent;
       dialog.querySelector('label[for="content"]').textContent = 'Content';
+      setImageSrc(null)
   }
   
   // Handle list and table elements
@@ -966,7 +967,6 @@ const handleUrlSubmit = async (e) => {
 
            if(results.success){
             const parsedElements = parseElements(results.code);
-            console.log(parsedElements)
             setElements(parsedElements);
            }
         }catch(err){
@@ -978,25 +978,6 @@ const handleUrlSubmit = async (e) => {
 const parseElements = (htmlString) => {
   const tempDiv = document.createElement("div");
   tempDiv.innerHTML = htmlString;
-
-  const measurementContainer = document.createElement("div");
-  measurementContainer.style.position = 'absolute';
-  measurementContainer.style.visibility = 'hidden';
-  measurementContainer.style.height = 'auto';
-  measurementContainer.style.width = '100%';
-
-  const clonedElements = Array.from(tempDiv.children).map(el => el.cloneNode(true));
-  clonedElements.forEach(el => measurementContainer.appendChild(el));
-
-  document.body.appendChild(measurementContainer);
-
-  const pageHeight = measurementContainer.getBoundingClientRect().height
-  
-  console.log(parseInt(editorRef.current.style['height']) < pageHeight)
-  if(parseInt(editorRef.current.style['height']) < pageHeight){
-    editorRef.current.style['height'] = pageHeight + 'px'
-  }
-  document.body.removeChild(measurementContainer);
 
   // Define the mapping between HTML elements and React components
   const componentMapping = {
@@ -1017,7 +998,7 @@ const parseElements = (htmlString) => {
 
   return Array.from(tempDiv.children).map((element) => {
     document.body.appendChild(element); // Temporarily add to DOM for measurements
-
+    
     const tagName = String(element.tagName).toLowerCase();
     const component = componentMapping[tagName] || Text; // Default to Text component if not found
     const x = parseFloat(element.style.x);
@@ -1044,8 +1025,6 @@ const parseElements = (htmlString) => {
       key: element.id,
       content,
     };
-
-    console.log(elements.type)
 
     // Handle special elements with unique attributes
     if (tagName === 'input') {
@@ -1213,7 +1192,13 @@ return (
                 handleResizeStop(el.id, e, direction, ref, delta, position)
               }
               dragGrid={[10, 10]}
-              onContextMenu={(e) => changeStyle(el.id, e)}
+              onContextMenu={(e) => {
+                if(e.shiftKey){
+                  e.preventDefault()
+                  changeStyle(editorRef.current.id, e)
+                } else{
+                changeStyle(el.id, e)}
+              }}
               key={el.id}
               id={el.id}
             >
