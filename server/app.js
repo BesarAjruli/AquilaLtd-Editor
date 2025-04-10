@@ -261,7 +261,7 @@ app.use((req, res, next) => {
 app.post('/pay/:productId', async(req,res) => {
   const productId = req.params.productId
   try{
-    const url = await paypal.createOrder(productId)
+    const url = productId !== '003'? await paypal.createOrder(productId): await paypal.createSubscription()
     
     res.json({ approvalUrl: url });
     }catch(error){
@@ -271,11 +271,42 @@ app.post('/pay/:productId', async(req,res) => {
 
 app.get('/complete-order', async (req, res) => {
   try{
+    const { token, subscription_id } = req.query;
+    if (subscription_id) {
+      await prisma.user.update({
+        where: {
+          id: req.user.id
+        },
+        data:{
+          subscription_id: subscription_id
+        }
+      })
+    res.json({bundleId: '003'})
+    } else if (token) { 
     const response = await paypal.capturePayments(req.query.token)
     res.json({bundleId: response.firstItemSku})
+  }
   }catch(err){
     res.status(500).json({ error: err.message || 'An unknown error occurred' });
   }
+})
+
+app.get('/subscription-status', async (req, res) => {
+  const user = await prisma.user.findUnique({
+    where:{
+      id: req.user.id
+    },
+    select:{
+      subscription_id: true
+    }
+  })
+  const status = await paypal.getSubscriptionStatus(user.subscription_id);
+
+    if (status === 'ACTIVE') {
+    return res.json({ subscriptionId: subscription_id });
+    } else {
+    return res.json({ subscriptionId: false})
+    }
 })
 
 app.put('/update-bundle/:bundleId', async(req, res) => {
@@ -286,6 +317,18 @@ app.put('/update-bundle/:bundleId', async(req, res) => {
   const bundleId = req.params.bundleId
 
   try{
+    if(bundleId === '000'){
+      await prisma.user.update({
+        where:{
+          id: req.user.id
+        },
+        data:{
+          bundle: parseInt(bundleId),
+          pages: 3,
+          imagesLimit: 3,
+        }
+      })
+    }else{
   await prisma.user.update({
     where:{
       id: req.user.id
@@ -295,7 +338,7 @@ app.put('/update-bundle/:bundleId', async(req, res) => {
       pages: bundleId === '001' ? req.user.pages + 3 : bundleId === '002' ? req.user.pages + 8 : 9999,
       imagesLimit: bundleId === '001' ? req.user.imagesLimit + 3 : bundleId === '002' ? req.user.imagesLimit + 5 : 9999,
     }
-  })
+  })}
 
   res.json({success: true})
 } catch(err){

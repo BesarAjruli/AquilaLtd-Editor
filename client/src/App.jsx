@@ -148,6 +148,21 @@ export default function App() {
     }}
     getUser()
   },[])
+  
+  useEffect(() => {
+    if(usersBundle === 3){
+      const checkSubscription = async () => {
+        const req = await fetch(`${backendUrl}/usersBundle`)
+        const res = await req.json()
+
+        if(!res){
+          await fetch(`${backendUrl}/update-bundle/000`)
+        }
+      }
+
+      checkSubscription()
+    }
+  }, [usersBundle])
 
   let editorStyle = {
     width: '1280px',

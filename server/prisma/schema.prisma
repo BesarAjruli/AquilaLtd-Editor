@@ -28,6 +28,7 @@ model User {
   bundle      Int        @default(0)
   imagesLimit Int        @default(3)
   pages       Int        @default(3)
+  subscription_id String? @default("")
   templates   Template[]
   todos       ToDo[]
 
@@ -47,4 +48,9 @@ model user_session {
   sid    String   @id @db.VarChar
   sess   Json     @db.Json
   expire DateTime @db.Timestamp(6)
+}
+
+model Categories {
+  id Int @id @default(autoincrement())
+  name String
 }
