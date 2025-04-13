@@ -647,7 +647,7 @@ const getXY = (id) => elements.find((e) => e.id === id);
     return hexColor;
 }
 
-  const saveDesign = async (totalPages, template = false) => {
+  const saveDesign = async (totalPages, template = false, saveASimg = false) => {
     setLoading(true)
     const savedImages = [];
     const originalPage = currentPage;
@@ -693,6 +693,22 @@ const getXY = (id) => elements.find((e) => e.id === id);
       }
       setLoading(false)
       return formDataList[formDataList.length - 1]
+    } else if(saveASimg){
+      for (const [index, image] of savedImages.entries()) {
+        const blob = await (await fetch(image)).blob();
+        const url = URL.createObjectURL(blob);
+    
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `editor-${index + 1}.png`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url); // Clean up the object URL
+      }
+    
+      editorRef.current.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.5)';
+      setLoading(false);
     } else {
       for (const [index, image] of savedImages.entries()) { 
         const blob = await (await fetch(image)).blob();

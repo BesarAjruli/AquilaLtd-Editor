@@ -142,7 +142,6 @@ app.post('/api/login', passport.authenticate('local'), (req, res) => {
 app.delete('/api/delete/:id', async (req, res) => {
 const id = req.params.id
 const retriveImage = await prisma.toDo.findFirst({where: { id: parseInt(id)}})
-console.log(retriveImage)
 const imagePublicId = retriveImage.publicId
 await prisma.toDo.delete({where: {id: parseInt(id)}})
 await cloudinary.uploader.destroy(imagePublicId);
