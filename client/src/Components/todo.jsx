@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react"
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import Loading from '../Components/Loading';
 
 const backendUrl = import.meta.env.VITE_BACKEND_URL;
@@ -8,6 +8,7 @@ const ToDo = () => {
     const [thumbnails, setThumbnails] = useState([])
     const navigate = useNavigate()
     const [loading, setLoading] = useState(true)
+    const { id } = useParams()
 
     useEffect(() => {
         async function getUser() {
@@ -31,8 +32,9 @@ const ToDo = () => {
         const getThumbnails = async () => {
           setLoading(true)
           try {
-            const response = await fetch(`${backendUrl}/api/to-do/`);
+            const response = await fetch(`${backendUrl}/api/to-do/${id}`);
             const data = await response.json();
+            console.log(data)
             const paths = data.map((element) => {
               if(!element.finished){
                 return {
@@ -53,6 +55,7 @@ const ToDo = () => {
       }, []);
       
     const disapprove = async (thumbnail) => {
+      console.log(thumbnail)
       setLoading(true)
         try {
             console.log("Deleting:", thumbnail); // Debugging log

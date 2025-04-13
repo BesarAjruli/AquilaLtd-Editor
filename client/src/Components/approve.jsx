@@ -59,7 +59,7 @@ const Approved = () => {
         try {
             console.log("Deleting:", thumbnail); // Debugging log
     
-            const response = await fetch(`${backendUrl}/api/delete/${thumbnail}`, {
+            const response = await fetch(`${backendUrl}/api/deleteTemplate/${thumbnail}`, {
                 method: 'DELETE',
                 headers: { 'Content-Type': 'application/json' }
             });
@@ -87,7 +87,7 @@ const Approved = () => {
         try {
             console.log("Updating:", thumbnail); // Debugging log
     
-            const response = await fetch(`${backendUrl}/api/update/${thumbnail}`, {
+            const response = await fetch(`${backendUrl}/api/updateTemplate/${thumbnail}`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' }
             });

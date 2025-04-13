@@ -1,5 +1,6 @@
 import React, { useState, useRef, forwardRef } from "react";
 import Unlock from './Dialogs/unlockMore.jsx'
+import SaveDesign from './Dialogs/saveDialog.jsx';
 
 const Toolbar = forwardRef(({ 
     historyIndex, saveDesign, saveTempRef, templatesRef,
@@ -10,6 +11,7 @@ const Toolbar = forwardRef(({
   const [pages, setPage] = useState([1])
   const mediaQuery = window.matchMedia('(max-width: 768px)');
   const unlockRef = useRef(null)
+  const saveDesignRef = useRef(null)
 
   const backendUrl = import.meta.env.VITE_BACKEND_URL;
 
@@ -124,7 +126,10 @@ const Toolbar = forwardRef(({
               <path d="M18.4,10.6C16.55,9 14.15,8 11.5,8C6.85,8 2.92,11.03 1.54,15.22L3.9,16C4.95,12.81 7.95,10.5 11.5,10.5C13.45,10.5 15.23,11.22 16.62,12.38L13,16H22V7L18.4,10.6Z" />
             </svg>
           </button>
-          <button onClick={() => saveDesign(pages, false)}>
+          <button onClick={() => {
+          //saveDesign(pages, false)
+          saveDesignRef.current.showModal()
+          }}>
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
               <title>save</title>
               <path d="M21,7L9,19L3.5,13.5L4.91,12.09L9,16.17L19.59,5.59L21,7Z" />
@@ -197,6 +202,7 @@ const Toolbar = forwardRef(({
           <path d="M15 13H16.5V15.82L18.94 17.23L18.19 18.53L15 16.69V13M23 16C23 19.87 19.87 23 16 23C14.09 23 12.36 22.24 11.1 21H8C6.9 21 6 20.1 6 19V7H18V9.29C20.89 10.15 23 12.83 23 16M16 11C13.24 11 11 13.24 11 16C11 18.76 13.24 21 16 21C18.76 21 21 18.76 21 16C21 13.24 18.76 11 16 11M19 4V6H5V4H8.5L9.5 3H14.5L15.5 4H19Z" /></svg>
         </div>
       </div>
+    <SaveDesign ref={saveDesignRef} saveDesign={saveDesign} totalPages={pages}/>
     </>
   );
 });

@@ -141,17 +141,18 @@ app.post('/api/login', passport.authenticate('local'), (req, res) => {
 //Delete thumbnail
 app.delete('/api/delete/:id', async (req, res) => {
 const id = req.params.id
-const retriveImage = await prisma.template.findFirst({where: { id: parseInt(id)}})
+const retriveImage = await prisma.toDo.findFirst({where: { id: parseInt(id)}})
+console.log(retriveImage)
 const imagePublicId = retriveImage.publicId
-await prisma.template.delete({where: {id: parseInt(id)}})
+await prisma.toDo.delete({where: {id: parseInt(id)}})
 await cloudinary.uploader.destroy(imagePublicId);
-const response = await prisma.template.findMany()
+const response = await prisma.toDo.findMany()
 res.json(response)
 })
 //Update thumbnail
 app.put('/api/update/:id', async (req, res) => {
   const id = req.params.id
-  await prisma.template.update({
+  await prisma.toDo.update({
     where: { id: parseInt(id) },
     data: {
       verified: true
@@ -160,6 +161,29 @@ app.put('/api/update/:id', async (req, res) => {
   const response = await prisma.template.findMany()
   res.json(response)
 })
+
+app.delete('/api/deleteTemplate/:id', async (req, res) => {
+  const id = req.params.id
+  const retriveImage = await prisma.template.findFirst({where: { id: parseInt(id)}})
+  console.log(retriveImage)
+  const imagePublicId = retriveImage.publicId
+  await prisma.template.delete({where: {id: parseInt(id)}})
+  await cloudinary.uploader.destroy(imagePublicId);
+  const response = await prisma.template.findMany()
+  res.json(response)
+  })
+  //Update thumbnail
+  app.put('/api/updateTemplate/:id', async (req, res) => {
+    const id = req.params.id
+    await prisma.template.update({
+      where: { id: parseInt(id) },
+      data: {
+        verified: true
+      }
+    })
+    const response = await prisma.template.findMany()
+    res.json(response)
+  })
 //get to do
 app.post('/api/to-do', upload.single('image'), async (req, res) => {
     try {
@@ -191,7 +215,7 @@ app.get('/api/to-do/:id', async (req, res) => {
   const id = req.params.id
   const data = await prisma.toDo.findMany({
     where: {
-      authorId: id
+      authorId: parseInt(id)
     }
   })  
   res.json(data)
@@ -225,9 +249,15 @@ app.get('/api/to-do-folders', async (req, res) => {
     include: { author: true },
   });
 
-  const uniqueUserIds = [...new Set(todos.map(todo => todo.username))];
+  const uniqueAuthorsMap = new Map();
+  for (const todo of todos) {
+    if (todo.author && !uniqueAuthorsMap.has(todo.author.id)) {
+      uniqueAuthorsMap.set(todo.author.id, todo.author);
+    }
+  }
 
-  res.json(uniqueUserIds);
+  const uniqueAuthors = Array.from(uniqueAuthorsMap.values());
+  res.json(uniqueAuthors);
 })
 
 app.get("/api/logout", (req, res, next) => {

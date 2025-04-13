@@ -619,7 +619,7 @@ input {
 
 .containerFolder{
   display: grid;
-  grid-template-columns: repeat(4 1fr);
+  grid-template-columns: repeat(4, 1fr);
   align-items: center;
   place-content: center;
   padding: 50px;
@@ -649,6 +649,16 @@ input {
   height: auto;
 }
 
+.saveSelect{
+  background-color: #8f8f8f;
+  color: #fff;
+  border: 0;
+  border-radius: 10px;
+  width: 250px;
+  height: 30px;
+  font-weight: 900;
+  text-align: center;
+}
 @media (max-width: 768px) {
   .tabs {
     transform: scale(0.6);

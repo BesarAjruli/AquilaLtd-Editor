@@ -50,6 +50,7 @@ const FoldersToDo = () => {
           try {
             const response = await fetch(`${backendUrl}/api/to-do-folders`);
             const data = await response.json();
+            console.log(data)
             setFolders(data)
           } catch (error) {
             setLoading(false)
@@ -63,16 +64,17 @@ const FoldersToDo = () => {
         <>
               {loading && <Loading/>}
         <div className="verifyThumbnails">
+        <div className="containerFolder">
+
         {folders.length > 0 ? (
         folders.map((folders, index) => (
             folders &&
-            <div className="containerFolder" key={index}>
-                <Folders key={folders.author.id} user={folders.author} />
-            </div>
+                <Folders key={folders.id} user={folders} />
         ))
       ) : (
         <p>No thumbnails available</p>
       )}
+        </div>
         </div>
         </>
     )
