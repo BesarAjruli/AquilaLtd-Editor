@@ -1,6 +1,7 @@
 import React, { forwardRef, useState, useRef } from "react"
 import Icon from '@mdi/react';
 import { mdiContentCopy } from '@mdi/js';
+import useShortcuts from "../../Shortcuts/shortcuts";
 
 let imagesSet = 0
 
@@ -8,7 +9,7 @@ const EditorDialog = forwardRef(({
     mediaQuery,duplicate,closeDialog, handleImageChange,
     currentElement, chngStyle, extraEditor, elements, injectCssRef,
      imageSrc, currentPage, setImageSrc, setElements, saveHistory, setChangingStyle,
-    setCurrentElement, iconsDialog, editorRef, limitations, unlockDialog
+    setCurrentElement, iconsDialog, editorRef, limitations, unlockDialog, selectedElements, setSelectedElements
     }, ref) => {
 
       const [layer, setLayer]= useState(null)
@@ -84,11 +85,23 @@ const EditorDialog = forwardRef(({
   }  
 
   const deleteElement = () => {
-    const newElements = elements.filter((el) => el.id !== chngStyle.id);
+    let newElements;
+  
+    if (selectedElements.length > 0) {
+      const selectedIds = selectedElements.map(sel => sel.id);
+      newElements = elements.filter(el => !selectedIds.includes(el.id));
+      setSelectedElements([]); // Clear selection
+    } else {
+      newElements = elements.filter(el => el.id !== chngStyle.id);
+    }
+  
     setElements(newElements);
     saveHistory(newElements);
+    setCurrentElement(null);
+    setChangingStyle(false);
+
     ref.current.close();
-  }
+  };
 
   const handleSubmit = (e) => {
     e.preventDefault()
@@ -158,6 +171,11 @@ const EditorDialog = forwardRef(({
     closeDialog()
     iconsDialog.current.close()
   }
+
+  useShortcuts({
+    onDuplicate: duplicate,
+    onDelete: deleteElement,
+  });
 
     return (
         <>

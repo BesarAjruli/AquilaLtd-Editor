@@ -14,6 +14,7 @@ import CodeEditor from './Components/Dialogs/codeEditor';
 import Unlock from './Components/Dialogs/unlockMore.jsx'
 import url2htmlIcon from './images/u2c.jpeg'
 import PromptDialog from './Components/Dialogs/promptDialog.jsx'
+import useShortcuts from './Shortcuts/shortcuts.jsx';
 
 const Text = ({style, content}) => <span className='edit' style={style}>{content}</span>;
 Text.displayName = 'Text'
@@ -192,7 +193,7 @@ if(mediaQuery.matches){
   const handleDragStart = (elId, e) => {
     e.preventDefault()
     e.stopPropagation()
-    
+
     const longClickThreshold = 500; // Set long click threshold to 500ms
     let pressTimer;
     let isLongClick = false;
@@ -393,7 +394,7 @@ if(mediaQuery.matches){
         style: {},
         page: currentPage,
         x: 0,
-        y: 0
+        y: window.scrollY || 0
     };
     setCurrentElement(newElement);
     setShouldRunEffect(true);
@@ -498,7 +499,7 @@ if(mediaQuery.matches){
           }
           break;
         default:
-          setValues({ '#width': 100, '#height': 50 });
+          setValues({ '#width': 100, '#height': 50, '#tranpsarent': 0, '#content': '' });
     }
 
     // Hide duplication & layers container
@@ -509,7 +510,6 @@ if(mediaQuery.matches){
     dialog.showModal();
     setShouldRunEffect(false);
   }, [currentElement, shouldRunEffect])
-
 
 const changeStyle = (id, e) => {
   e.preventDefault();
@@ -807,7 +807,6 @@ const getXY = (id) => elements.find((e) => e.id === id);
 
   const deserializeTemplate = (serializedData) => {
     const { editorStyle, elements } = JSON.parse(serializedData);
-    console.log(elements) 
     
     const deserializedElements = elements.map(({ id, style, type, content, page, x, y }) => {
       let Component;
@@ -916,7 +915,7 @@ const getXY = (id) => elements.find((e) => e.id === id);
   
       Object.keys(editorStyle).forEach(key => {
         if (editorRef.current) {
-          if(editorRef.current.style['height'] > editorStyle['height']) return
+          if(parseInt(editorRef.current.style['height'])> parseInt(editorStyle['height'])) return
           editorRef.current.style[key] = editorStyle[key];
       }
       });
@@ -932,6 +931,69 @@ const getXY = (id) => elements.find((e) => e.id === id);
   };
 
 const duplicate = () => {
+  if (selectedElements.length > 0) {
+    const cleanedElements = elements.map(el => {
+      const found = selectedElements.find(sel => sel.id === el.id);
+      if (found) {
+        const restoredBorder = found.border || '';
+        return {
+          ...el,
+          style: {
+            ...el.style,
+            border: restoredBorder,
+          },
+          component: React.cloneElement(el.component, {
+            ...el.component.props,
+            style: {
+              ...el.style,
+              border: restoredBorder,
+            },
+          }),
+        };
+      }
+      return el;
+    });
+
+    const newSelected = [];
+
+    const duplicated = selectedElements.map(sel => {
+      const original = cleanedElements.find(el => el.id === sel.id);
+      if (!original) return null;
+
+      const newId = uniqueId();
+      const prevBorder = original.style?.border || '';
+      const newBorder = '1px dotted blue';
+
+      newSelected.push({ id: newId, border: prevBorder });
+
+      return {
+        ...original,
+        id: newId,
+        x: original.x + 20,
+        y: original.y + 20,
+        style: {
+          ...original.style,
+          border: newBorder,
+        },
+        component: React.cloneElement(original.component, {
+          ...original.component.props,
+          style: {
+            ...original.style,
+            border: newBorder,
+          },
+          key: newId,
+        }),
+      };
+    }).filter(Boolean);
+
+    const newElements = [...cleanedElements, ...duplicated];
+    setElements(newElements);
+    saveHistory(newElements);
+    setChangingStyle(false);
+    setCurrentElement(null);
+    setSelectedElements(newSelected);
+    closeDialog();
+  }else {
   const updatedElement = {
     ...currentElement,
     style: currentElement.style,
@@ -946,7 +1008,7 @@ const duplicate = () => {
   saveHistory(newElements);
   setChangingStyle(false);
   setCurrentElement(null);
-
+  }
   closeDialog()
 }
 // editor only
@@ -1166,6 +1228,11 @@ const handleGeneratePrompt = async(e) => {
             console.error(err)
         } 
 }
+
+useShortcuts({
+  onDuplicate: duplicate,
+});
+
 return (
     <>
       {loading && <Loading/>}
@@ -1269,7 +1336,7 @@ return (
               onResizeStop={(e, direction, ref, delta, position) =>
                 handleResizeStop(el.id, e, direction, ref, delta, position)
               }
-              dragGrid={[10, 10]}
+              dragGrid={[5, 5]}
               onContextMenu={(e) => {
                 if(e.shiftKey){
                   e.preventDefault()
@@ -1326,7 +1393,7 @@ return (
       extraEditor={extraInptRef} elements={elements} injectCssRef={injectCssRef}
        imageSrc={imageSrc} currentPage={currentPage} setImageSrc={setImageSrc} setElements={setElements} saveHistory={saveHistory}
        setChangingStyle={setChangingStyle} setCurrentElement={setCurrentElement} iconsDialog={iconsDialog} editorRef={editorRef} 
-       limitations={limitations.images} unlockDialog={unlockRef}/>
+       limitations={limitations.images} unlockDialog={unlockRef} selectedElements={selectedElements} setSelectedElements={setSelectedElements}/>
       <SaveTemplateDialog ref={saveTempRef} saveTemplate={(elements, e) => saveTemplate(elements, e)} elements={elements}/>
       <IconsSelector ref={iconsDialog} addElement={() => addElement(Icons)} 
         sendIconName={(value) => setIconName(value)}/>
