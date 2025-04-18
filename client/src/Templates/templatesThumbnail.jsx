@@ -4,7 +4,7 @@ const backendUrl = import.meta.env.VITE_BACKEND_URL;
 import Loading from '../Components/Loading';
 
 
-const Thumbnails = ({onThumbnailClick, category, deviceType}) => {
+const Thumbnails = ({onThumbnailClick, category, searchedTemplate, deviceType}) => {
   const [thumbnails, setThumbnails] = useState([]);
   const [loading, setLoading] = useState(true)
   const [Categories, setCategories] = useState()
@@ -27,44 +27,50 @@ const Thumbnails = ({onThumbnailClick, category, deviceType}) => {
       try {
         const response = await fetch(`${backendUrl}/api/saveTemplate/`);
         const data = await response.json();
-        
-        const paths = data.map((element) => {
-          const normalizedCategory = category?.toLowerCase().replace(/\s+/g, '') || '';
-
-          // Handle the 'all' case first
+  
+        const normalizedCategory = category?.toLowerCase().replace(/\s+/g, '') || '';
+  
+        const filtered = data.filter((element) => {
+          const isVerified = element.verified === true;
+  
+          if (searchedTemplate) {
+            return element.name.toLowerCase().includes(searchedTemplate.toLowerCase()) && isVerified;
+          }
+  
           if (normalizedCategory === 'all') {
-            if (element.device_type === deviceType && element.verified === true) {
-              return element;
-            }
+            return element.device_type === deviceType && isVerified;
           }
-        
-          // Check if the category exists in Categories and matches the element
-          if (Categories && Categories.some((cat) => cat.name.toLowerCase().replace(/\s+/g, '') === normalizedCategory)) {
-            if (element.category?.toLowerCase().replace(/\s+/g, '') === normalizedCategory &&
-                element.device_type === deviceType && 
-                element.verified === true) {
-              return element;
-            }
-          }
-        
-          return undefined;
+  
+          const validCategory = Categories?.some(
+            (cat) => cat.name.toLowerCase().replace(/\s+/g, '') === normalizedCategory
+          );
+  
+          return (
+            validCategory &&
+            element.category?.toLowerCase().replace(/\s+/g, '') === normalizedCategory &&
+            element.device_type === deviceType &&
+            isVerified
+          );
         });
-        setThumbnails(paths);
-        setLoading(false)
+  
+        setThumbnails(filtered);
       } catch (error) {
         console.error('Error fetching thumbnails:', error);
-        setLoading(false)
+      } finally {
+        setLoading(false);
       }
     };
+  
     getThumbnails();
-  }, [category, deviceType]); 
+  }, [category, deviceType, searchedTemplate]);
+  
   return (
     <>
           {loading && <Loading/>}
       {thumbnails.length > 0 ? (
         thumbnails.map((thumbnail, index) => (
           thumbnail &&
-          <img key={index} src={thumbnail.path} alt={`Thumbnail ${index + 1}`} title={thumbnail.device_type} onClick={() => onThumbnailClick(index)} />
+          <img key={index} src={thumbnail.path} alt={`Thumbnail ${index + 1}`} title={thumbnail.name} onClick={() => onThumbnailClick(index)} />
 
         ))
       ) : (

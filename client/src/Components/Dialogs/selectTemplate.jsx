@@ -6,6 +6,8 @@ const SelectTemplate = forwardRef(({loadTemplate}, ref) => {
 
     const [templateCategory, setTemplateCat] = useState('all')
     const [tempDeviceType, setTempDeviceType] = useState('pc')
+    const [searchedTemplate, setSearchedTemplate] = useState('')
+
       const [Categories, setCategories] = useState()
       useEffect( () => {
         const getCategories = async () =>  {
@@ -21,9 +23,26 @@ const SelectTemplate = forwardRef(({loadTemplate}, ref) => {
       getCategories()
       },[])
 
+      const searchTemplate = (e) => {
+        const value = e.target.value.trim()
+        if(value !== ''){
+            setSearchedTemplate(value)    
+        }else{
+          setSearchedTemplate('')
+        }
+        }
+
 return(
     <>
     <dialog ref={ref} className='templateDialog'>
+            <div style={{display: 'flex', flexGrow: '1', justifyContent: 'center', alignItems: 'center'}}>
+              <input
+                type="search"
+                placeholder="Search templates"
+                onChange={(e) => searchTemplate(e)}
+                style={{height: '35px', width: '350px', margin: '10px 0 20px 0'}}
+              />
+            </div>
         <div className='templateCategory'>
           <div>
             <label htmlFor="category">Category:</label>
@@ -49,7 +68,7 @@ return(
           <i onClick={() => ref.current.close()} className="close-icon" title='close'>✖</i>
         </div>
         <div className='tmeplateDiv'>
-          <Thumbnails onThumbnailClick={(e) => loadTemplate(e)} category={templateCategory} deviceType={tempDeviceType}/>
+          <Thumbnails onThumbnailClick={(e) => loadTemplate(e)} category={templateCategory} searchedTemplate={searchedTemplate} deviceType={tempDeviceType}/>
         </div>
       </dialog>
       </>
