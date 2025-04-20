@@ -15,7 +15,7 @@ const EditorDialog = forwardRef(({
       const [layer, setLayer]= useState(null)
       const imageRef = useRef(null)
 
-      let clicksW = 0, clicksH = 0, clicksT = 0
+      let clicksT = 0
 
   const setWidthMax = (e) => {
     e.preventDefault()
@@ -28,39 +28,34 @@ const EditorDialog = forwardRef(({
   const setAuto = (e, typ) => {
     e.preventDefault()
     if(typ === 'width'){
-      if(clicksW === 0){
+      console.log(ref.current.querySelector('#autoW').value )
+      if(ref.current.querySelector('#autoW').value  === '0'){
       ref.current.querySelector('#width').setAttribute('disabled', 'true')
       ref.current.querySelector('#autoW').value = 1
-      clicksW+=2
     } else{
       ref.current.querySelector('#width').removeAttribute('disabled')
       ref.current.querySelector('#autoW').value = 0
-      clicksW = 0
     }
     }
     else{
-      if(clicksH === 0){
+      if(ref.current.querySelector('#autoH').value === '0'){
         ref.current.querySelector('#height').setAttribute('disabled', 'true')
         ref.current.querySelector('#autoH').value = 1
-        clicksH+=2
       } else{
         ref.current.querySelector('#height').removeAttribute('disabled')
         ref.current.querySelector('#autoH').value = 0
-        clicksH = 0
       }
     }
   }
   const setTransparent = (e) => {
     e.preventDefault()
-
-    if(clicksT === 0){
+    console.log(ref.current.querySelector('#transparent').value)
+    if(parseInt(ref.current.querySelector('#transparent').value) === 0){
       ref.current.querySelector('#bgColor').setAttribute('disabled', 'true')
       ref.current.querySelector('#transparent').value = 1
-      clicksT+=2
     } else{
       ref.current.querySelector('#bgColor').removeAttribute('disabled')
       ref.current.querySelector('#transparent').value = 0
-      clicksT = 0
     }
   }
 
@@ -228,14 +223,14 @@ const EditorDialog = forwardRef(({
       <input type="number" id="width" name="width" min={1} defaultValue={100} max={mediaQuery.matches ? 300: 1280} required/>
       <button type="button" className="maxWidth" onClick={(e) => setAuto(e, 'width')}>Auto</button>
       <button type="button" className='maxWidth' onClick={setWidthMax}>Max</button>
-      <input type="hidden" name="autoW" id="autoW" defaultValue={0}/>
+      <input type="hidden" name="autoW" id="autoW"/>
     </div>
     
     <label htmlFor="height">Height:</label>
     <div>
       <input type="number" name="height" id="height" min={1} defaultValue={100} required/>
       <button type="button" className="maxWidth" onClick={(e) => setAuto(e, 'height')}>Auto</button>
-      <input type="hidden" name="autoH" id="autoH" defaultValue={0}/>
+      <input type="hidden" name="autoH" id="autoH"/>
     </div>
     
     <label htmlFor="fontSize">Font Size:</label>
@@ -248,7 +243,7 @@ const EditorDialog = forwardRef(({
     <div>
       <input type="color" name="bgColor" id="bgColor" defaultValue="#ffffff"/>
       <button type="button" className="maxWidth" onClick={(e) => setTransparent(e)}>Transparent</button>
-      <input type="hidden" name="transparent" id="transparent"  defaultValue={0}/>
+      <input type="hidden" name="transparent" id="transparent"/>
     </div>
     
     <label htmlFor="borderWidth">Border Width:</label>

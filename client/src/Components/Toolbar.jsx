@@ -1,6 +1,7 @@
 import React, { useState, useRef, forwardRef } from "react";
 import Unlock from './Dialogs/unlockMore.jsx'
 import SaveDesign from './Dialogs/saveDialog.jsx';
+import useShortcuts from "../Shortcuts/shortcuts.jsx";
 
 const Toolbar = forwardRef(({ 
     historyIndex, saveDesign, saveTempRef, templatesRef,
@@ -106,6 +107,12 @@ const Toolbar = forwardRef(({
         }
         });
       }
+
+    useShortcuts({
+      goBack: undoFunction,
+      goForward: redoFunction,
+      onDeleteAll: restartAll
+    })
   return (
     <>
     <Unlock ref={unlockRef} userId={userId}/>

@@ -332,12 +332,8 @@ input[name='height']{
   overflow-y: scroll;
 }
 .tmeplateDiv {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  overflow: hidden;
-  place-items: center;
-  justify-content: center;
-  gap: 30px;
+  column-count: 2;
+  column-gap: 30px;
 }
 .tmeplateDiv:has(> img[title='mobile']){
   grid-template-columns: repeat(4, 1fr);
@@ -350,6 +346,7 @@ input[name='height']{
   border: 2px solid #a7a6a6;
   border-radius: 10px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+  margin-bottom: 50px;
 }
 .templateCategory {
   display: flex;
@@ -429,6 +426,67 @@ input {
   display: flex;
   margin-left: 20%;
 }
+.footer {
+  background-color: #111827;
+  color: #f3f4f6;
+  padding: 3rem 1rem 2rem;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  font-size: 0.95rem;
+}
+
+.footer-container {
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+.footer-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 2rem;
+  margin-bottom: 2rem;
+}
+
+.footer-section h3 {
+  font-size: 1.1rem;
+  margin-bottom: 0.75rem;
+  color: #ffffff;
+}
+
+.footer-section p {
+  line-height: 1.6;
+  color: #d1d5db;
+}
+
+.footer-section ul {
+  list-style: none;
+  padding: 0;
+}
+
+.footer-section ul li {
+  margin: 0.5rem 0;
+}
+
+.footer-section a {
+  color: #60a5fa;
+  text-decoration: none;
+}
+
+.footer-section a:hover {
+  text-decoration: underline;
+}
+
+.social-links li {
+  display: inline-block;
+  margin-right: 1rem;
+}
+
+.footer-bottom {
+  text-align: center;
+  border-top: 1px solid #374151;
+  padding-top: 1.5rem;
+  color: #9ca3af;
+}
+
 .iconSelectorDialog {
   width: 600px;
   padding: 10px 20px 20px 20px;

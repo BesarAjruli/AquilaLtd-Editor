@@ -311,6 +311,7 @@ if(mediaQuery.matches){
 
       let newLines = [];
   
+      if(selectedElements.length === 0){
       updatedElements.forEach(el => {
         const elCenterX = el.x + parseFloat(el.style.width) / 2;
         const elCenterY = el.y + parseFloat(el.style.height) / 2;
@@ -335,10 +336,10 @@ if(mediaQuery.matches){
         if (el.y === draggingElm.y) {
           newLines.push({ x: el.x, y: elCenterY, height: el.height, type: 'horizontal' });
         }
-      });
+      });}
   
-      setAlignmentLines(newLines.length > 0 ? newLines : []);
-            return updatedElements;
+      setAlignmentLines(newLines.length === 0 && selectedElements.length === 0 ? [] : newLines);
+      return updatedElements;
     });
   }
 
@@ -430,10 +431,15 @@ if(mediaQuery.matches){
 
     // Helper function to set values in input fields
     const setValues = (values) => {
-        Object.entries(values).forEach(([selector, value]) => {
-            dialog.querySelector(selector).value = value;
-        });
-    };
+      Object.entries(values).forEach(([selector, value]) => {
+          const el = dialog.querySelector(selector);
+          if (el) {
+              el.value = value;
+          } else {
+              console.warn(`Element not found for selector: ${selector}`);
+          }
+      });
+  };
 
     // Apply settings based on component type
     switch (type) {
@@ -499,7 +505,7 @@ if(mediaQuery.matches){
           }
           break;
         default:
-          setValues({ '#width': 100, '#height': 50, '#tranpsarent': 0, '#content': '' });
+          setValues({ '#width': 100, '#height': 50, '#tranpsarent': 0, '#content': '', '#autoW': 0, '#autoH': 0});
     }
 
     // Hide duplication & layers container
@@ -524,13 +530,41 @@ const changeStyle = (id, e) => {
   const hasTable = target.children[0]?.tagName === 'TABLE';
   const isIcon = target.tagName === 'ICONIFY-ICON';
   const isEditor = id.startsWith('editor');
+  let autoW = false
+  let autoH = false
 
   // Disable/enable appropriate fields
   dialog.querySelector('#hiddenContent').setAttribute('disabled', 'true');
+  if(parseInt(target.style.width)){
   dialog.querySelector('#width').removeAttribute('disabled');
-  dialog.querySelector('#height').removeAttribute('disabled');
   dialog.querySelector('#autoW').value = 0;
+  autoW = false
+}else {
+  dialog.querySelector('#width').disabled = true
+  dialog.querySelector('#autoW').value = 1;
+  autoW = true
+}
+
+if(parseInt(target.style.height)){
+  dialog.querySelector('#height').removeAttribute('disabled');
   dialog.querySelector('#autoH').value = 0;
+  autoH = false
+}else {
+  dialog.querySelector('#height').setAttribute('disabled', 'true');
+  dialog.querySelector('#autoH').value = 1;
+  
+  autoH = true
+}
+
+console.log(dialog.querySelector('#transparent').value)
+if(target.style.backgroundColor === 'transparent' || target.style.backgroundColor === ''){
+  dialog.querySelector('#bgColor').setAttribute('disabled', 'true')
+  dialog.querySelector('#transparent').value = 1
+}else{
+  dialog.querySelector('#bgColor').removeAttribute('disabled')
+  dialog.querySelector('#transparent').value = 0
+}
+
 
   // Handle image-specific content toggling
   if (isImage) {
@@ -586,7 +620,13 @@ const changeStyle = (id, e) => {
           dialog.querySelector('#hiddenContent').removeAttribute('disabled');
           dialog.querySelector('#content').setAttribute('disabled', 'true');
       } else {
-          dialog.querySelectorAll('#content, #width, #height').forEach(el => el.removeAttribute('disabled'));
+        if(!autoH){
+          dialog.querySelector('#height').removeAttribute('disabled');
+        }
+        if(!autoW){
+          dialog.querySelector('#width').removeAttribute('disabled')
+        }
+        dialog.querySelector('#content').removeAttribute('disabled');
       }
       dialog.querySelectorAll('#borderWidth, #borderRadius, #fontSize, #imageContent, .deleteButton, #opacity, #borderColor, .maxWidth ').forEach(el => el.removeAttribute('disabled'));
 
@@ -974,12 +1014,14 @@ const duplicate = () => {
         style: {
           ...original.style,
           border: newBorder,
+          zIndex: elements.length
         },
         component: React.cloneElement(original.component, {
           ...original.component.props,
           style: {
             ...original.style,
             border: newBorder,
+            zIndex: elements.length
           },
           key: newId,
         }),
@@ -1402,6 +1444,47 @@ return (
       <CodeEditor ref={injectCssRef} currentElement={currentElement} dialogRef={dialogRef}/>
       <Unlock ref={unlockRef} userId={userId}/>
       <PromptDialog ref={promptDialogRef} handleGeneratePrompt={handleGeneratePrompt}/>
+      <footer className="footer" id='footer'>
+  <div className="footer-container">
+    <div className="footer-grid">
+
+      <div className="footer-section">
+        <h3>About APLÓS.editor</h3>
+        <p>
+          APLÓS.editor is a web-based design editor powered by Aquila Ltd, focused on intuitive design, flexibility, and creative freedom.
+        </p>
+      </div>
+
+      <div className="footer-section">
+        <h3>Quick Links</h3>
+        <ul>
+          <li><a href="#">Features</a></li>
+          <li><a href="/payment">Pricing</a></li>
+          <li><a href="#">Documentation</a></li>
+          <li><a href="#footer">Contact Us</a></li>
+        </ul>
+      </div>
+
+      <div className="footer-section">
+        <h3>Follow Us</h3>
+        <ul className="social-links">
+          <li><a href="#">Twitter</a></li><br />
+          <li><a href="https://github.com/BesarAjruli/AquilaLtd-Editor">GitHub</a></li> <br />
+          <li><a href="#">YouTube</a></li>
+        </ul>
+      </div>
+
+    </div>
+
+    <div className="footer-bottom">
+      <p>
+        Contact support at <a href="mailto:aploseditor@gmail.com">aploseditor@gmail.com</a>
+        <br /><br />
+        All rights reserved © to Aquila Ltd/APLÓS.editor
+      </p>
+    </div>
+  </div>
+</footer>
     </>
   );
 }
