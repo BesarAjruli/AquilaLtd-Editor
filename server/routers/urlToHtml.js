@@ -1,4 +1,5 @@
 const puppeteer = require("puppeteer");
+const mediaQuery = window.matchMedia('(max-width: 768px)');
 
 exports.url2html = async (baseUrl) => {
     try{
@@ -32,7 +33,7 @@ exports.url2html = async (baseUrl) => {
     
 
     await page.setViewport({
-        width: 1280,
+        width: mediaQuery ? 520: 1280,
         height: pageHeight,
         deviceScaleFactor: 2
     });
