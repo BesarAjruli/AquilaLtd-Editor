@@ -441,6 +441,8 @@ if(mediaQuery.matches){
       });
   };
 
+  setValues({ '#width': 100, '#height': 50, '#tranpsarent': 0, '#content': '', '#autoW': 0, '#autoH': 0});
+
     // Apply settings based on component type
     switch (type) {
         case 'Button':
@@ -1395,28 +1397,56 @@ return (
               }}
               onClick={(e) => {
                 e.preventDefault()
-                if(e.shiftKey){
-                  if(!e.target.className.includes('edit')) return
-                const isSelected = selectedElements.some(item => item.id === el.id);
-                if (!isSelected) {
-                  const prevBorder = `${e.target.style.borderWidth} ${e.target.style.borderStyle} ${e.target.style.borderColor}`
-
-                  setSelectedElements(prev => [...prev, {id: el.id,border: prevBorder }]);
-                  e.target.style.border = '1px dotted blue'
-                } else{
-                  const prevBorder = selectedElements.find(item => item.id === el.id)?.border;
-                  e.target.style.border = prevBorder || '';
-
-                  setSelectedElements(prev => prev.filter(item => item.id !== el.id));
-                }} else {
+                if (e.shiftKey) {
+                  if (!e.target.className.includes('edit')) return;
+                
+                  const isSelected = selectedElements.some(item => item.id === el.id);
+                  
+                  if (!isSelected) {
+                    // Get the individual border properties
+                    const prevBorderWidth = e.target.style.borderWidth;
+                    const prevBorderStyle = e.target.style.borderStyle;
+                    const prevBorderColor = e.target.style.borderColor;
+                
+                    setSelectedElements(prev => [
+                      ...prev, 
+                      { 
+                        id: el.id, 
+                        borderWidth: prevBorderWidth,
+                        borderStyle: prevBorderStyle,
+                        borderColor: prevBorderColor
+                      }
+                    ]);
+                    
+                    // Set the new border in long form
+                    e.target.style.borderWidth = '1px';
+                    e.target.style.borderStyle = 'dotted';
+                    e.target.style.borderColor = 'blue';
+                  } else {
+                    // Get the border values for the previously selected element
+                    const prevBorder = selectedElements.find(item => item.id === el.id);
+                    
+                    if (prevBorder) {
+                      e.target.style.borderWidth = prevBorder.borderWidth || '';
+                      e.target.style.borderStyle = prevBorder.borderStyle || '';
+                      e.target.style.borderColor = prevBorder.borderColor || '';
+                    }
+                
+                    setSelectedElements(prev => prev.filter(item => item.id !== el.id));
+                  }
+                } else {
+                  // Reset border for all selected elements
                   selectedElements.forEach(sel => {
                     const element = document.getElementById(sel.id).children[0];
                     if (element) {
-                      element.style.border = sel.border || '';
+                      element.style.borderWidth = sel.borderWidth || '';
+                      element.style.borderStyle = sel.borderStyle || '';
+                      element.style.borderColor = sel.borderColor || '';
                     }
                   });
-                  setSelectedElements([])
+                  setSelectedElements([]);
                 }
+                
               }}
               key={el.id}
               id={el.id}

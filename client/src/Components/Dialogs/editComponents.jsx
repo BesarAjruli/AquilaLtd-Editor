@@ -102,7 +102,7 @@ const EditorDialog = forwardRef(({
     const formData = new FormData(e.target)
     const data = Object.fromEntries(formData.entries())
     const formattedStyle = {
-        ...currentElement.style,
+      ...(currentElement && !currentElement.id.startsWith('editor') ? currentElement.style : {}),
         width: parseInt(data.autoW ) === 0 ? data.width + 'px' : 'auto',
         height: parseInt(data.autoH) === 0 ? data.height + 'px' : 'auto',
         color: data.fontColor,
@@ -154,7 +154,9 @@ const EditorDialog = forwardRef(({
         setCurrentElement(null);
         imageRef.current = null
         } else if(currentElement){
+          console.log(formattedStyle)
           Object.keys(formattedStyle).forEach(key => {
+            console.log(key)
             editorRef.current.style[key] = formattedStyle[key];
         });
         setChangingStyle(false);

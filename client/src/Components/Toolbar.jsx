@@ -84,8 +84,8 @@ const Toolbar = forwardRef(({
       }
 
       let editorStyle = {
-        width: '1280px',
-        height: '520px',
+        width: mediaQuery ? '300px' : '1280px',
+        height: mediaQuery? '600px' : '520px',
         borderWidth: '0',
         borderColor: '#000',
         borderRadius: '10px',
@@ -97,6 +97,7 @@ const Toolbar = forwardRef(({
         backgroundColor: '#fff'
     }
 
+    
       const restartAll = () => {
         setElements([])
         setCurrentPage(1)
