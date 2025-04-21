@@ -556,7 +556,6 @@ if(parseInt(target.style.height)){
   autoH = true
 }
 
-console.log(dialog.querySelector('#transparent').value)
 if(target.style.backgroundColor === 'transparent' || target.style.backgroundColor === ''){
   dialog.querySelector('#bgColor').setAttribute('disabled', 'true')
   dialog.querySelector('#transparent').value = 1
@@ -924,7 +923,15 @@ const getXY = (id) => elements.find((e) => e.id === id);
       await fetch(`${backendUrl}/api/saveTemplate`)
         .then((response) => response.json())
         .then((data) => {
-          serialized = JSON.parse(data[templateNr].template);
+          function findTemplateById(templateNr) {
+            for (let key in data) {
+              if (data[key].id === templateNr) {
+                return data[key].template;
+              }
+            }
+            return null; // If no matching template is found
+          }
+          serialized = JSON.parse(findTemplateById(templateNr));
           setLoading(false)
         });
       }
@@ -1441,7 +1448,8 @@ return (
         sendIconName={(value) => setIconName(value)}/>
       <ExtraInput ref={extraInptRef} currentElement={currentElement} listItems={listItems} setListItems={setListItems} dialogRef={dialogRef}
       setTableData={setTableData} tableItems={tableItems}/>
-      <CodeEditor ref={injectCssRef} currentElement={currentElement} dialogRef={dialogRef}/>
+      <CodeEditor ref={injectCssRef} currentElement={currentElement} dialogRef={dialogRef} elements={elements} setElements={setElements} 
+      saveHistory={saveHistory} setChangingStyle={setChangingStyle} setCurrentElement={setCurrentElement} chngStyle={chngStyle} currentPage={currentPage}/>
       <Unlock ref={unlockRef} userId={userId}/>
       <PromptDialog ref={promptDialogRef} handleGeneratePrompt={handleGeneratePrompt}/>
       <footer className="footer" id='footer'>

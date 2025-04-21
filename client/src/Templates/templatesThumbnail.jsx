@@ -70,7 +70,7 @@ const Thumbnails = ({onThumbnailClick, category, searchedTemplate, deviceType}) 
       {thumbnails.length > 0 ? (
         thumbnails.map((thumbnail, index) => (
           thumbnail &&
-          <img key={index} src={thumbnail.path} alt={`Thumbnail ${index + 1}`} title={thumbnail.name} onClick={() => onThumbnailClick(index)} />
+          <img key={index} src={thumbnail.path} alt={`Thumbnail ${thumbnail.id}`} title={thumbnail.name} onClick={() => onThumbnailClick(thumbnail.id)} />
 
         ))
       ) : (

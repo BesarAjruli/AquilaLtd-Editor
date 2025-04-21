@@ -49,7 +49,6 @@ const EditorDialog = forwardRef(({
   }
   const setTransparent = (e) => {
     e.preventDefault()
-    console.log(ref.current.querySelector('#transparent').value)
     if(parseInt(ref.current.querySelector('#transparent').value) === 0){
       ref.current.querySelector('#bgColor').setAttribute('disabled', 'true')
       ref.current.querySelector('#transparent').value = 1
@@ -103,6 +102,7 @@ const EditorDialog = forwardRef(({
     const formData = new FormData(e.target)
     const data = Object.fromEntries(formData.entries())
     const formattedStyle = {
+        ...currentElement.style,
         width: parseInt(data.autoW ) === 0 ? data.width + 'px' : 'auto',
         height: parseInt(data.autoH) === 0 ? data.height + 'px' : 'auto',
         color: data.fontColor,
@@ -161,6 +161,7 @@ const EditorDialog = forwardRef(({
         setCurrentElement(null);
         setImageSrc(null)
         setLayer(null)
+        imageRef.current = null
         }
     e.target.reset()
     closeDialog()

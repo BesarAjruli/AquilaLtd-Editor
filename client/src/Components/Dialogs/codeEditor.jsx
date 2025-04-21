@@ -1,7 +1,8 @@
-import { forwardRef, useRef, useState, useEffect } from "react";
+import React, { forwardRef, useRef, useState, useEffect } from "react";
 import Editor from '@monaco-editor/react'
 
- const CodeEditor = forwardRef(({currentElement, dialogRef}, ref) => {
+ const CodeEditor = forwardRef(({currentElement, dialogRef, elements, setElements,
+  saveHistory,setChangingStyle,setCurrentElement, chngStyle, currentPage}, ref) => {
     const editorRef = useRef(null);
     const [defaultStyle, setDefaultStyle] = useState(null); 
     const [id, setId] = useState(null);
@@ -40,18 +41,47 @@ ${prevStyle}
         editorRef.current = editor;
       }
 
+      const toCamelCase = (str) =>
+        str.replace(/-([a-z])/g, (_, letter) => letter.toUpperCase());
+
       function showValue() {
       const style = String(editorRef.current.getValue()).split('{')[1]
       const completedStyle = style.replace('}', '').trim()
 
       const styleProperties = completedStyle.split(';').filter(Boolean);
+
+      const blacklist = ['x', 'y', 'border']; // remove invalid or conflicting keys
+      const formattedStyle = {};
+
       styleProperties.forEach(property => {
         const [key, value] = property.split(':').map(str => str.trim());
         
-        if (key && value) {
-            document.getElementById(elmId).children[0].style[key] = value;
+        if (key && value && !blacklist.includes(key)) {
+          formattedStyle[toCamelCase(key)] = value;
+            // document.getElementById(elmId).children[0].style[key] = value;
         }
       });
+      const updatedElement = {
+        ...currentElement,
+        style: formattedStyle,
+        component: React.cloneElement(currentElement.component, {
+          ...currentElement.component.props,
+          style: formattedStyle
+        }),
+        page: currentPage
+      };
+      
+      const newElements = chngStyle.changing
+      ? elements.map((el) => el.id === currentElement.id ? updatedElement : el)
+      : [...elements, updatedElement];
+
+      console.log(newElements)
+
+        setElements(newElements);
+        saveHistory(newElements);
+        setChangingStyle(false);
+        setCurrentElement(null);
+
       ref.current.close()
       dialogRef.current.close()
       }
