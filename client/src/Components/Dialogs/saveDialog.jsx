@@ -75,10 +75,6 @@ const SaveDesign = forwardRef(({saveDesign, totalPages, editorRef}, ref) => {
             document.body.removeChild(link);
             URL.revokeObjectURL(url);
           }
-          
-          
-          
-          
 
         const value = document.getElementById('saveOptions').value
         if(value === 'send'){

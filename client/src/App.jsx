@@ -125,6 +125,7 @@ export default function App() {
 
   const mediaQuery = window.matchMedia('(max-width: 768px)');
   const [selectedElements, setSelectedElements] = useState([]);
+  console.log(elements)
 
   useEffect(() => {
     async function getUser() {

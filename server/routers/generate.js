@@ -93,7 +93,7 @@ async function getStyledElementsHTML(htmlContent) {
         
     
         await page.setViewport({
-            width: mediaQuery? 300 : 1280,
+            width: mediaQuery.matches ? 300 : 1280,
             height: pageHeight,
             deviceScaleFactor: 2
         });

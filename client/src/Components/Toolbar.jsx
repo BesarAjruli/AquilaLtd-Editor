@@ -84,8 +84,8 @@ const Toolbar = forwardRef(({
       }
 
       let editorStyle = {
-        width: mediaQuery ? '300px' : '1280px',
-        height: mediaQuery? '600px' : '520px',
+        width: mediaQuery.matches ? '300px' : '1280px',
+        height: mediaQuery.matches ? '600px' : '520px',
         borderWidth: '0',
         borderColor: '#000',
         borderRadius: '10px',
