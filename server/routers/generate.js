@@ -1,5 +1,4 @@
 const puppeteer = require('puppeteer');
-const mediaQuery = window.matchMedia('(max-width: 768px)');
 
 exports.generate = async (prompt) => {
     try {
@@ -59,7 +58,7 @@ exports.generate = async (prompt) => {
     }
 };
 
-async function getStyledElementsHTML(htmlContent) {
+async function getStyledElementsHTML(htmlContent, mobile) {
      const browser = await puppeteer.launch({
                 timeout: 0,
                 headless: "new",
@@ -93,7 +92,7 @@ async function getStyledElementsHTML(htmlContent) {
         
     
         await page.setViewport({
-            width: mediaQuery.matches ? 300 : 1280,
+            width: mobile ? 300 : 1280,
             height: pageHeight,
             deviceScaleFactor: 2
         });

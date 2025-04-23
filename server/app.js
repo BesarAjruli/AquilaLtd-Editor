@@ -17,6 +17,7 @@ const db = new Pool({
 const paypal = require('./routers/paypal')
 const urlToHtml = require('./routers/urlToHtml')
 const generate = require('./routers/generate')
+const useragent = require('express-useragent');
 
 const upload = multer({dest: '/tmp'})
 
@@ -31,6 +32,7 @@ cloudinary.config({
   api_secret: process.env.API_CLOUDINARY,
 });
 
+app.use(useragent.express());
 app.use(cors({
     origin: ['http://localhost:5173', 'https://aploseditor.web.app'],
     methods: 'GET,POST,PUT,DELETE',
@@ -378,14 +380,16 @@ app.put('/update-bundle/:bundleId', async(req, res) => {
 //urlToHTML
 app.post('/api/url2html', async (req, res) => {
   const url = req.body.url
-  const code = await urlToHtml.url2html(url)
+  const mobile = req.useragent.isMobile
+  const code = await urlToHtml.url2html(url, mobile)
   res.json({success: true, code: code});
 })
 
 //generate designs
 app.post('/api/generate', async (req, res) => {
   const prompt = req.body.prompt
-const generatedCode = await generate.generate(prompt)
+  const mobile = req.useragent.isMobile
+const generatedCode = await generate.generate(prompt, mobile)
 res.json({generatedCode: generatedCode})
 })
 
