@@ -53,7 +53,6 @@ const Pie = ({style}) => <img className='edit' style={style} src='https://img.ic
 Pie.displayName = 'Charts'
 const Charts = ({style}) => <img className='edit' style={style} src='https://img.icons8.com/skeuomorphism/64/bar-chart.png'/>
 Charts.displayName = 'Charts'
-const Menu = ({style}) => <img className='edit' style={style} src='https://img.icons8.com/material-rounded/64/menu--v1.png'/>
 const Icons = ({style, content}) => <Icon className='edit' icon={`mdi-light:${content}`} style={style}/>
 Icons.displayName = 'Icons'
 const Table = ({style, content}) => {
@@ -125,7 +124,6 @@ export default function App() {
 
   const mediaQuery = window.matchMedia('(max-width: 768px)');
   const [selectedElements, setSelectedElements] = useState([]);
-  console.log(elements)
 
   useEffect(() => {
     async function getUser() {
@@ -442,7 +440,7 @@ if(mediaQuery.matches){
       });
   };
 
-  setValues({ '#width': 100, '#height': 50, '#tranpsarent': 0, '#content': '', '#autoW': 0, '#autoH': 0});
+  setValues({ '#width': 100, '#height': 50, '#transparent': 0, '#content': '', '#autoW': 0, '#autoH': 0});
 
     // Apply settings based on component type
     switch (type) {
@@ -508,7 +506,7 @@ if(mediaQuery.matches){
           }
           break;
         default:
-          setValues({ '#width': 100, '#height': 50, '#tranpsarent': 0, '#content': '', '#autoW': 0, '#autoH': 0});
+          setValues({ '#width': 100, '#height': 50, '#transparent': 0, '#content': '', '#autoW': 0, '#autoH': 0});
     }
 
     // Hide duplication & layers container

@@ -8,6 +8,8 @@ import Editor from '@monaco-editor/react'
     const [id, setId] = useState(null);
     const [elmId, setElmID] = useState('')
     const [prevStyle, setPrevStyle] = useState(null)
+    const mediaQuery = window.matchMedia('(max-width: 768px)');
+
 
     function camelToKebab(str) {
         return str.replace(/[A-Z]/g, match => `-${match.toLowerCase()}`);
@@ -91,7 +93,7 @@ ${prevStyle}
       <dialog ref={ref} className="custom-dialog injectDialog">
       <i onClick={() => ref.current.close()} className="close-icon inj" title='close'>✖</i>
         <Editor
-            width='600px'
+            width={mediaQuery.match ? '600px' : '100%'}
             height='500px'
             defaultLanguage="css"
             value={defaultStyle}

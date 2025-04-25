@@ -721,6 +721,7 @@ input {
   .tabs {
     transform: scale(0.6);
   }
+  
   input[name='height']{
     width: 125px;
   }
@@ -831,6 +832,13 @@ input {
   }
   .iconSelectorDialog .close-icon {
     margin-left: 10%;
+  }
+  .maxWidth{
+    margin-left: 15px;
+    width: 65px;
+  }
+  .txtEditor{
+    width: 200px;
   }
 }
 @media (min-width: 1440px) {
