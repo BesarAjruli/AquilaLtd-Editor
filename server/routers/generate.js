@@ -1,6 +1,15 @@
 const puppeteer = require('puppeteer');
 
-exports.generate = async (prompt) => {
+// Shared browser config
+const getBrowser = async () => {
+    return puppeteer.launch({
+      timeout: 0,
+      headless: "new",
+      args: ["--no-sandbox", "--disable-setuid-sandbox", '--disable-dev-shm-usage'],
+    });
+  };
+
+exports.generate = async (prompt, mobile) => {
     try {
         const request = await fetch(process.env.OPENROUTER_URL, {
             method: 'POST',
@@ -51,7 +60,8 @@ exports.generate = async (prompt) => {
         }
 
         const messageContent = response.choices[0].message.content;
-        return getStyledElementsHTML(messageContent);
+
+        return {comp: await getStyledElementsHTML(messageContent, mobile), pageHeight: await pageHeight(messageContent, mobile)}
     } catch (error) {
         console.error("Error generating HTML:", error);
         return "";
@@ -59,11 +69,7 @@ exports.generate = async (prompt) => {
 };
 
 async function getStyledElementsHTML(htmlContent, mobile) {
-     const browser = await puppeteer.launch({
-                timeout: 0,
-                headless: "new",
-                args: ["--no-sandbox", "--disable-setuid-sandbox", '--disable-dev-shm-usage'],
-            });
+     const browser = await getBrowser()
     
         const page = await browser.newPage();
     
@@ -74,8 +80,38 @@ async function getStyledElementsHTML(htmlContent, mobile) {
 
         await page.evaluate(() => {
             document.querySelectorAll('img, link, script, a').forEach(el => {
-                if (el.src) el.src = new URL(el.src, location.href).href;
-                if (el.href) el.href = new URL(el.href, location.href).href;
+                try {
+                    // Handle src attributes
+                    if (el.src) {
+                        try {
+                            // Skip data URLs and empty src
+                            if (!el.src.startsWith('data:') && el.src.trim() !== '') {
+                                el.src = new URL(el.src, location.href).href;
+                            }
+                        } catch (e) {
+                            console.warn(`Could not process src URL: ${el.src}`);
+                            // Keep original src if URL construction fails
+                        }
+                    }
+                    
+                    // Handle href attributes
+                    if (el.href) {
+                        try {
+                            // Skip javascript:, mailto:, tel:, etc. and empty href
+                            if (!el.href.startsWith('javascript:') && 
+                                !el.href.startsWith('mailto:') &&
+                                !el.href.startsWith('tel:') &&
+                                el.href.trim() !== '') {
+                                el.href = new URL(el.href, location.href).href;
+                            }
+                        } catch (e) {
+                            console.warn(`Could not process href URL: ${el.href}`);
+                            // Keep original href if URL construction fails
+                        }
+                    }
+                } catch (e) {
+                    console.warn('Error processing element:', el, e);
+                }
             });
         });
 
@@ -89,6 +125,7 @@ async function getStyledElementsHTML(htmlContent, mobile) {
                 document.documentElement.clientHeight
             );
         });
+        console.log(pageHeight)
         
     
         await page.setViewport({
@@ -249,4 +286,33 @@ async function getStyledElementsHTML(htmlContent, mobile) {
 
     await browser.close()
     return results.join('\n')
+}
+
+const pageHeight = async(htmlContent, mobile) => {
+    const browser = await getBrowser()
+
+const page = await browser.newPage();
+
+await page.setContent(htmlContent,{
+    waitUntil: 'networkidle0',
+    timeout: 0
+})
+
+await page.evaluateHandle('document.fonts.ready'); // wait for fonts to load
+await new Promise(resolve => setTimeout(resolve, 1000));
+
+const pageHeight = await page.evaluate(() => {
+    return Math.max(
+        document.body.scrollHeight,
+        document.documentElement.scrollHeight,
+        document.body.offsetHeight,
+        document.documentElement.offsetHeight,
+        document.body.clientHeight,
+        document.documentElement.clientHeight
+    );
+});
+
+await browser.close()
+return pageHeight
+
 }

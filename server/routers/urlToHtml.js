@@ -1,12 +1,16 @@
 const puppeteer = require("puppeteer");
 
+const getBrowser = async () => {
+    return puppeteer.launch({
+      timeout: 0,
+      headless: "new",
+      args: ["--no-sandbox", "--disable-setuid-sandbox", '--disable-dev-shm-usage'],
+    });
+  };
+
 exports.url2html = async (baseUrl, mobile) => {
     try{
-        const browser = await puppeteer.launch({
-            timeout: 0,
-            headless: "new",
-            args: ["--no-sandbox", "--disable-setuid-sandbox", '--disable-dev-shm-usage'],
-        });
+        const browser = await getBrowser()
 
     const page = await browser.newPage();
 
@@ -252,3 +256,30 @@ exports.url2html = async (baseUrl, mobile) => {
     return
 }
 };
+
+exports.pageHeight = async(baseUrl) => {
+    const browser = await getBrowser()
+
+const page = await browser.newPage();
+
+await page.goto(baseUrl, { waitUntil: "networkidle0", timeout: 0 });
+
+
+await page.evaluateHandle('document.fonts.ready'); // wait for fonts to load
+await new Promise(resolve => setTimeout(resolve, 1000));
+
+const pageHeight = await page.evaluate(() => {
+    return Math.max(
+        document.body.scrollHeight,
+        document.documentElement.scrollHeight,
+        document.body.offsetHeight,
+        document.documentElement.offsetHeight,
+        document.body.clientHeight,
+        document.documentElement.clientHeight
+    );
+});
+
+await browser.close()
+return pageHeight
+
+}

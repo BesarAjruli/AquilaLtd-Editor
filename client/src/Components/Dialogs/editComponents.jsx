@@ -156,7 +156,6 @@ const EditorDialog = forwardRef(({
         } else if(currentElement){
           console.log(formattedStyle)
           Object.keys(formattedStyle).forEach(key => {
-            console.log(key)
             editorRef.current.style[key] = formattedStyle[key];
         });
         setChangingStyle(false);

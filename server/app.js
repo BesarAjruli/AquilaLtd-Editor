@@ -16,7 +16,7 @@ const db = new Pool({
 })
 const paypal = require('./routers/paypal')
 const urlToHtml = require('./routers/urlToHtml')
-const generate = require('./routers/generate')
+const {generate} = require('./routers/generate')
 const useragent = require('express-useragent');
 
 const upload = multer({dest: '/tmp'})
@@ -382,15 +382,28 @@ app.post('/api/url2html', async (req, res) => {
   const url = req.body.url
   const mobile = req.useragent.isMobile
   const code = await urlToHtml.url2html(url, mobile)
-  res.json({success: true, code: code});
+  const pageHeight= await urlToHtml.pageHeight(url)
+  res.json({success: true, code: code, pageHeight: pageHeight});
 })
 
 //generate designs
 app.post('/api/generate', async (req, res) => {
   const prompt = req.body.prompt
   const mobile = req.useragent.isMobile
-const generatedCode = await generate.generate(prompt, mobile)
-res.json({generatedCode: generatedCode})
+
+  try {
+    const result = await generate(prompt, mobile);
+    res.json({
+        generatedCode: await result.comp,
+        pageHeight: await result.pageHeight
+    });
+} catch (error) {
+    console.error("Generation error:", error);
+    res.status(500).json({ 
+        error: "Generation failed",
+        details: error.message 
+    });
+}
 })
 
 //categories
@@ -403,6 +416,12 @@ app.get('/api/Categories', async (req, res) => {
     res.status(500).json({ error: 'Internal server error' });
   }
 });
+
+//Galaxy Comp
+app.get('/api/galaxyElm', (req,res) => {
+  const components = require('./routers/components.json')
+  res.json(components)
+})
 
 //Passport
 passport.use(

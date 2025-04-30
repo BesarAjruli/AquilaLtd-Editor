@@ -15,6 +15,7 @@ import Unlock from './Components/Dialogs/unlockMore.jsx'
 import url2htmlIcon from './images/u2c.jpeg'
 import PromptDialog from './Components/Dialogs/promptDialog.jsx'
 import useShortcuts from './Shortcuts/shortcuts.jsx';
+import GalaxyDialog from './Components/Dialogs/galaxyDialog.jsx';
 
 const Text = ({style, content}) => <span className='edit' style={style}>{content}</span>;
 Text.displayName = 'Text'
@@ -83,6 +84,7 @@ const Table = ({style, content}) => {
 Table.displayName = 'Table'
 const Calendar = ({style}) => <img className='edit' style={style} src="https://www.figma.com/community/resource/e155ded4-5d35-4474-93ef-a8c53f619ca3/thumbnail" alt="calendar" />
 Calendar.displayName = 'Calendar'
+const Svg = () => <svg></svg>
 
 export default function App() {
   const [elements, setElements] = useState([]);
@@ -118,6 +120,7 @@ export default function App() {
   const [usersBundle, setUsersBundle] = useState(0)
   const urlRef = useRef(null)
   const promptDialogRef = useRef(null)
+  const galaxyRef = useRef(null)
 
   const uniqueId = () => `element-${Date.now()}-${Math.random()}`;
   const backendUrl = import.meta.env.VITE_BACKEND_URL;
@@ -1152,6 +1155,7 @@ const handleUrlSubmit = async (e) => {
 
            if(results.success){
             const parsedElements = parseElements(results.code);
+            editorRef.current.style.height = results.pageHeight + 'px'
             setElements(parsedElements);
            }
         }catch(err){
@@ -1178,7 +1182,8 @@ const parseElements = (htmlString) => {
     'li': Text,
     'table': Table,
     'footer': Section,
-    'header': Section
+    'header': Section,
+    'span': Text
   };
 
   return Array.from(tempDiv.children).map((element) => {
@@ -1186,8 +1191,8 @@ const parseElements = (htmlString) => {
     
     const tagName = String(element.tagName).toLowerCase();
     const component = componentMapping[tagName] || Text; // Default to Text component if not found
-    const x = parseFloat(element.style.x);
-    const y = parseFloat(element.style.y);
+    const x = parseFloat(element.style.x) || 0;
+    const y = parseFloat(element.style.y) || 0;
     const content = element.textContent.trim() || element.innerHTML || element.src;
     
     // Convert CSS text into a React-friendly object
@@ -1238,6 +1243,24 @@ const parseElements = (htmlString) => {
   });
 };
 
+const parseGalaxyElements = (htmlString, cssString) => {
+  /*const tempDiv = document.createElement("div");
+  tempDiv.innerHTML = htmlString;
+
+  // Create a style element to apply the CSS
+  const styleElement = document.createElement('style');
+  styleElement.textContent = cssString;
+  document.head.appendChild(styleElement);
+
+
+  const result = Array.from(tempDiv.children).map(parseElement());
+  
+  // Clean up the style element
+  document.head.removeChild(styleElement);
+  
+  return result;*/
+};
+
 function parseNestedTable(html) {
   const tempDiv = document.createElement('div');
   tempDiv.innerHTML = html;
@@ -1271,7 +1294,7 @@ const handleGeneratePrompt = async(e) => {
 
            
             const parsedElements = parseElements(results.generatedCode);
-            console.log(parsedElements)
+            editorRef.current.style.height = results.pageHeight + 'px'
             setElements(parsedElements);
         }catch(err){
           setLoading(false)
@@ -1321,7 +1344,9 @@ return (
         </div>
       </div>
       <div className='sideElementsBar right'>
-        <div title='Pie Charts' onClick={() => addElement(Pie)}><img src="https://img.icons8.com/skeuomorphism/64/pie-chart.png" alt="pie chart" /></div>
+        <div title='Pie Charts' onClick={() => { galaxyRef.current.showModal()//addElement(Pie)
+
+        }}><img src="https://img.icons8.com/skeuomorphism/64/pie-chart.png" alt="pie chart" /></div>
         <div title='Charts' onClick={() => addElement(Charts)}><img src="https://img.icons8.com/skeuomorphism/64/bar-chart.png" alt="charts" /></div>
         <div title='Icons' onClick={() => iconsDialog.current.showModal()}>
           <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24">
@@ -1481,6 +1506,7 @@ return (
       saveHistory={saveHistory} setChangingStyle={setChangingStyle} setCurrentElement={setCurrentElement} chngStyle={chngStyle} currentPage={currentPage}/>
       <Unlock ref={unlockRef} userId={userId}/>
       <PromptDialog ref={promptDialogRef} handleGeneratePrompt={handleGeneratePrompt}/>
+      <GalaxyDialog ref={galaxyRef} parseGalaxyElements={parseGalaxyElements}/>
       <footer className="footer" id='footer'>
   <div className="footer-container">
     <div className="footer-grid">
