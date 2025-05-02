@@ -16,6 +16,7 @@ import url2htmlIcon from './images/u2c.jpeg'
 import PromptDialog from './Components/Dialogs/promptDialog.jsx'
 import useShortcuts from './Shortcuts/shortcuts.jsx';
 import GalaxyDialog from './Components/Dialogs/galaxyDialog.jsx';
+import './style/tooltip.css'
 
 const Text = ({style, content}) => <span className='edit' style={style}>{content}</span>;
 Text.displayName = 'Text'
@@ -84,7 +85,14 @@ const Table = ({style, content}) => {
 Table.displayName = 'Table'
 const Calendar = ({style}) => <img className='edit' style={style} src="https://www.figma.com/community/resource/e155ded4-5d35-4474-93ef-a8c53f619ca3/thumbnail" alt="calendar" />
 Calendar.displayName = 'Calendar'
-const Svg = () => <svg></svg>
+const Svg = ({style, content}) => <svg 
+className='edit' 
+style={style} 
+viewBox="0 0 24 24" 
+xmlns="http://www.w3.org/2000/svg"
+dangerouslySetInnerHTML={content ? {__html: content} : undefined}
+></svg>
+Svg.displayName = 'Svg';
 
 export default function App() {
   const [elements, setElements] = useState([]);
@@ -1164,7 +1172,7 @@ const handleUrlSubmit = async (e) => {
         }
 }
 
-const parseElements = (htmlString) => {
+const parseElements = (htmlString, galaxyElements = false) => {
   const tempDiv = document.createElement("div");
   tempDiv.innerHTML = htmlString;
 
@@ -1183,16 +1191,15 @@ const parseElements = (htmlString) => {
     'table': Table,
     'footer': Section,
     'header': Section,
-    'span': Text
+    'span': Text,
+    'svg': Svg
   };
 
   return Array.from(tempDiv.children).map((element) => {
-    document.body.appendChild(element); // Temporarily add to DOM for measurements
-    
     const tagName = String(element.tagName).toLowerCase();
     const component = componentMapping[tagName] || Text; // Default to Text component if not found
     const x = parseFloat(element.style.x) || 0;
-    const y = parseFloat(element.style.y) || 0;
+    const y = !galaxyElements ? parseFloat(element.style.y) || 0 : parseFloat(element.style.y) + window.scrollY || window.scrollY;
     const content = element.textContent.trim() || element.innerHTML || element.src;
     
     // Convert CSS text into a React-friendly object
@@ -1201,6 +1208,7 @@ const parseElements = (htmlString) => {
         .split(";")
         .map((rule) => rule.trim().split(":").map((part) => part.trim()))
         .filter(([key, value]) => key && value)
+        .filter(([key]) => !key.startsWith('-'))
         .map(([key, value]) => [toCamelCase(key), value])
     );
 
@@ -1230,8 +1238,6 @@ const parseElements = (htmlString) => {
     // Dynamically create the React component
     const createdComponent = React.createElement(component, componentProps);
 
-    document.body.removeChild(element); // Cleanup after getting position
-
     return {
       id: uniqueId(),
       component: createdComponent,
@@ -1241,24 +1247,6 @@ const parseElements = (htmlString) => {
       y,
     };
   });
-};
-
-const parseGalaxyElements = (htmlString, cssString) => {
-  /*const tempDiv = document.createElement("div");
-  tempDiv.innerHTML = htmlString;
-
-  // Create a style element to apply the CSS
-  const styleElement = document.createElement('style');
-  styleElement.textContent = cssString;
-  document.head.appendChild(styleElement);
-
-
-  const result = Array.from(tempDiv.children).map(parseElement());
-  
-  // Clean up the style element
-  document.head.removeChild(styleElement);
-  
-  return result;*/
 };
 
 function parseNestedTable(html) {
@@ -1309,6 +1297,14 @@ useShortcuts({
 return (
     <>
       {loading && <Loading/>}
+      <a href='https://www.youtube.com/@APL%C3%93Seditor' target='_blank'>
+        <button className="faq-button">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512">
+            <path d="M80 160c0-35.3 28.7-64 64-64h32c35.3 0 64 28.7 64 64v3.6c0 21.8-11.1 42.1-29.4 53.8l-42.2 27.1c-25.2 16.2-40.4 44.1-40.4 74V320c0 17.7 14.3 32 32 32s32-14.3 32-32v-1.4c0-8.2 4.2-15.8 11-20.2l42.2-27.1c36.6-23.6 58.8-64.1 58.8-107.7V160c0-70.7-57.3-128-128-128H144C73.3 32 16 89.3 16 160c0 17.7 14.3 32 32 32s32-14.3 32-32zm80 320a40 40 0 1 0 0-80 40 40 0 1 0 0 80z" />
+          </svg>
+          <span className="tooltip">FAQ</span>
+        </button>
+      </a>
       <Toolbar ref={toolbarRef}
        historyIndex={historyIndex} saveDesign={saveDesign}
        saveTempRef={saveTempRef} templatesRef={templatesRef}
@@ -1344,9 +1340,7 @@ return (
         </div>
       </div>
       <div className='sideElementsBar right'>
-        <div title='Pie Charts' onClick={() => { galaxyRef.current.showModal()//addElement(Pie)
-
-        }}><img src="https://img.icons8.com/skeuomorphism/64/pie-chart.png" alt="pie chart" /></div>
+        <div title='Pie Charts' onClick={() => addElement(Pie)}><img src="https://img.icons8.com/skeuomorphism/64/pie-chart.png" alt="pie chart" /></div>
         <div title='Charts' onClick={() => addElement(Charts)}><img src="https://img.icons8.com/skeuomorphism/64/bar-chart.png" alt="charts" /></div>
         <div title='Icons' onClick={() => iconsDialog.current.showModal()}>
           <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24">
@@ -1506,7 +1500,7 @@ return (
       saveHistory={saveHistory} setChangingStyle={setChangingStyle} setCurrentElement={setCurrentElement} chngStyle={chngStyle} currentPage={currentPage}/>
       <Unlock ref={unlockRef} userId={userId}/>
       <PromptDialog ref={promptDialogRef} handleGeneratePrompt={handleGeneratePrompt}/>
-      <GalaxyDialog ref={galaxyRef} parseGalaxyElements={parseGalaxyElements}/>
+      <GalaxyDialog ref={galaxyRef} parseElements={parseElements} setElements={setElements}/>
       <footer className="footer" id='footer'>
   <div className="footer-container">
     <div className="footer-grid">

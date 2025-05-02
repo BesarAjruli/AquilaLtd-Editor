@@ -192,7 +192,52 @@ textarea{
   transition: color 0.2s;
   margin-left: 15%;
 }
-
+.galaxyComp{
+  width: 700px;
+  max-width: 700px;
+  height: 500px;
+  background: linear-gradient(to bottom, rgba(0, 0, 0, 0.5) 0%, rgb(55, 65, 81) 95%);
+}
+.galaxyClose{
+  color: #212121;
+  font-size: 18px;
+}
+.pagination-controls{
+  padding: 0 50px;
+}
+.pagination-controls button{
+  width: 220px;
+  height: 40px;
+  border: 0;
+  border-radius: 5px;
+  background-color: #212121;
+  color: #fff;
+  font-weight: 900;
+  font-size: 20px;
+}
+.pagination-controls span{
+  color: #fff;
+  font-weight: 900;
+  font-size: 18px;
+  line-height: 40px;
+}
+.containerGalaxyComp{
+  background-color: #212121;
+  width: 300px;
+  height: 250px;
+  border-radius: 15px;
+  border: 0;
+  display: flex;
+  justify-content: center;
+  place-items: center;
+}
+.galaxyElementsContainer{
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  justify-content: center;
+  place-items: center;
+  gap: 20px;
+}
 .close-icon:hover {
   color: #333;
 }
