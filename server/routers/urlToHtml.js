@@ -15,12 +15,14 @@ exports.url2html = async (baseUrl, mobile) => {
     const page = await browser.newPage();
 
     await page.setViewport({
-        width: mobile ? 520: 1280,
+        width: mobile ? 300: 1280,
         height: 800,
         deviceScaleFactor: 2
     });
 
     await page.goto(baseUrl, { waitUntil: "networkidle0", timeout: 0 });
+
+    await page.waitForTimeout(100);
 
     await page.evaluate(() => {
         document.querySelectorAll('img, link, script, a').forEach(el => {
@@ -42,7 +44,7 @@ exports.url2html = async (baseUrl, mobile) => {
     
 
     await page.setViewport({
-        width: mobile ? 520: 1280,
+        width: mobile ? 300: 1280,
         height: pageHeight,
         deviceScaleFactor: 2
     });

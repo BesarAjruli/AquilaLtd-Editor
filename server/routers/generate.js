@@ -84,6 +84,8 @@ async function getStyledElementsHTML(htmlContent, mobile) {
             timeout: 0
         })
 
+        await page.waitForTimeout(100);
+
         await page.evaluate(() => {
             document.querySelectorAll('img, link, script, a').forEach(el => {
                 try {

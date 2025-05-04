@@ -1164,6 +1164,7 @@ const handleUrlSubmit = async (e) => {
 
            if(results.success){
             const parsedElements = parseElements(results.code);
+            console.log(results.pageHeight)
             editorRef.current.style.height = results.pageHeight + 'px'
             setElements(parsedElements);
            }
