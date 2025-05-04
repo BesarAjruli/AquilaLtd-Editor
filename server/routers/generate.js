@@ -72,6 +72,11 @@ async function getStyledElementsHTML(htmlContent, mobile) {
      const browser = await getBrowser()
     
         const page = await browser.newPage();
+
+        await page.setViewport({
+            width: mobile ? 300 : 1280,
+            deviceScaleFactor: 2
+        });
     
         await page.setContent(htmlContent,{
             waitUntil: 'networkidle0',
@@ -125,8 +130,6 @@ async function getStyledElementsHTML(htmlContent, mobile) {
                 document.documentElement.clientHeight
             );
         });
-        console.log(pageHeight)
-        
     
         await page.setViewport({
             width: mobile ? 300 : 1280,
