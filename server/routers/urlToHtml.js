@@ -14,6 +14,12 @@ exports.url2html = async (baseUrl, mobile) => {
 
     const page = await browser.newPage();
 
+    await page.setViewport({
+        width: mobile ? 520: 1280,
+        height: 800,
+        deviceScaleFactor: 2
+    });
+
     await page.goto(baseUrl, { waitUntil: "networkidle0", timeout: 0 });
 
     await page.evaluate(() => {
