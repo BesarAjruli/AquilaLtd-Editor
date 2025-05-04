@@ -75,6 +75,7 @@ async function getStyledElementsHTML(htmlContent, mobile) {
 
         await page.setViewport({
             width: mobile ? 300 : 1280,
+            height: 800,
             deviceScaleFactor: 2
         });
     
