@@ -14,7 +14,7 @@ import CodeEditor from './Components/Dialogs/codeEditor';
 import Unlock from './Components/Dialogs/unlockMore.jsx'
 import url2htmlIcon from './images/u2c.jpeg'
 import PromptDialog from './Components/Dialogs/promptDialog.jsx'
-import useShortcuts from './Shortcuts/shortcuts.jsx';
+import useShortcuts from './Shortcuts/shortcuts.jsx'; 
 import GalaxyDialog from './Components/Dialogs/galaxyDialog.jsx';
 import './style/tooltip.css'
 
@@ -1274,7 +1274,7 @@ const handleGeneratePrompt = async(e) => {
         const data = Object.fromEntries(formData.entries())
 
         try{
-           const resposne = await fetch(`${backendUrl}/api/generate`, {
+           const resposne = await fetch(`http://localhost:5000/api/generate`, {
             method: 'POST',
             headers: {"Content-Type": "application/json"},
             body: JSON.stringify(data),

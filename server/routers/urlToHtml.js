@@ -22,7 +22,6 @@ exports.url2html = async (baseUrl, mobile) => {
 
     await page.goto(baseUrl, { waitUntil: "networkidle0", timeout: 0 });
 
-    await page.waitForTimeout(100);
 
     await page.evaluate(() => {
         document.querySelectorAll('img, link, script, a').forEach(el => {

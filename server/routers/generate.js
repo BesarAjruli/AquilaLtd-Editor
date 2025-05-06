@@ -49,6 +49,7 @@ exports.generate = async (prompt, mobile) => {
                     ${prompt}
 
                     Ensure it contains base elements like headers, footers, images, videos and buttons if relevant.
+                    Use concise and modern HTML. Avoid unnecessary divs and nesting. Use only free image/video links and make sure the output renders without external libraries.
                     Only return pure HTML with inline CSS. Do not include explanations or additional text.`
                 }]
             })
@@ -84,7 +85,6 @@ async function getStyledElementsHTML(htmlContent, mobile) {
             timeout: 0
         })
 
-        await page.waitForTimeout(100);
 
         await page.evaluate(() => {
             document.querySelectorAll('img, link, script, a').forEach(el => {
