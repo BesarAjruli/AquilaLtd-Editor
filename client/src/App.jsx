@@ -1274,7 +1274,7 @@ const handleGeneratePrompt = async(e) => {
         const data = Object.fromEntries(formData.entries())
 
         try{
-           const resposne = await fetch(`http://localhost:5000/api/generate`, {
+           const resposne = await fetch(`${backendUrl}/api/generate`, {
             method: 'POST',
             headers: {"Content-Type": "application/json"},
             body: JSON.stringify(data),
