@@ -53,10 +53,11 @@ app.use(session({
   cookie: {
     maxAge: 30 * 24 * 60 * 60 * 1000, //30 days
     httpOnly: true,
-    secure: false,
-    sameSite: 'Lax',
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'None',
   }
 }))
+console.log(process.env.NODE_ENV)
 app.use(passport.initialize())
 app.use(passport.session())
 app.use(express.urlencoded({ limit: '50mb',extended: true }));
