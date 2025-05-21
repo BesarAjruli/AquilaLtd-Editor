@@ -51,13 +51,13 @@ app.use(session({
   resave: false,
   saveUninitialized: false,
   cookie: {
+    domain: '.onrender.com',
     maxAge: 30 * 24 * 60 * 60 * 1000, //30 days
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
     sameSite: 'None',
   }
 }))
-console.log(process.env.NODE_ENV)
 app.use(passport.initialize())
 app.use(passport.session())
 app.use(express.urlencoded({ limit: '50mb',extended: true }));
@@ -271,7 +271,7 @@ app.get("/api/logout", (req, res, next) => {
 
       res.clearCookie("connect.sid", { 
         path: "/", 
-        domain: ".koyeb.app", 
+        domain: ".onrender.com", 
         httpOnly: true, 
         secure: true, 
         sameSite: 'None' 
