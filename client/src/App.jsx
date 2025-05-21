@@ -702,6 +702,10 @@ const getXY = (id) => elements.find((e) => e.id === id);
     setLoading(true)
     const savedImages = [];
     const originalPage = currentPage;
+    if(!userId) {
+      location.href = '/login'
+      return
+    }
   
     for (let page = 1; page <= totalPages; page++) {
       setCurrentPage(page); 
